@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS "navigation";
+DROP TABLE IF EXISTS "menu";
+DROP TABLE IF EXISTS "helptext";
+ALTER TABLE IF EXISTS "role_tasks" DROP CONSTRAINT IF EXISTS "role_tasks_role_id_fkey";
+ALTER TABLE IF EXISTS "role_tasks" DROP CONSTRAINT IF EXISTS "role_tasks_task_id_fkey";
+DROP TABLE IF EXISTS "role_tasks";
+ALTER TABLE IF EXISTS "account_roles" DROP CONSTRAINT IF EXISTS "account_roles_account_id_fkey";
+ALTER TABLE IF EXISTS "account_roles" DROP CONSTRAINT IF EXISTS "account_roles_role_id_fkey";
+DROP TABLE IF EXISTS "account_roles";
+DROP TABLE IF EXISTS "tasks";
+DROP TABLE IF EXISTS "roles";
+DROP TABLE IF EXISTS "accounts";
+DROP TABLE IF EXISTS "profiles";
