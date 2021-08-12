@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +23,9 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.uber.org/zap"
 )
+
+//go:embed static
+var content embed.FS
 
 func main() {
 
@@ -144,14 +149,19 @@ type serverConfig struct {
 
 func newServer(conf serverConfig) (*http.Server, error) {
 	r := mux.NewRouter()
-
 	for _, mw := range conf.Middlewares {
 		r.Use(mw)
 	}
 
 	repo := postgresql.NewRBAC(conf.Db)
 	svc := service.NewRBAC(repo)
+
+	rest.RegisterOpenAPI(r)
 	rest.NewRBACHandler(svc).Register(r)
+
+	fsys, _ := fs.Sub(content, "static")
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.FS(fsys))))
+
 	return &http.Server{
 		Handler:           r,
 		Addr:              conf.Address,

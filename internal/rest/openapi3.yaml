@@ -1,0 +1,207 @@
+extensionprops: {}
+openapi: 3.0.0
+components:
+  extensionprops: {}
+  schemas:
+    Account:
+      ref: ""
+      value:
+        extensionprops: {}
+        type: object
+        properties:
+          created_at:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+              format: date-time
+          id:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+              format: uuid
+          profile:
+            ref: '#/components/schemas/Profile'
+            value: null
+          username:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+    Profile:
+      ref: ""
+      value:
+        extensionprops: {}
+        type: object
+        properties:
+          created_at:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+              format: date-time
+          email:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+          first_name:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+          id:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+              format: uuid
+          is_blocked:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: boolean
+          last_name:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+          mobile:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+          profile_background:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+          profile_picture:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+  requestBodies:
+    CreateAccountRequest:
+      ref: ""
+      value:
+        extensionprops: {}
+        description: Request used for registering an account.
+        required: true
+        content:
+          application/json:
+            extensionprops: {}
+            schema:
+              ref: ""
+              value:
+                extensionprops: {}
+                properties:
+                  email:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  first_name:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  last_name:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  mobile:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  password:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  profile_background:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  profile_picture:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  username:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+  responses:
+    CreateAccountResponse:
+      ref: ""
+      value:
+        extensionprops: {}
+        description: Response returned back after registering an accounts.
+        content:
+          application/json:
+            extensionprops: {}
+            schema:
+              ref: ""
+              value:
+                extensionprops: {}
+                properties:
+                  task:
+                    ref: '#/components/schemas/Task'
+                    value: null
+    ErrorResponse:
+      ref: ""
+      value:
+        extensionprops: {}
+        description: Response when errors happen.
+        content:
+          application/json:
+            extensionprops: {}
+            schema:
+              ref: ""
+              value:
+                extensionprops: {}
+                properties:
+                  error:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+info:
+  extensionprops: {}
+  title: RBAC API
+  description: REST APIs used for interacting with the RBAC Service
+  contact:
+    extensionprops: {}
+  license:
+    extensionprops: {}
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 0.0.0
+paths:
+  /register:
+    extensionprops: {}
+    post:
+      extensionprops: {}
+      operationId: RegisterAccount
+      requestBody:
+        ref: '#/components/requestBodies/CreateAccountRequest'
+        value: null
+      responses:
+        "201":
+          ref: '#/components/responses/CreateAccountResponse'
+          value: null
+        "400":
+          ref: '#/components/responses/ErrorResponse'
+          value: null
+        "500":
+          ref: '#/components/responses/ErrorResponse'
+          value: null
+servers:
+- url: http://192.168.10.199:9234
+  description: Local development
