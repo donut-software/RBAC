@@ -27,6 +27,26 @@ type RBAC interface {
 	Task(ctx context.Context, id string) (internal.Tasks, error)
 	UpdateTask(ctx context.Context, id string, taskname string) error
 	DeleteTask(ctx context.Context, id string) error
+
+	CreateRoleTasks(ctx context.Context, taskid string, roleid string) error
+	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
+	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
+	DeleteRoleTask(ctx context.Context, id string) error
+
+	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
+	HelpText(ctx context.Context, id string) (internal.HelpText, error)
+	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
+	DeleteHelpText(ctx context.Context, id string) error
+
+	CreateMenu(ctx context.Context, menu internal.Menu) error
+	Menu(ctx context.Context, id string) (internal.Menu, error)
+	UpdateMenu(ctx context.Context, menu internal.Menu) error
+	DeleteMenu(ctx context.Context, id string) error
+
+	CreateNavigation(ctx context.Context, menu internal.Navigation) error
+	Navigation(ctx context.Context, id string) (internal.Navigation, error)
+	UpdateNavigation(ctx context.Context, menu internal.Navigation) error
+	DeleteNavigation(ctx context.Context, id string) error
 }
 
 func NewRBAC(db *sql.DB) RBAC {
