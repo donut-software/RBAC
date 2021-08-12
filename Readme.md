@@ -37,32 +37,32 @@ go install github.com/fdaines/spm-go@v0.11.1
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 ```
 ## Features
-- [ ] Project Layout 
-- [ ] Dependency Injection 
+- [X] Project Layout 
+- [X] Dependency Injection 
 - [ ] Secure Configuration
   - [ ] Using Hashicorp Vault
 - [ ] Metric, Traces and Logging using OpenTelemetry
 - [ ] Caching 
   - [ ] Using memcached
-- [ ] Persistent Storage
-  - [ ] Using Postgresql
-    - [ ] sqlc
+- [X] Persistent Storage
+  - [X] Using Postgresql
+    - [X] sqlc
 - [ ] Rest APIs
-  - [ ] HTTP Handlers
+  - [X] HTTP Handlers
   - [ ] Custom JSON Types
   - [ ] Versioning 
-  - [ ] Error Handling
+  - [X] Error Handling
   - [ ] OpenAPI 3 and Swagger-UI
   - [ ] Authorization
 - [ ] Events and Messaging
   - [ ] Apache Kafka
   - [ ] RabbitMq
   - [ ] Redis
-- [ ] Testing
-  - [ ] Type safe mocks with [`maxbrunsfeld/counterfeiter`](https://github.com/maxbrunsfeld/counterfeiter)
-  - [ ] Equality with [`google/go-cmp`](https://github.com/google/go-cmp)
-  - [ ] Integration tests for Datastores with [`ory/dockertest`](https://github.com/ory/dockertest)
-  - [ ] REST APIs
+- [X] Testing
+  - [X] Type safe mocks with [`maxbrunsfeld/counterfeiter`](https://github.com/maxbrunsfeld/counterfeiter)
+  - [X] Equality with [`google/go-cmp`](https://github.com/google/go-cmp)
+  - [X] Integration tests for Datastores with [`ory/dockertest`](https://github.com/ory/dockertest)
+  - [X] REST APIs
 - [ ] Containerization using Docker
 - [ ] Graceful Shutdown
 - [ ] Search Engine using [ElasticSearch](https://www.elastic.co/elasticsearch/)
