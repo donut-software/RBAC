@@ -32,6 +32,7 @@ func renderErrorResponse(ctx context.Context, w http.ResponseWriter, msg string,
 		// _, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "rest.renderErrorResponse")
 		// defer span.End()
 		// span.RecordError(err)
+		fmt.Println(err)
 	}
 	renderResponse(w, resp, status)
 }
