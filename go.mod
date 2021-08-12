@@ -13,7 +13,9 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.7.4
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
+	github.com/hashicorp/vault/api v1.1.1
 	github.com/jackc/pgx/v4 v4.10.1
+	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/opencontainers/runc v1.0.1 // indirect
 	github.com/ory/dockertest v3.3.5+incompatible

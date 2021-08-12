@@ -3,21 +3,31 @@ package internal
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/url"
+	"rbac/internal/envvar"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 // NewPostgreSQL instantiates the PostgreSQL database using configuration defined in environment variables.
-func NewPostgreSQL() (*sql.DB, error) {
+func NewPostgreSQL(conf *envvar.Configuration) (*sql.DB, error) {
+	get := func(v string) string {
+		res, err := conf.Get(v)
+		if err != nil {
+			log.Fatalf("Couldn't get configuration value for %s: %s", v, err)
+		}
+
+		return res
+	}
 
 	// XXX: We will revisit this code in future episodes replacing it with another solution
-	databaseHost := "127.0.0.1"  //get("DATABASE_HOST")
-	databasePort := "5432"       //get("DATABASE_PORT")
-	databaseUsername := "user"   //get("DATABASE_USERNAME")
-	databasePassword := "user"   //get("DATABASE_PASSWORD")
-	databaseName := "rbac"       //get("DATABASE_NAME")
-	databaseSSLMode := "disable" //get("DATABASE_SSLMODE")
+	databaseHost := get("DATABASE_HOST")
+	databasePort := get("DATABASE_PORT")
+	databaseUsername := get("DATABASE_USERNAME")
+	databasePassword := get("DATABASE_PASSWORD")
+	databaseName := get("DATABASE_NAME")
+	databaseSSLMode := get("DATABASE_SSLMODE")
 	// XXX: -
 
 	dsn := url.URL{
