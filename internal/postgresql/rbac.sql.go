@@ -395,6 +395,35 @@ func (q *Queries) SelectAccounts(ctx context.Context, username string) (Accounts
 	return i, err
 }
 
+const selectAccountsById = `-- name: SelectAccountsById :one
+SELECT
+  id,
+  username,
+  hashedpassword,
+  profile,
+  is_blocked,
+  created_at
+FROM
+  accounts
+WHERE
+  id = $1
+LIMIT 1
+`
+
+func (q *Queries) SelectAccountsById(ctx context.Context, id uuid.UUID) (Accounts, error) {
+	row := q.db.QueryRowContext(ctx, selectAccountsById, id)
+	var i Accounts
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Hashedpassword,
+		&i.Profile,
+		&i.IsBlocked,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const selectHelpText = `-- name: SelectHelpText :one
 SELECT
   id,

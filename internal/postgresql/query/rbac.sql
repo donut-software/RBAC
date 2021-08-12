@@ -63,6 +63,20 @@ WHERE
   username = @username
 LIMIT 1;
 
+-- name: SelectAccountsById :one
+SELECT
+  id,
+  username,
+  hashedpassword,
+  profile,
+  is_blocked,
+  created_at
+FROM
+  accounts
+WHERE
+  id = @id
+LIMIT 1;
+
 
 -- name: InsertAccounts :one
 INSERT INTO accounts (
