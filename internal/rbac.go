@@ -44,8 +44,8 @@ func (r *Roles) Validate() error {
 
 type AccountRoles struct {
 	Id        string
-	AccountId string
-	RoleId    string
+	Account   Account
+	Role      Roles
 	CreatedAt time.Time
 }
 
@@ -55,9 +55,12 @@ func (ar *AccountRoles) Validate() error {
 }
 
 type Tasks struct {
-	Id        string
-	Task      string
-	CreatedAt time.Time
+	Id         string
+	Task       string
+	HelpText   HelpText
+	Menu       []Menu
+	Navigation []Navigation
+	CreatedAt  time.Time
 }
 
 func (t *Tasks) Validate() error {
@@ -67,8 +70,8 @@ func (t *Tasks) Validate() error {
 
 type RoleTasks struct {
 	Id        string
-	Task_id   string
-	Role_id   string
+	Task      Tasks
+	Role      Roles
 	CreatedAt time.Time
 }
 

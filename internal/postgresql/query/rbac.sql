@@ -135,6 +135,18 @@ WHERE
   id = @id
 LIMIT 1;
 
+-- name: SelectHelpTextByTasks :one
+SELECT
+  id,
+  task_id,
+  helptext,
+  created_at
+FROM
+  helptext
+WHERE
+  task_id = @task_id
+LIMIT 1;
+
 -- name: InsertHelpText :one
 INSERT INTO helptext (
     task_id,
@@ -169,6 +181,17 @@ WHERE
   id = @id
 LIMIT 1;
 
+-- name: SelectMenuByTask :many
+SELECT
+  id,
+  task_id,
+  name,
+  created_at
+FROM
+  menu
+WHERE
+  task_id = @task_id;
+
 -- name: InsertMenu :one
 INSERT INTO menu (
     task_id,
@@ -202,6 +225,17 @@ FROM
 WHERE
   id = @id
 LIMIT 1;
+
+-- name: SelectNavigationByTask :many
+SELECT
+  id,
+  task_id,
+  name,
+  created_at
+FROM
+  navigation
+WHERE
+  task_id = @task_id;
 
 -- name: InsertNavigation :one
 INSERT INTO navigation (

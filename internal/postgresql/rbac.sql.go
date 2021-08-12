@@ -420,6 +420,31 @@ func (q *Queries) SelectHelpText(ctx context.Context, id uuid.UUID) (Helptext, e
 	return i, err
 }
 
+const selectHelpTextByTasks = `-- name: SelectHelpTextByTasks :one
+SELECT
+  id,
+  task_id,
+  helptext,
+  created_at
+FROM
+  helptext
+WHERE
+  task_id = $1
+LIMIT 1
+`
+
+func (q *Queries) SelectHelpTextByTasks(ctx context.Context, taskID uuid.UUID) (Helptext, error) {
+	row := q.db.QueryRowContext(ctx, selectHelpTextByTasks, taskID)
+	var i Helptext
+	err := row.Scan(
+		&i.ID,
+		&i.TaskID,
+		&i.Helptext,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const selectMenu = `-- name: SelectMenu :one
 SELECT
   id,
@@ -452,6 +477,53 @@ func (q *Queries) SelectMenu(ctx context.Context, id uuid.UUID) (SelectMenuRow, 
 	return i, err
 }
 
+const selectMenuByTask = `-- name: SelectMenuByTask :many
+SELECT
+  id,
+  task_id,
+  name,
+  created_at
+FROM
+  menu
+WHERE
+  task_id = $1
+`
+
+type SelectMenuByTaskRow struct {
+	ID        uuid.UUID
+	TaskID    uuid.UUID
+	Name      string
+	CreatedAt time.Time
+}
+
+func (q *Queries) SelectMenuByTask(ctx context.Context, taskID uuid.UUID) ([]SelectMenuByTaskRow, error) {
+	rows, err := q.db.QueryContext(ctx, selectMenuByTask, taskID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SelectMenuByTaskRow{}
+	for rows.Next() {
+		var i SelectMenuByTaskRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.TaskID,
+			&i.Name,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const selectNavigation = `-- name: SelectNavigation :one
 SELECT
   id,
@@ -482,6 +554,53 @@ func (q *Queries) SelectNavigation(ctx context.Context, id uuid.UUID) (SelectNav
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const selectNavigationByTask = `-- name: SelectNavigationByTask :many
+SELECT
+  id,
+  task_id,
+  name,
+  created_at
+FROM
+  navigation
+WHERE
+  task_id = $1
+`
+
+type SelectNavigationByTaskRow struct {
+	ID        uuid.UUID
+	TaskID    uuid.UUID
+	Name      string
+	CreatedAt time.Time
+}
+
+func (q *Queries) SelectNavigationByTask(ctx context.Context, taskID uuid.UUID) ([]SelectNavigationByTaskRow, error) {
+	rows, err := q.db.QueryContext(ctx, selectNavigationByTask, taskID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SelectNavigationByTaskRow{}
+	for rows.Next() {
+		var i SelectNavigationByTaskRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.TaskID,
+			&i.Name,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const selectProfile = `-- name: SelectProfile :one
