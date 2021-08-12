@@ -6,9 +6,14 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateTask(ctx context.Context, taskname string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		_, err := q.InsertTask(ctx, taskname)
 		if err != nil {
@@ -20,6 +25,9 @@ func (s *Store) CreateTask(ctx context.Context, taskname string) error {
 	return err
 }
 func (s *Store) Task(ctx context.Context, id string) (internal.Tasks, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Task")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	tasks := internal.Tasks{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(id)
@@ -84,6 +92,9 @@ func (s *Store) Task(ctx context.Context, id string) (internal.Tasks, error) {
 	return tasks, err
 }
 func (s *Store) UpdateTask(ctx context.Context, id string, taskname string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(id)
 		if err != nil {
@@ -104,6 +115,9 @@ func (s *Store) UpdateTask(ctx context.Context, id string, taskname string) erro
 }
 
 func (s *Store) DeleteTask(ctx context.Context, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(id)
 		if err != nil {

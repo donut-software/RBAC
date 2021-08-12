@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -38,6 +40,11 @@ func main() {
 	}
 }
 func run(env, address string) (<-chan error, error) {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		return nil, fmt.Errorf("zap.NewProduction %w", err)
+	}
+
 	if err := envvar.Load(env); err != nil {
 		return nil, fmt.Errorf("envvar.Load %w", err)
 	}
@@ -50,9 +57,28 @@ func run(env, address string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("newDB %w", err)
 	}
+
+	promExporter, err := internal.NewOTExporter(conf)
+	if err != nil {
+		return nil, fmt.Errorf("newOTExporter %w", err)
+	}
+
+	logging := func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			logger.Info(r.Method,
+				zap.Time("time", time.Now()),
+				zap.String("url", r.URL.String()),
+			)
+
+			h.ServeHTTP(w, r)
+		})
+	}
 	srv, err := newServer(serverConfig{
-		Address: address,
-		Db:      db,
+		Address:     address,
+		Db:          db,
+		Metrics:     promExporter,
+		Middlewares: []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
+		Logger:      logger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -74,9 +100,12 @@ func run(env, address string) (<-chan error, error) {
 		// <-sc // XXX: When using Go 1.15 or older
 		<-ctx.Done()
 
+		logger.Info("Shutdown signal received")
+
 		ctxTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 		defer func() {
+			logger.Sync()
 			db.Close()
 			stop()
 			cancel()
@@ -88,9 +117,12 @@ func run(env, address string) (<-chan error, error) {
 		if err := srv.Shutdown(ctxTimeout); err != nil {
 			errC <- err
 		}
+
+		logger.Info("Shutdown completed")
 	}()
 
 	go func() {
+		logger.Info("Listening and serving", zap.String("address", address))
 
 		// "ListenAndServe always returns a non-nil error. After Shutdown or Close, the returned error is
 		// ErrServerClosed."
@@ -103,12 +135,20 @@ func run(env, address string) (<-chan error, error) {
 }
 
 type serverConfig struct {
-	Address string
-	Db      *sql.DB
+	Address     string
+	Db          *sql.DB
+	Metrics     http.Handler
+	Middlewares []mux.MiddlewareFunc
+	Logger      *zap.Logger
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
 	r := mux.NewRouter()
+
+	for _, mw := range conf.Middlewares {
+		r.Use(mw)
+	}
+
 	repo := postgresql.NewRBAC(conf.Db)
 	svc := service.NewRBAC(repo)
 	rest.NewRBACHandler(svc).Register(r)

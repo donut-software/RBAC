@@ -6,9 +6,14 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		aid, err := uuid.Parse(accountId)
 		if err != nil {
@@ -33,6 +38,9 @@ func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId 
 	return err
 }
 func (s *Store) AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AcountRole")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	accountrole := internal.AccountRoles{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		acid, err := uuid.Parse(accountRoleId)
@@ -93,6 +101,9 @@ func (s *Store) AccountRole(ctx context.Context, accountRoleId string) (internal
 	return accountrole, err
 }
 func (s *Store) UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		acid, err := uuid.Parse(accountId)
 		if err != nil {
@@ -119,6 +130,9 @@ func (s *Store) UpdateAccountRole(ctx context.Context, accountId string, roleId 
 }
 
 func (s *Store) DeleteAccountRole(ctx context.Context, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		arid, err := uuid.Parse(id)
 		if err != nil {

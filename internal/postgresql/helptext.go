@@ -6,9 +6,14 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateHelpText(ctx context.Context, helptext internal.HelpText) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(helptext.Task_id)
 		if err != nil {
@@ -28,6 +33,9 @@ func (s *Store) CreateHelpText(ctx context.Context, helptext internal.HelpText) 
 	return err
 }
 func (s *Store) HelpText(ctx context.Context, id string) (internal.HelpText, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.HelpText")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	helptext := internal.HelpText{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(id)
@@ -49,6 +57,9 @@ func (s *Store) HelpText(ctx context.Context, id string) (internal.HelpText, err
 	return helptext, err
 }
 func (s *Store) UpdateHelpText(ctx context.Context, helptext internal.HelpText) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(helptext.Task_id)
 		if err != nil {
@@ -74,6 +85,9 @@ func (s *Store) UpdateHelpText(ctx context.Context, helptext internal.HelpText) 
 	return err
 }
 func (s *Store) DeleteHelpText(ctx context.Context, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		hid, err := uuid.Parse(id)
 		if err != nil {

@@ -6,9 +6,15 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateAccount(ctx context.Context, account internal.Account, password string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
+
 	err := s.execTx(ctx, func(q *Queries) error {
 		profileId, err := q.InsertProfile(ctx, InsertProfileParams{
 			ProfilePicture:    account.Profile.Profile_Picture,
@@ -38,6 +44,9 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 	return err
 }
 func (s *Store) Account(ctx context.Context, username string) (internal.Account, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	account := internal.Account{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		acc, err := q.SelectAccounts(ctx, username)
@@ -70,6 +79,9 @@ func (s *Store) Account(ctx context.Context, username string) (internal.Account,
 	return account, err
 }
 func (s *Store) UpdateProfile(ctx context.Context, profile internal.Profile) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		profId, err := uuid.Parse(profile.Id)
 		if err != nil {
@@ -90,6 +102,9 @@ func (s *Store) UpdateProfile(ctx context.Context, profile internal.Profile) err
 	return err
 }
 func (s *Store) DeleteAccount(ctx context.Context, username string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		err := q.DeleteAccount(ctx, username)
 		if err != nil {
@@ -101,6 +116,9 @@ func (s *Store) DeleteAccount(ctx context.Context, username string) error {
 	return err
 }
 func (s *Store) ChangePassword(ctx context.Context, username string, password string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.ChangePassword")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		hashedPassword, err := HashPassword(password)
 		if err != nil {

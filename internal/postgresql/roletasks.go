@@ -6,9 +6,14 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(taskid)
 		if err != nil {
@@ -33,6 +38,9 @@ func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid strin
 	return err
 }
 func (s *Store) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.RoleTask")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	roletask := internal.RoleTasks{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		rtId, err := uuid.Parse(roleTaskId)
@@ -117,6 +125,9 @@ func (s *Store) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleT
 	return roletask, err
 }
 func (s *Store) UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(taskId)
 		if err != nil {
@@ -143,6 +154,9 @@ func (s *Store) UpdateRoleTask(ctx context.Context, taskId string, roleId string
 	return err
 }
 func (s *Store) DeleteRoleTask(ctx context.Context, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		rtId, err := uuid.Parse(id)
 		if err != nil {

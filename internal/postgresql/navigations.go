@@ -6,9 +6,14 @@ import (
 	"rbac/internal"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Store) CreateNavigation(ctx context.Context, menu internal.Navigation) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Navigation.Create")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(menu.Task_id)
 		if err != nil {
@@ -28,6 +33,9 @@ func (s *Store) CreateNavigation(ctx context.Context, menu internal.Navigation) 
 	return err
 }
 func (s *Store) Navigation(ctx context.Context, id string) (internal.Navigation, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Navigation.Navigation")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	menu := internal.Navigation{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(id)
@@ -49,6 +57,9 @@ func (s *Store) Navigation(ctx context.Context, id string) (internal.Navigation,
 	return menu, err
 }
 func (s *Store) UpdateNavigation(ctx context.Context, menu internal.Navigation) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Navigation.Update")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(menu.Task_id)
 		if err != nil {
@@ -74,6 +85,9 @@ func (s *Store) UpdateNavigation(ctx context.Context, menu internal.Navigation) 
 	return err
 }
 func (s *Store) DeleteNavigation(ctx context.Context, id string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Navigation.Delete")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
 	err := s.execTx(ctx, func(q *Queries) error {
 		hid, err := uuid.Parse(id)
 		if err != nil {
