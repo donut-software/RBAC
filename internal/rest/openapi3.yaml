@@ -137,6 +137,60 @@ components:
                     value:
                       extensionprops: {}
                       type: string
+    GetAccountRequest:
+      ref: ""
+      value:
+        extensionprops: {}
+        description: Request used for registering an account.
+        required: true
+        content:
+          application/json:
+            extensionprops: {}
+            schema:
+              ref: ""
+              value:
+                extensionprops: {}
+                properties:
+                  email:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  first_name:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  last_name:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  mobile:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  password:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  profile_background:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  profile_picture:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
+                  username:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
   responses:
     CreateAccountResponse:
       ref: ""
@@ -151,9 +205,11 @@ components:
               value:
                 extensionprops: {}
                 properties:
-                  task:
-                    ref: '#/components/schemas/Task'
-                    value: null
+                  message:
+                    ref: ""
+                    value:
+                      extensionprops: {}
+                      type: string
     ErrorResponse:
       ref: ""
       value:
@@ -172,6 +228,22 @@ components:
                     value:
                       extensionprops: {}
                       type: string
+    GetAccountResponse:
+      ref: ""
+      value:
+        extensionprops: {}
+        description: Response returned back after registering an accounts.
+        content:
+          application/json:
+            extensionprops: {}
+            schema:
+              ref: ""
+              value:
+                extensionprops: {}
+                properties:
+                  account:
+                    ref: '#/components/schemas/Account'
+                    value: null
 info:
   extensionprops: {}
   title: RBAC API
@@ -184,6 +256,30 @@ info:
     url: https://opensource.org/licenses/MIT
   version: 0.0.0
 paths:
+  /accounts/{username}:
+    extensionprops: {}
+    get:
+      extensionprops: {}
+      operationId: Get Account
+      parameters:
+      - ref: ""
+        value:
+          extensionprops: {}
+          name: username
+          in: path
+          required: true
+          schema:
+            ref: ""
+            value:
+              extensionprops: {}
+              type: string
+      responses:
+        "200":
+          ref: '#/components/responses/GetAccountResponse'
+          value: null
+        "500":
+          ref: '#/components/responses/ErrorResponse'
+          value: null
   /register:
     extensionprops: {}
     post:

@@ -185,7 +185,7 @@ func newServer(conf serverConfig) (*http.Server, error) {
 		Addr:              conf.Address,
 		ReadTimeout:       1 * time.Second,
 		ReadHeaderTimeout: 1 * time.Second,
-		WriteTimeout:      1 * time.Second,
+		WriteTimeout:      1 * time.Minute,
 		IdleTimeout:       1 * time.Second,
 	}, nil
 }

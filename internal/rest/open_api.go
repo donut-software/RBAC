@@ -73,6 +73,20 @@ func NewOpenAPI3() openapi3.Swagger {
 					WithProperty("mobile", openapi3.NewStringSchema()).
 					WithProperty("email", openapi3.NewStringSchema())),
 		},
+		"GetAccountRequest": &openapi3.RequestBodyRef{
+			Value: openapi3.NewRequestBody().
+				WithDescription("Request used for registering an account.").
+				WithRequired(true).
+				WithJSONSchema(openapi3.NewSchema().
+					WithProperty("username", openapi3.NewStringSchema()).
+					WithProperty("password", openapi3.NewStringSchema()).
+					WithProperty("profile_picture", openapi3.NewStringSchema()).
+					WithProperty("profile_background", openapi3.NewStringSchema()).
+					WithProperty("first_name", openapi3.NewStringSchema()).
+					WithProperty("last_name", openapi3.NewStringSchema()).
+					WithProperty("mobile", openapi3.NewStringSchema()).
+					WithProperty("email", openapi3.NewStringSchema())),
+		},
 	}
 
 	swagger.Components.Responses = openapi3.Responses{
@@ -86,8 +100,14 @@ func NewOpenAPI3() openapi3.Swagger {
 			Value: openapi3.NewResponse().
 				WithDescription("Response returned back after registering an accounts.").
 				WithContent(openapi3.NewContentWithJSONSchema(openapi3.NewSchema().
-					WithPropertyRef("task", &openapi3.SchemaRef{
-						Ref: "#/components/schemas/Task",
+					WithProperty("message", openapi3.NewStringSchema()))),
+		},
+		"GetAccountResponse": &openapi3.ResponseRef{
+			Value: openapi3.NewResponse().
+				WithDescription("Response returned back after registering an accounts.").
+				WithContent(openapi3.NewContentWithJSONSchema(openapi3.NewSchema().
+					WithPropertyRef("account", &openapi3.SchemaRef{
+						Ref: "#/components/schemas/Account",
 					}))),
 		},
 		// "ReadTasksResponse": &openapi3.ResponseRef{
@@ -118,24 +138,25 @@ func NewOpenAPI3() openapi3.Swagger {
 				},
 			},
 		},
-		// "/tasks/{taskId}": &openapi3.PathItem{
-		// 	Get: &openapi3.Operation{
-		// 		OperationID: "ReadTask",
-		// 		Parameters: []*openapi3.ParameterRef{
-		// 			{
-		// 				Value: openapi3.NewPathParameter("taskId").
-		// 					WithSchema(openapi3.NewUUIDSchema()),
-		// 			},
-		// 		},
-		// 		Responses: openapi3.Responses{
-		// 			"500": &openapi3.ResponseRef{
-		// 				Ref: "#/components/responses/ErrorResponse",
-		// 			},
-		// 			"200": &openapi3.ResponseRef{
-		// 				Ref: "#/components/responses/ReadTasksResponse",
-		// 			},
-		// 		},
-		// 	},
+		"/accounts/{username}": &openapi3.PathItem{
+			Get: &openapi3.Operation{
+				OperationID: "Get Account",
+				Parameters: []*openapi3.ParameterRef{
+					{
+						Value: openapi3.NewPathParameter("username").
+							WithSchema(openapi3.NewStringSchema()),
+					},
+				},
+				Responses: openapi3.Responses{
+					"500": &openapi3.ResponseRef{
+						Ref: "#/components/responses/ErrorResponse",
+					},
+					"200": &openapi3.ResponseRef{
+						Ref: "#/components/responses/GetAccountResponse",
+					},
+				},
+			},
+		},
 		// 	Put: &openapi3.Operation{
 		// 		OperationID: "UpdateTask",
 		// 		Parameters: []*openapi3.ParameterRef{
