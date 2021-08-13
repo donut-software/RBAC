@@ -13,8 +13,19 @@ func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, pass
 	defer span.End()
 	err := r.repo.CreateAccount(ctx, account, password)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo create account: %w", err)
+	}
+	acc, err := r.repo.Account(ctx, account.UserName)
+	if err != nil {
+		return fmt.Errorf("repo create account: %w", err)
+	}
+	err = r.search.IndexAccount(ctx, acc)
+	if err != nil {
+		return fmt.Errorf("search indexed account: %w", err)
+	}
+	err = r.search.IndexProfile(ctx, acc.Profile)
+	if err != nil {
+		return fmt.Errorf("search indexed profile: %w", err)
 	}
 	return nil
 }

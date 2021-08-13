@@ -7,6 +7,7 @@ require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
+	github.com/elastic/go-elasticsearch/v7 v7.14.0
 	github.com/getkin/kin-openapi v0.37.0
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/google/go-cmp v0.5.5

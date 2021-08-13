@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"rbac/cmd/internal"
+	"rbac/internal/elasticsearch"
 	"rbac/internal/envvar"
 	"rbac/internal/postgresql"
 	"rbac/internal/rest"
@@ -19,6 +20,7 @@ import (
 	"syscall"
 	"time"
 
+	esv7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.uber.org/zap"
@@ -78,12 +80,17 @@ func run(env, address string) (<-chan error, error) {
 			h.ServeHTTP(w, r)
 		})
 	}
+	es, err := internal.NewElasticSearch(conf)
+	if err != nil {
+		return nil, fmt.Errorf("new ElasticSearch %w", err)
+	}
 	srv, err := newServer(serverConfig{
-		Address:     address,
-		Db:          db,
-		Metrics:     promExporter,
-		Middlewares: []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
-		Logger:      logger,
+		Address:       address,
+		Db:            db,
+		ElasticSearch: es,
+		Metrics:       promExporter,
+		Middlewares:   []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
+		Logger:        logger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -140,11 +147,12 @@ func run(env, address string) (<-chan error, error) {
 }
 
 type serverConfig struct {
-	Address     string
-	Db          *sql.DB
-	Metrics     http.Handler
-	Middlewares []mux.MiddlewareFunc
-	Logger      *zap.Logger
+	Address       string
+	Db            *sql.DB
+	ElasticSearch *esv7.Client
+	Metrics       http.Handler
+	Middlewares   []mux.MiddlewareFunc
+	Logger        *zap.Logger
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
@@ -154,7 +162,8 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	}
 
 	repo := postgresql.NewRBAC(conf.Db)
-	svc := service.NewRBAC(repo)
+	search := elasticsearch.NewRBAC(conf.ElasticSearch)
+	svc := service.NewRBAC(repo, search)
 
 	rest.RegisterOpenAPI(r)
 	rest.NewRBACHandler(svc).Register(r)

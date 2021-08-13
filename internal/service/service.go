@@ -49,12 +49,21 @@ type RBACRepository interface {
 	DeleteNavigation(ctx context.Context, id string) error
 }
 
+type RBACSearchRepository interface {
+	IndexAccount(ctx context.Context, account internal.Account) error
+	DeleteAccount(ctx context.Context, username string) error
+	GetAccount(ctx context.Context, username string) (internal.Account, error)
+
+	IndexProfile(ctx context.Context, profile internal.Profile) error
+}
 type RBAC struct {
-	repo RBACRepository
+	repo   RBACRepository
+	search RBACSearchRepository
 }
 
-func NewRBAC(repo RBACRepository) *RBAC {
+func NewRBAC(repo RBACRepository, search RBACSearchRepository) *RBAC {
 	return &RBAC{
-		repo: repo,
+		repo:   repo,
+		search: search,
 	}
 }

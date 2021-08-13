@@ -39,9 +39,9 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 ## Features
 - [X] Project Layout 
 - [X] Dependency Injection 
-- [ ] Secure Configuration
-  - [ ] Using Hashicorp Vault
-- [ ] Metric, Traces and Logging using OpenTelemetry
+- [X] Secure Configuration
+  - [X] Using Hashicorp Vault
+- [X] Metric, Traces and Logging using OpenTelemetry
 - [ ] Caching 
   - [ ] Using memcached
 - [X] Persistent Storage
@@ -49,10 +49,10 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
     - [X] sqlc
 - [ ] Rest APIs
   - [X] HTTP Handlers
-  - [ ] Custom JSON Types
+  - [X] Custom JSON Types
   - [ ] Versioning 
   - [X] Error Handling
-  - [ ] OpenAPI 3 and Swagger-UI
+  - [X] OpenAPI 3 and Swagger-UI
   - [ ] Authorization
 - [ ] Events and Messaging
   - [ ] Apache Kafka
@@ -64,7 +64,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
   - [X] Integration tests for Datastores with [`ory/dockertest`](https://github.com/ory/dockertest)
   - [X] REST APIs
 - [ ] Containerization using Docker
-- [ ] Graceful Shutdown
+- [X] Graceful Shutdown
 - [ ] Search Engine using [ElasticSearch](https://www.elastic.co/elasticsearch/)
 - [ ] Documentation
   - [ ] [C4 Model](https://c4model.com/)
