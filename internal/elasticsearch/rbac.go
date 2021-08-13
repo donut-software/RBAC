@@ -15,6 +15,6 @@ func NewRBAC(client *esv7.Client) *RBAC {
 }
 
 const (
-	INDEX_ACCOUNT = "rbac_account"
-	INDEX_PROFILE = "rbac_profile"
+	INDEX_ACCOUNT = "rbacaccount"
+	INDEX_PROFILE = "rbacprofile"
 )

@@ -51,10 +51,9 @@ type RBACRepository interface {
 
 type RBACSearchRepository interface {
 	IndexAccount(ctx context.Context, account internal.Account) error
-	DeleteAccount(ctx context.Context, username string) error
+	// DeleteAccount(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, username string) (internal.Account, error)
-
-	IndexProfile(ctx context.Context, profile internal.Profile) error
+	// IndexProfile(ctx context.Context, profile internal.Profile) error
 }
 type RBAC struct {
 	repo   RBACRepository

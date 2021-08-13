@@ -42,8 +42,8 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 - [X] Secure Configuration
   - [X] Using Hashicorp Vault
 - [X] Metric, Traces and Logging using OpenTelemetry
-- [ ] Caching 
-  - [ ] Using memcached
+- [X] Caching 
+  - [X] Using memcached
 - [X] Persistent Storage
   - [X] Using Postgresql
     - [X] sqlc
@@ -65,7 +65,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
   - [X] REST APIs
 - [ ] Containerization using Docker
 - [X] Graceful Shutdown
-- [ ] Search Engine using [ElasticSearch](https://www.elastic.co/elasticsearch/)
+- [X] Search Engine using [ElasticSearch](https://www.elastic.co/elasticsearch/)
 - [ ] Documentation
   - [ ] [C4 Model](https://c4model.com/)
 - [ ] Cloud Design Pattern

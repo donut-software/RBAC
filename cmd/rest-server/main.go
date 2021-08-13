@@ -14,12 +14,14 @@ import (
 	"rbac/cmd/internal"
 	"rbac/internal/elasticsearch"
 	"rbac/internal/envvar"
+	"rbac/internal/memcached"
 	"rbac/internal/postgresql"
 	"rbac/internal/rest"
 	"rbac/internal/service"
 	"syscall"
 	"time"
 
+	"github.com/bradfitz/gomemcache/memcache"
 	esv7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
@@ -84,6 +86,10 @@ func run(env, address string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new ElasticSearch %w", err)
 	}
+	memcached, err := internal.NewMemcached(conf)
+	if err != nil {
+		return nil, fmt.Errorf("internal.NewMemcached %w", err)
+	}
 	srv, err := newServer(serverConfig{
 		Address:       address,
 		Db:            db,
@@ -91,6 +97,7 @@ func run(env, address string) (<-chan error, error) {
 		Metrics:       promExporter,
 		Middlewares:   []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
 		Logger:        logger,
+		Memcached:     memcached,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -153,6 +160,7 @@ type serverConfig struct {
 	Metrics       http.Handler
 	Middlewares   []mux.MiddlewareFunc
 	Logger        *zap.Logger
+	Memcached     *memcache.Client
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
@@ -163,7 +171,8 @@ func newServer(conf serverConfig) (*http.Server, error) {
 
 	repo := postgresql.NewRBAC(conf.Db)
 	search := elasticsearch.NewRBAC(conf.ElasticSearch)
-	svc := service.NewRBAC(repo, search)
+	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
+	svc := service.NewRBAC(repo, mclient)
 
 	rest.RegisterOpenAPI(r)
 	rest.NewRBACHandler(svc).Register(r)

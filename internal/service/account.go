@@ -23,19 +23,19 @@ func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, pass
 	if err != nil {
 		return fmt.Errorf("search indexed account: %w", err)
 	}
-	err = r.search.IndexProfile(ctx, acc.Profile)
-	if err != nil {
-		return fmt.Errorf("search indexed profile: %w", err)
-	}
+	// err = r.search.IndexProfile(ctx, acc.Profile)
+	// if err != nil {
+	// 	return fmt.Errorf("search indexed profile: %w", err)
+	// }
 	return nil
 }
 func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
 	defer span.End()
-	account, err := r.repo.Account(ctx, username)
+	// account, err := r.repo.Account(ctx, username)
+	account, err := r.search.GetAccount(ctx, username)
 	if err != nil {
-		fmt.Println(err)
-		return internal.Account{}, err
+		return internal.Account{}, fmt.Errorf("get account: %w", err)
 	}
 	return account, nil
 }
