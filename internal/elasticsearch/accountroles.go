@@ -122,3 +122,171 @@ func (a *RBAC) GetAccountRole(ctx context.Context, accRoleId string) (internal.A
 		CreatedAt: hits.Source.CreatedAt,
 	}, err
 }
+
+// Search returns tasks matching a query.
+// XXX: Pagination will be implemented in future episodes
+func (a *RBAC) AccountRoleByAccount(ctx context.Context, username *string) (internal.AccountRoleByAccountResult, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	defer span.End()
+
+	should := make([]interface{}, 0, 4)
+
+	if username != nil {
+		should = append(should, map[string]interface{}{
+			"match": map[string]interface{}{
+				"account": username,
+			},
+		})
+	}
+
+	var query map[string]interface{}
+
+	if len(should) > 1 {
+		query = map[string]interface{}{
+			"query": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"should": should,
+				},
+			},
+		}
+	} else {
+		query = map[string]interface{}{
+			"query": should[0],
+		}
+	}
+
+	fmt.Println(query)
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		return internal.AccountRoleByAccountResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
+	}
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ACCOUNT_ROLE},
+		Body:  &buf,
+	}
+
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.AccountRoleByAccountResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return internal.AccountRoleByAccountResult{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedAccountRoles `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return internal.AccountRoleByAccountResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	account := internal.Account{
+		UserName: *username,
+	}
+	res := make([]internal.Roles, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+
+		res[i].Id = hit.Source.RoleId
+	}
+
+	return internal.AccountRoleByAccountResult{
+		Account: account,
+		Roles:   res,
+	}, nil
+}
+
+// Search returns tasks matching a query.
+// XXX: Pagination will be implemented in future episodes
+func (a *RBAC) AccountRoleByRole(ctx context.Context, roleId *string) (internal.AccountRoleByRoleResult, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	defer span.End()
+
+	should := make([]interface{}, 0, 4)
+
+	if roleId != nil {
+		should = append(should, map[string]interface{}{
+			"match": map[string]interface{}{
+				"role": roleId,
+			},
+		})
+	}
+
+	var query map[string]interface{}
+
+	if len(should) > 1 {
+		query = map[string]interface{}{
+			"query": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"should": should,
+				},
+			},
+		}
+	} else {
+		query = map[string]interface{}{
+			"query": should[0],
+		}
+	}
+
+	fmt.Println(query)
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		return internal.AccountRoleByRoleResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
+	}
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ACCOUNT_ROLE},
+		Body:  &buf,
+	}
+
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.AccountRoleByRoleResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return internal.AccountRoleByRoleResult{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedAccountRoles `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return internal.AccountRoleByRoleResult{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	role := internal.Roles{
+		Id: *roleId,
+	}
+	res := make([]internal.Account, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+
+		res[i].UserName = hit.Source.AccountUsername
+	}
+
+	return internal.AccountRoleByRoleResult{
+		Role:    role,
+		Account: res,
+	}, nil
+}

@@ -1,11 +1,8 @@
 package memcached
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"rbac/internal"
-	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"go.uber.org/zap"
@@ -27,6 +24,8 @@ type Datastore interface {
 	IndexAccountRole(ctx context.Context, accRole internal.AccountRoles) error
 	GetAccountRole(ctx context.Context, accRoleId string) (internal.AccountRoles, error)
 	DeleteAccountRole(ctx context.Context, accRoleId string) error
+	AccountRoleByAccount(ctx context.Context, username *string) (internal.AccountRoleByAccountResult, error)
+	AccountRoleByRole(ctx context.Context, roleId *string) (internal.AccountRoleByRoleResult, error)
 
 	IndexTask(ctx context.Context, task internal.Tasks) error
 	DeleteTask(ctx context.Context, taskId string) error
@@ -35,18 +34,23 @@ type Datastore interface {
 	IndexRoleTask(ctx context.Context, roletask internal.RoleTasks) error
 	DeleteRoleTask(ctx context.Context, roletaskId string) error
 	GetRoleTask(ctx context.Context, roletaskId string) (internal.RoleTasks, error)
+	RoleTaskByRole(ctx context.Context, roleId *string) (internal.RoleTaskByRole, error)
+	RoleTaskByTask(ctx context.Context, taskId *string) (internal.RoleTaskByTask, error)
 
 	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
 	DeleteHelpText(ctx context.Context, helptextId string) error
 	GetHelpText(ctx context.Context, helptextId string) (internal.HelpText, error)
+	HelpTextByTask(ctx context.Context, taskId *string) (internal.HelpTextByTask, error)
 
 	IndexMenu(ctx context.Context, menu internal.Menu) error
 	DeleteMenu(ctx context.Context, menuId string) error
 	GetMenu(ctx context.Context, menuId string) (internal.Menu, error)
+	MenuByTask(ctx context.Context, taskId *string) (internal.MenuByTask, error)
 
 	IndexNavigation(ctx context.Context, navigation internal.Navigation) error
 	DeleteNavigation(ctx context.Context, navigationId string) error
 	GetNavigation(ctx context.Context, navigationId string) (internal.Navigation, error)
+	NavigationByTask(ctx context.Context, taskId *string) (internal.NavigationByTask, error)
 }
 type RBAC struct {
 	client *memcache.Client
@@ -60,51 +64,4 @@ func NewRBAC(client *memcache.Client, orig Datastore, logger *zap.Logger) *RBAC 
 		orig:   orig,
 		logger: logger,
 	}
-}
-
-// Index ...
-func (t *RBAC) IndexAccount(ctx context.Context, account internal.Account) error {
-	err := t.orig.IndexProfile(ctx, account.Profile)
-	if err != nil {
-		return err
-	}
-	return t.orig.IndexAccount(ctx, account)
-}
-
-func (t *RBAC) GetAccount(ctx context.Context, username string) (internal.Account, error) {
-	key := username
-	item, err := t.client.Get(key)
-	if err != nil {
-		if err == memcache.ErrCacheMiss {
-			t.logger.Info("values NOT found", zap.String("key", string(key)))
-			res, err := t.orig.GetAccount(ctx, username)
-			if err != nil {
-				return internal.Account{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetAccount")
-			}
-			prof, err := t.orig.GetProfile(ctx, res.Profile.Id)
-			if err != nil {
-				return internal.Account{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetProfile")
-			}
-			res.Profile = prof
-			var b bytes.Buffer
-			if err := gob.NewEncoder(&b).Encode(&res); err == nil {
-				t.logger.Info("settin value")
-
-				t.client.Set(&memcache.Item{
-					Key:        key,
-					Value:      b.Bytes(),
-					Expiration: int32(time.Now().Add(25 * time.Second).Unix()),
-				})
-			}
-
-			return res, err
-		}
-		return internal.Account{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
-	}
-	t.logger.Info("values found", zap.String("key", string(key)))
-	var res internal.Account
-	if err := gob.NewDecoder(bytes.NewReader(item.Value)).Decode(&res); err != nil {
-		return internal.Account{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
-	}
-	return res, nil
 }
