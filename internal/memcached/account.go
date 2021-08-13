@@ -95,11 +95,7 @@ func (t *RBAC) GetAccountById(ctx context.Context, id string) (internal.Account,
 	}
 	return res, nil
 }
-func (t *RBAC) DeleteAccount(ctx context.Context, username string, profileId string) error {
-	err := t.orig.DeleteProfile(ctx, profileId)
-	if err != nil {
-		return err
-	}
+func (t *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	return t.orig.DeleteAccount(ctx, username)
 }
 
@@ -114,7 +110,7 @@ func (t *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (interna
 				return internal.ListAccount{}, err
 			}
 			for i, value := range listacc.Accounts {
-				listacc.Accounts[i].Profile, err = t.orig.GetProfile(ctx, value.Profile.Id)
+				listacc.Accounts[i].Profile, err = t.GetProfile(ctx, value.Profile.Id)
 				if err != nil {
 					return internal.ListAccount{}, err
 				}
