@@ -14,9 +14,39 @@ import (
 type Datastore interface {
 	IndexAccount(ctx context.Context, account internal.Account) error
 	GetAccount(ctx context.Context, username string) (internal.Account, error)
+	DeleteAccount(ctx context.Context, username string) error
 
 	IndexProfile(ctx context.Context, profile internal.Profile) error
 	GetProfile(ctx context.Context, profileId string) (internal.Profile, error)
+	DeleteProfile(ctx context.Context, profileId string) error
+
+	IndexRole(ctx context.Context, role internal.Roles) error
+	DeleteRole(ctx context.Context, roleId string) error
+	GetRole(ctx context.Context, roleId string) (internal.Roles, error)
+
+	IndexAccountRole(ctx context.Context, accRole internal.AccountRoles) error
+	GetAccountRole(ctx context.Context, accRoleId string) (internal.AccountRoles, error)
+	DeleteAccountRole(ctx context.Context, accRoleId string) error
+
+	IndexTask(ctx context.Context, task internal.Tasks) error
+	DeleteTask(ctx context.Context, taskId string) error
+	GetTask(ctx context.Context, taskId string) (internal.Tasks, error)
+
+	IndexRoleTask(ctx context.Context, roletask internal.RoleTasks) error
+	DeleteRoleTask(ctx context.Context, roletaskId string) error
+	GetRoleTask(ctx context.Context, roletaskId string) (internal.RoleTasks, error)
+
+	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
+	DeleteHelpText(ctx context.Context, helptextId string) error
+	GetHelpText(ctx context.Context, helptextId string) (internal.HelpText, error)
+
+	IndexMenu(ctx context.Context, menu internal.Menu) error
+	DeleteMenu(ctx context.Context, menuId string) error
+	GetMenu(ctx context.Context, menuId string) (internal.Menu, error)
+
+	IndexNavigation(ctx context.Context, navigation internal.Navigation) error
+	DeleteNavigation(ctx context.Context, navigationId string) error
+	GetNavigation(ctx context.Context, navigationId string) (internal.Navigation, error)
 }
 type RBAC struct {
 	client *memcache.Client
