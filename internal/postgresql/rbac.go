@@ -13,7 +13,7 @@ type RBAC interface {
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
 
-	CreateRole(ctx context.Context, rolename string) error
+	CreateRole(ctx context.Context, rolename string) (string, error)
 	Role(ctx context.Context, id string) (internal.Roles, error)
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	DeleteRole(ctx context.Context, id string) error

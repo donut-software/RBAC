@@ -52,7 +52,7 @@ func TestTasks_Post(t *testing.T) {
 			output{
 				http.StatusCreated,
 				&rest.AccountResponse{
-					Message: "Created Succesfully",
+					Message: "Created Successfully",
 				},
 				&rest.AccountResponse{},
 			},
@@ -103,7 +103,7 @@ func TestTasks_Post(t *testing.T) {
 			//-
 
 			res := doRequest(router,
-				httptest.NewRequest(http.MethodPost, "/register", bytes.NewReader(tt.input)))
+				httptest.NewRequest(http.MethodPost, "/accounts/register", bytes.NewReader(tt.input)))
 
 			//-
 

@@ -208,7 +208,7 @@ func (a *RBAC) GetAccountById(ctx context.Context, id *string) (internal.Account
 
 	return res[0], nil
 }
-func (a *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error) {
+func (a *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
 	defer span.End()
 

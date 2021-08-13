@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"fmt"
 	"rbac/internal"
 	"time"
 
@@ -103,8 +102,9 @@ func (t *RBAC) DeleteAccount(ctx context.Context, username string, profileId str
 	}
 	return t.orig.DeleteAccount(ctx, username)
 }
-func (t *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error) {
-	key := newKey(args)
+
+func (t *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error) {
+	key := newKey("listaccount", args)
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {
@@ -140,24 +140,4 @@ func (t *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (
 		return internal.ListAccount{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
 	}
 	return res, nil
-}
-
-func newKey(args internal.ListAccountArgs) string {
-	var (
-		from int
-		size int
-	)
-
-	if args.From != nil {
-		from = *args.From
-	}
-	if args.Size != nil {
-		size = *args.Size
-	}
-
-	// if args.Role != nil {
-	// 	role = *args.Role
-	// }
-
-	return fmt.Sprintf("listaccount_%d_%d", from, size)
 }

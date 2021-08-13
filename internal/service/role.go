@@ -11,20 +11,26 @@ import (
 func (r *RBAC) CreateRole(ctx context.Context, rolename string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Create")
 	defer span.End()
-	err := r.repo.CreateRole(ctx, rolename)
+	id, err := r.repo.CreateRole(ctx, rolename)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	role, err := r.repo.Role(ctx, id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
+	}
+	err = r.search.IndexRole(ctx, role)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
 	}
 	return nil
 }
 func (r *RBAC) Role(ctx context.Context, id string) (internal.Roles, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Role")
 	defer span.End()
-	role, err := r.repo.Role(ctx, id)
+	role, err := r.search.GetRole(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return internal.Roles{}, err
+		return internal.Roles{}, fmt.Errorf("search: %w", err)
 	}
 	return role, err
 }
@@ -37,6 +43,16 @@ func (r *RBAC) UpdateRole(ctx context.Context, id string, rolename string) error
 		return err
 	}
 	return err
+}
+func (r *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	defer span.End()
+	lr, err := r.search.ListRole(ctx, args)
+	if err != nil {
+		return internal.ListRole{}, fmt.Errorf("search: %w", err)
+	}
+	return lr, nil
+
 }
 func (r *RBAC) DeleteRole(ctx context.Context, id string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Delete")

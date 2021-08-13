@@ -72,7 +72,7 @@ func (r *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	}
 	return nil
 }
-func (r *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error) {
+func (r *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
 	defer span.End()
 	la, err := r.search.ListAccount(ctx, args)

@@ -13,7 +13,7 @@ type RBACRepository interface {
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
 
-	CreateRole(ctx context.Context, rolename string) error
+	CreateRole(ctx context.Context, rolename string) (string, error)
 	Role(ctx context.Context, id string) (internal.Roles, error)
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	DeleteRole(ctx context.Context, id string) error
@@ -54,8 +54,13 @@ type RBACSearchRepository interface {
 	// DeleteAccount(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, username string) (internal.Account, error)
 	GetAccountById(ctx context.Context, id string) (internal.Account, error)
-	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
+	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
 	// IndexProfile(ctx context.Context, profile internal.Profile) error
+
+	IndexRole(ctx context.Context, role internal.Roles) error
+	GetRole(ctx context.Context, roleId string) (internal.Roles, error)
+	DeleteRole(ctx context.Context, roleId string) error
+	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 }
 type RBAC struct {
 	repo   RBACRepository

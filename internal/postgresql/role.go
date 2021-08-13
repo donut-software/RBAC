@@ -10,19 +10,21 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *Store) CreateRole(ctx context.Context, rolename string) error {
+func (s *Store) CreateRole(ctx context.Context, rolename string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
+	var rid string
 	err := s.execTx(ctx, func(q *Queries) error {
-		_, err := q.InsertRole(ctx, rolename)
+		id, err := q.InsertRole(ctx, rolename)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
+		rid = id.String()
 		return nil
 	})
-	return err
+	return rid, err
 }
 
 func (s *Store) Role(ctx context.Context, id string) (internal.Roles, error) {

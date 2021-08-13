@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"rbac/internal"
+	"strings"
 	"time"
 
 	esv7api "github.com/elastic/go-elasticsearch/v7/esapi"
@@ -112,4 +113,54 @@ func (a *RBAC) GetRole(ctx context.Context, roleId string) (internal.Roles, erro
 		Role:      hits.Source.Role,
 		CreatedAt: hits.Source.CreatedAt,
 	}, err
+}
+
+func (a *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	defer span.End()
+
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ROLE},
+		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
+		From:  args.From,
+		Size:  args.Size,
+	}
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.ListRole{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return internal.ListRole{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedRole `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return internal.ListRole{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	res := make([]internal.Roles, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+		res[i].Id = hit.Source.Id
+		res[i].Role = hit.Source.Role
+		res[i].CreatedAt = hit.Source.CreatedAt
+	}
+
+	return internal.ListRole{
+		Roles: res,
+		Total: hits.Hits.Total.Value,
+	}, nil
 }

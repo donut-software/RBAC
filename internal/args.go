@@ -1,6 +1,6 @@
 package internal
 
-type ListAccountArgs struct {
+type ListArgs struct {
 	From *int
 	Size *int
 }
@@ -8,6 +8,16 @@ type ListAccount struct {
 	Accounts []Account
 	Total    int64
 }
+
+type ListRole struct {
+	Roles []Roles
+	Total int64
+}
+type ListTask struct {
+	Task  []Tasks
+	Total int64
+}
+
 type AccountRoleByAccountResult struct {
 	Account Account
 	Roles   []Roles

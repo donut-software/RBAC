@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"rbac/internal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -45,7 +46,7 @@ func (rb *RBACHandler) role(w http.ResponseWriter, r *http.Request) {
 	roleId := mux.Vars(r)["roleId"]
 	role, err := rb.svc.Role(r.Context(), roleId)
 	if err != nil {
-		renderErrorResponse(r.Context(), w, "error getting the account", err)
+		renderErrorResponse(r.Context(), w, "error getting the role", err)
 		return
 	}
 	renderResponse(w, &GetRoleResponse{
@@ -77,4 +78,42 @@ func (rb *RBACHandler) updateRole(w http.ResponseWriter, r *http.Request) {
 		&RoleResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListRoleRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListRoleResponse struct {
+	Roles []Role `json:"roles"`
+	Total int64  `json:"total"`
+}
+
+func (rb *RBACHandler) listrole(w http.ResponseWriter, r *http.Request) {
+	var req ListRoleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListRole(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	roles := []Role{}
+	for _, value := range la.Roles {
+		acc := Role{
+			Id:        value.Id,
+			Role:      value.Role,
+			CreatedAt: value.CreatedAt,
+		}
+		roles = append(roles, acc)
+	}
+	renderResponse(w, &ListRoleResponse{
+		Roles: roles,
+		Total: la.Total,
+	}, http.StatusOK)
 }

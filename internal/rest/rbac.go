@@ -16,7 +16,7 @@ type RBACService interface {
 	UpdateProfile(ctx context.Context, profile internal.Profile) error
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
-	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
+	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
 
 	CreateRole(ctx context.Context, rolename string) error
 	Role(ctx context.Context, id string) (internal.Roles, error)
@@ -25,6 +25,7 @@ type RBACService interface {
 	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
+	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 
 	CreateTask(ctx context.Context, taskname string) error
 	Task(ctx context.Context, id string) (internal.Tasks, error)
@@ -67,13 +68,14 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 
 	roleRouter := r.PathPrefix("/roles/").Subrouter()
 	roleRouter.HandleFunc("/", rb.createRole).Methods(http.MethodPost)
-	accountRouter.HandleFunc("/{roleId}", rb.role).Methods(http.MethodGet)
-	accountRouter.HandleFunc("/", rb.updateRole).Methods(http.MethodPut)
+	roleRouter.HandleFunc("/{roleId}", rb.role).Methods(http.MethodGet)
+	roleRouter.HandleFunc("/", rb.updateRole).Methods(http.MethodPut)
+	roleRouter.HandleFunc("/", rb.listrole).Methods(http.MethodGet)
 
 	accountroleRouter := r.PathPrefix("/accountroles/").Subrouter()
 	accountroleRouter.HandleFunc("/", rb.createAccountRole).Methods(http.MethodPost)
-	accountRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
-	accountRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
+	accountroleRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
+	accountroleRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
 
 	taskRouter := r.PathPrefix("/task/").Subrouter()
 	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)

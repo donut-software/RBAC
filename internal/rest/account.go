@@ -111,7 +111,7 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	la, err := rb.svc.ListAccount(r.Context(), internal.ListAccountArgs{
+	la, err := rb.svc.ListAccount(r.Context(), internal.ListArgs{
 		From: &req.From,
 		Size: &req.Size,
 	})
@@ -133,7 +133,7 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 		acc := Account{
 			Username:  value.UserName,
 			Profile:   prof,
-			CreatedAt: prof.CreatedAt,
+			CreatedAt: value.CreatedAt,
 		}
 		accounts = append(accounts, acc)
 	}

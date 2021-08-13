@@ -13,7 +13,7 @@ type Datastore interface {
 	GetAccount(ctx context.Context, username string) (internal.Account, error)
 	GetAccountById(ctx context.Context, id *string) (internal.Account, error)
 	DeleteAccount(ctx context.Context, username string) error
-	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
+	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
 
 	IndexProfile(ctx context.Context, profile internal.Profile) error
 	GetProfile(ctx context.Context, profileId string) (internal.Profile, error)
@@ -22,6 +22,7 @@ type Datastore interface {
 	IndexRole(ctx context.Context, role internal.Roles) error
 	DeleteRole(ctx context.Context, roleId string) error
 	GetRole(ctx context.Context, roleId string) (internal.Roles, error)
+	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 
 	IndexAccountRole(ctx context.Context, accRole internal.AccountRoles) error
 	GetAccountRole(ctx context.Context, accRoleId string) (internal.AccountRoles, error)

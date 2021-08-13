@@ -189,11 +189,11 @@ type FakeRBACService struct {
 		result1 internal.HelpText
 		result2 error
 	}
-	ListAccountStub        func(context.Context, internal.ListAccountArgs) (internal.ListAccount, error)
+	ListAccountStub        func(context.Context, internal.ListArgs) (internal.ListAccount, error)
 	listAccountMutex       sync.RWMutex
 	listAccountArgsForCall []struct {
 		arg1 context.Context
-		arg2 internal.ListAccountArgs
+		arg2 internal.ListArgs
 	}
 	listAccountReturns struct {
 		result1 internal.ListAccount
@@ -201,6 +201,20 @@ type FakeRBACService struct {
 	}
 	listAccountReturnsOnCall map[int]struct {
 		result1 internal.ListAccount
+		result2 error
+	}
+	ListRoleStub        func(context.Context, internal.ListArgs) (internal.ListRole, error)
+	listRoleMutex       sync.RWMutex
+	listRoleArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listRoleReturns struct {
+		result1 internal.ListRole
+		result2 error
+	}
+	listRoleReturnsOnCall map[int]struct {
+		result1 internal.ListRole
 		result2 error
 	}
 	MenuStub        func(context.Context, string) (internal.Menu, error)
@@ -1263,12 +1277,12 @@ func (fake *FakeRBACService) HelpTextReturnsOnCall(i int, result1 internal.HelpT
 	}{result1, result2}
 }
 
-func (fake *FakeRBACService) ListAccount(arg1 context.Context, arg2 internal.ListAccountArgs) (internal.ListAccount, error) {
+func (fake *FakeRBACService) ListAccount(arg1 context.Context, arg2 internal.ListArgs) (internal.ListAccount, error) {
 	fake.listAccountMutex.Lock()
 	ret, specificReturn := fake.listAccountReturnsOnCall[len(fake.listAccountArgsForCall)]
 	fake.listAccountArgsForCall = append(fake.listAccountArgsForCall, struct {
 		arg1 context.Context
-		arg2 internal.ListAccountArgs
+		arg2 internal.ListArgs
 	}{arg1, arg2})
 	stub := fake.ListAccountStub
 	fakeReturns := fake.listAccountReturns
@@ -1289,13 +1303,13 @@ func (fake *FakeRBACService) ListAccountCallCount() int {
 	return len(fake.listAccountArgsForCall)
 }
 
-func (fake *FakeRBACService) ListAccountCalls(stub func(context.Context, internal.ListAccountArgs) (internal.ListAccount, error)) {
+func (fake *FakeRBACService) ListAccountCalls(stub func(context.Context, internal.ListArgs) (internal.ListAccount, error)) {
 	fake.listAccountMutex.Lock()
 	defer fake.listAccountMutex.Unlock()
 	fake.ListAccountStub = stub
 }
 
-func (fake *FakeRBACService) ListAccountArgsForCall(i int) (context.Context, internal.ListAccountArgs) {
+func (fake *FakeRBACService) ListAccountArgsForCall(i int) (context.Context, internal.ListArgs) {
 	fake.listAccountMutex.RLock()
 	defer fake.listAccountMutex.RUnlock()
 	argsForCall := fake.listAccountArgsForCall[i]
@@ -1324,6 +1338,71 @@ func (fake *FakeRBACService) ListAccountReturnsOnCall(i int, result1 internal.Li
 	}
 	fake.listAccountReturnsOnCall[i] = struct {
 		result1 internal.ListAccount
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListRole(arg1 context.Context, arg2 internal.ListArgs) (internal.ListRole, error) {
+	fake.listRoleMutex.Lock()
+	ret, specificReturn := fake.listRoleReturnsOnCall[len(fake.listRoleArgsForCall)]
+	fake.listRoleArgsForCall = append(fake.listRoleArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListRoleStub
+	fakeReturns := fake.listRoleReturns
+	fake.recordInvocation("ListRole", []interface{}{arg1, arg2})
+	fake.listRoleMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListRoleCallCount() int {
+	fake.listRoleMutex.RLock()
+	defer fake.listRoleMutex.RUnlock()
+	return len(fake.listRoleArgsForCall)
+}
+
+func (fake *FakeRBACService) ListRoleCalls(stub func(context.Context, internal.ListArgs) (internal.ListRole, error)) {
+	fake.listRoleMutex.Lock()
+	defer fake.listRoleMutex.Unlock()
+	fake.ListRoleStub = stub
+}
+
+func (fake *FakeRBACService) ListRoleArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listRoleMutex.RLock()
+	defer fake.listRoleMutex.RUnlock()
+	argsForCall := fake.listRoleArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListRoleReturns(result1 internal.ListRole, result2 error) {
+	fake.listRoleMutex.Lock()
+	defer fake.listRoleMutex.Unlock()
+	fake.ListRoleStub = nil
+	fake.listRoleReturns = struct {
+		result1 internal.ListRole
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListRoleReturnsOnCall(i int, result1 internal.ListRole, result2 error) {
+	fake.listRoleMutex.Lock()
+	defer fake.listRoleMutex.Unlock()
+	fake.ListRoleStub = nil
+	if fake.listRoleReturnsOnCall == nil {
+		fake.listRoleReturnsOnCall = make(map[int]struct {
+			result1 internal.ListRole
+			result2 error
+		})
+	}
+	fake.listRoleReturnsOnCall[i] = struct {
+		result1 internal.ListRole
 		result2 error
 	}{result1, result2}
 }
@@ -2188,6 +2267,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.helpTextMutex.RUnlock()
 	fake.listAccountMutex.RLock()
 	defer fake.listAccountMutex.RUnlock()
+	fake.listRoleMutex.RLock()
+	defer fake.listRoleMutex.RUnlock()
 	fake.menuMutex.RLock()
 	defer fake.menuMutex.RUnlock()
 	fake.navigationMutex.RLock()
