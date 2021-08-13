@@ -12,10 +12,39 @@ import (
 type RBACService interface {
 	CreateAccount(ctx context.Context, account internal.Account, password string) error
 	Account(ctx context.Context, username string) (internal.Account, error)
+	AccountByID(ctx context.Context, id string) (internal.Account, error)
 	UpdateProfile(ctx context.Context, profile internal.Profile) error
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
 	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
+
+	CreateRole(ctx context.Context, rolename string) error
+	Role(ctx context.Context, id string) (internal.Roles, error)
+	UpdateRole(ctx context.Context, id string, rolename string) error
+
+	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
+	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
+	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
+
+	CreateTask(ctx context.Context, taskname string) error
+	Task(ctx context.Context, id string) (internal.Tasks, error)
+	UpdateTask(ctx context.Context, id string, taskname string) error
+
+	CreateRoleTask(ctx context.Context, taskid string, roleid string) error
+	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
+	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
+
+	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
+	HelpText(ctx context.Context, id string) (internal.HelpText, error)
+	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
+
+	CreateMenu(ctx context.Context, menu internal.Menu) error
+	Menu(ctx context.Context, id string) (internal.Menu, error)
+	UpdateMenu(ctx context.Context, menu internal.Menu) error
+
+	CreateNavigation(ctx context.Context, navigation internal.Navigation) error
+	Navigation(ctx context.Context, id string) (internal.Navigation, error)
+	UpdateNavigation(ctx context.Context, navigation internal.Navigation) error
 }
 
 type RBACHandler struct {
@@ -29,7 +58,46 @@ func NewRBACHandler(svc RBACService) *RBACHandler {
 }
 
 func (rb *RBACHandler) Register(r *mux.Router) {
-	r.HandleFunc("/register", rb.register).Methods(http.MethodPost)
-	r.HandleFunc("/accounts/{username}", rb.account).Methods(http.MethodGet)
-	r.HandleFunc("/accounts", rb.listaccount).Methods(http.MethodGet)
+
+	accountRouter := r.PathPrefix("/accounts/").Subrouter()
+	accountRouter.HandleFunc("/register", rb.register).Methods(http.MethodPost)
+	accountRouter.HandleFunc("/{username}", rb.account).Methods(http.MethodGet)
+	accountRouter.HandleFunc("/", rb.listaccount).Methods(http.MethodGet)
+	accountRouter.HandleFunc("/{username}", rb.deleteAccount).Methods(http.MethodDelete)
+
+	roleRouter := r.PathPrefix("/roles/").Subrouter()
+	roleRouter.HandleFunc("/", rb.createRole).Methods(http.MethodPost)
+	accountRouter.HandleFunc("/{roleId}", rb.role).Methods(http.MethodGet)
+	accountRouter.HandleFunc("/", rb.updateRole).Methods(http.MethodPut)
+
+	accountroleRouter := r.PathPrefix("/accountroles/").Subrouter()
+	accountroleRouter.HandleFunc("/", rb.createAccountRole).Methods(http.MethodPost)
+	accountRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
+	accountRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
+
+	taskRouter := r.PathPrefix("/task/").Subrouter()
+	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)
+	taskRouter.HandleFunc("/{taskId}", rb.task).Methods(http.MethodGet)
+	taskRouter.HandleFunc("/", rb.updateTask).Methods(http.MethodPut)
+
+	roletaskRouter := r.PathPrefix("/roletask/").Subrouter()
+	roletaskRouter.HandleFunc("/", rb.createRoleTask).Methods(http.MethodPost)
+	roletaskRouter.HandleFunc("/{roleTaskId}", rb.roleTask).Methods(http.MethodGet)
+	roletaskRouter.HandleFunc("/", rb.updateRoleTask).Methods(http.MethodPut)
+
+	helptextRouter := r.PathPrefix("/helptext/").Subrouter()
+	helptextRouter.HandleFunc("/", rb.createHelpText).Methods(http.MethodPost)
+	helptextRouter.HandleFunc("/{helpTextId}", rb.helpText).Methods(http.MethodGet)
+	helptextRouter.HandleFunc("/", rb.updateHelpText).Methods(http.MethodPut)
+
+	menuRouter := r.PathPrefix("/menu/").Subrouter()
+	menuRouter.HandleFunc("/", rb.createMenu).Methods(http.MethodPost)
+	menuRouter.HandleFunc("/{menuId}", rb.menu).Methods(http.MethodGet)
+	menuRouter.HandleFunc("/", rb.updateMenu).Methods(http.MethodPut)
+
+	navigationRouter := r.PathPrefix("/navigation/").Subrouter()
+	navigationRouter.HandleFunc("/", rb.createNavigation).Methods(http.MethodPost)
+	navigationRouter.HandleFunc("/{menuId}", rb.navigation).Methods(http.MethodGet)
+	navigationRouter.HandleFunc("/", rb.updateNavigation).Methods(http.MethodPut)
+
 }

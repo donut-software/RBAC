@@ -63,7 +63,7 @@ func (rb *RBACHandler) register(w http.ResponseWriter, r *http.Request) {
 	}
 	renderResponse(w,
 		&AccountResponse{
-			Message: "Created Succesfully",
+			Message: "Created Successfully",
 		}, http.StatusCreated)
 }
 
@@ -140,5 +140,27 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 	renderResponse(w, &ListAccountResponse{
 		Accounts: accounts,
 		Total:    la.Total,
+	}, http.StatusOK)
+}
+
+type DeleteAccountResponse struct {
+	Message string `json:"message"`
+}
+
+func (rb *RBACHandler) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	username := mux.Vars(r)["username"]
+	_, err := rb.svc.Account(r.Context(), username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting the account", err)
+		return
+	}
+	err = rb.svc.DeleteAccount(r.Context(), username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting the account", err)
+		return
+	}
+
+	renderResponse(w, &DeleteAccountResponse{
+		Message: "Deleted Successfully..",
 	}, http.StatusOK)
 }
