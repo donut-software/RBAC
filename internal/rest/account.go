@@ -95,3 +95,50 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 		},
 	}, http.StatusOK)
 }
+
+type ListAccountRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListAccountResponse struct {
+	Accounts []Account `json:"accounts"`
+	Total    int64     `json:"total"`
+}
+
+func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
+	var req ListAccountRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListAccount(r.Context(), internal.ListAccountArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	accounts := []Account{}
+	for _, value := range la.Accounts {
+		prof := Profile{
+			ProfilePicture:    value.Profile.Profile_Picture,
+			ProfileBackground: value.Profile.Profile_Background,
+			FirstName:         value.Profile.First_Name,
+			LastName:          value.Profile.Last_Name,
+			Mobile:            value.Profile.Mobile,
+			Email:             value.Profile.Email,
+			CreatedAt:         value.CreatedAt,
+		}
+		acc := Account{
+			Username:  value.UserName,
+			Profile:   prof,
+			CreatedAt: prof.CreatedAt,
+		}
+		accounts = append(accounts, acc)
+	}
+	renderResponse(w, &ListAccountResponse{
+		Accounts: accounts,
+		Total:    la.Total,
+	}, http.StatusOK)
+}

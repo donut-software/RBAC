@@ -1,5 +1,13 @@
 package internal
 
+type ListAccountArgs struct {
+	From *int
+	Size *int
+}
+type ListAccount struct {
+	Accounts []Account
+	Total    int64
+}
 type AccountRoleByAccountResult struct {
 	Account Account
 	Roles   []Roles

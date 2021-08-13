@@ -15,6 +15,7 @@ type RBACService interface {
 	UpdateProfile(ctx context.Context, profile internal.Profile) error
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
+	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
 }
 
 type RBACHandler struct {
@@ -30,4 +31,5 @@ func NewRBACHandler(svc RBACService) *RBACHandler {
 func (rb *RBACHandler) Register(r *mux.Router) {
 	r.HandleFunc("/register", rb.register).Methods(http.MethodPost)
 	r.HandleFunc("/accounts/{username}", rb.account).Methods(http.MethodGet)
+	r.HandleFunc("/accounts", rb.listaccount).Methods(http.MethodGet)
 }

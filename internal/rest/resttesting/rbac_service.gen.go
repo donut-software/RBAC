@@ -61,6 +61,20 @@ type FakeRBACService struct {
 	deleteAccountReturnsOnCall map[int]struct {
 		result1 error
 	}
+	ListAccountStub        func(context.Context, internal.ListAccountArgs) (internal.ListAccount, error)
+	listAccountMutex       sync.RWMutex
+	listAccountArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListAccountArgs
+	}
+	listAccountReturns struct {
+		result1 internal.ListAccount
+		result2 error
+	}
+	listAccountReturnsOnCall map[int]struct {
+		result1 internal.ListAccount
+		result2 error
+	}
 	UpdateProfileStub        func(context.Context, internal.Profile) error
 	updateProfileMutex       sync.RWMutex
 	updateProfileArgsForCall []struct {
@@ -330,6 +344,71 @@ func (fake *FakeRBACService) DeleteAccountReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeRBACService) ListAccount(arg1 context.Context, arg2 internal.ListAccountArgs) (internal.ListAccount, error) {
+	fake.listAccountMutex.Lock()
+	ret, specificReturn := fake.listAccountReturnsOnCall[len(fake.listAccountArgsForCall)]
+	fake.listAccountArgsForCall = append(fake.listAccountArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListAccountArgs
+	}{arg1, arg2})
+	stub := fake.ListAccountStub
+	fakeReturns := fake.listAccountReturns
+	fake.recordInvocation("ListAccount", []interface{}{arg1, arg2})
+	fake.listAccountMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListAccountCallCount() int {
+	fake.listAccountMutex.RLock()
+	defer fake.listAccountMutex.RUnlock()
+	return len(fake.listAccountArgsForCall)
+}
+
+func (fake *FakeRBACService) ListAccountCalls(stub func(context.Context, internal.ListAccountArgs) (internal.ListAccount, error)) {
+	fake.listAccountMutex.Lock()
+	defer fake.listAccountMutex.Unlock()
+	fake.ListAccountStub = stub
+}
+
+func (fake *FakeRBACService) ListAccountArgsForCall(i int) (context.Context, internal.ListAccountArgs) {
+	fake.listAccountMutex.RLock()
+	defer fake.listAccountMutex.RUnlock()
+	argsForCall := fake.listAccountArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListAccountReturns(result1 internal.ListAccount, result2 error) {
+	fake.listAccountMutex.Lock()
+	defer fake.listAccountMutex.Unlock()
+	fake.ListAccountStub = nil
+	fake.listAccountReturns = struct {
+		result1 internal.ListAccount
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListAccountReturnsOnCall(i int, result1 internal.ListAccount, result2 error) {
+	fake.listAccountMutex.Lock()
+	defer fake.listAccountMutex.Unlock()
+	fake.ListAccountStub = nil
+	if fake.listAccountReturnsOnCall == nil {
+		fake.listAccountReturnsOnCall = make(map[int]struct {
+			result1 internal.ListAccount
+			result2 error
+		})
+	}
+	fake.listAccountReturnsOnCall[i] = struct {
+		result1 internal.ListAccount
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRBACService) UpdateProfile(arg1 context.Context, arg2 internal.Profile) error {
 	fake.updateProfileMutex.Lock()
 	ret, specificReturn := fake.updateProfileReturnsOnCall[len(fake.updateProfileArgsForCall)]
@@ -403,6 +482,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.createAccountMutex.RUnlock()
 	fake.deleteAccountMutex.RLock()
 	defer fake.deleteAccountMutex.RUnlock()
+	fake.listAccountMutex.RLock()
+	defer fake.listAccountMutex.RUnlock()
 	fake.updateProfileMutex.RLock()
 	defer fake.updateProfileMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"rbac/internal"
+	"strings"
 	"time"
 
 	esv7api "github.com/elastic/go-elasticsearch/v7/esapi"
@@ -121,4 +122,56 @@ func (a *RBAC) GetAccount(ctx context.Context, username string) (internal.Accoun
 		IsBlocked: hits.Source.IsBlocked,
 		CreatedAt: hits.Source.CreatedAt,
 	}, err
+}
+
+func (a *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	defer span.End()
+
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ACCOUNT},
+		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
+		From:  args.From,
+		Size:  args.Size,
+	}
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.ListAccount{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return internal.ListAccount{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedAccount `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return internal.ListAccount{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	res := make([]internal.Account, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+		res[i].Id = hit.Source.ID
+		res[i].UserName = hit.Source.Username
+		res[i].Profile.Id = hit.Source.ProfileId
+		res[i].IsBlocked = hit.Source.IsBlocked
+		res[i].CreatedAt = hit.Source.CreatedAt
+	}
+
+	return internal.ListAccount{
+		Accounts: res,
+		Total:    hits.Hits.Total.Value,
+	}, nil
 }

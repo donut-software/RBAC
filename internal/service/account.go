@@ -23,10 +23,6 @@ func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, pass
 	if err != nil {
 		return fmt.Errorf("search indexed account: %w", err)
 	}
-	// err = r.search.IndexProfile(ctx, acc.Profile)
-	// if err != nil {
-	// 	return fmt.Errorf("search indexed profile: %w", err)
-	// }
 	return nil
 }
 func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, error) {
@@ -44,8 +40,7 @@ func (r *RBAC) UpdateProfile(ctx context.Context, profile internal.Profile) erro
 	defer span.End()
 	err := r.repo.UpdateProfile(ctx, profile)
 	if err != nil {
-		fmt.Print(err)
-		return err
+		return fmt.Errorf("search: %w", err)
 	}
 	return nil
 }
@@ -54,8 +49,7 @@ func (r *RBAC) ChangePassword(ctx context.Context, username string, password str
 	defer span.End()
 	err := r.repo.ChangePassword(ctx, username, password)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("search: %w", err)
 	}
 	return nil
 }
@@ -64,8 +58,17 @@ func (r *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	defer span.End()
 	err := r.repo.DeleteAccount(ctx, username)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		return fmt.Errorf("search: %w", err)
 	}
 	return nil
+}
+func (r *RBAC) ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	defer span.End()
+	la, err := r.search.ListAccount(ctx, args)
+	if err != nil {
+		return internal.ListAccount{}, fmt.Errorf("search: %w", err)
+	}
+	return la, nil
+
 }
