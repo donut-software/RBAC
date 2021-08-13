@@ -11,6 +11,7 @@ import (
 type Datastore interface {
 	IndexAccount(ctx context.Context, account internal.Account) error
 	GetAccount(ctx context.Context, username string) (internal.Account, error)
+	GetAccountById(ctx context.Context, id *string) (internal.Account, error)
 	DeleteAccount(ctx context.Context, username string) error
 	ListAccount(ctx context.Context, args internal.ListAccountArgs) (internal.ListAccount, error)
 

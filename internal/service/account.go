@@ -35,6 +35,16 @@ func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, 
 	}
 	return account, nil
 }
+func (r *RBAC) AccountByID(ctx context.Context, id string) (internal.Account, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
+	defer span.End()
+	// account, err := r.repo.Account(ctx, username)
+	account, err := r.search.GetAccountById(ctx, id)
+	if err != nil {
+		return internal.Account{}, fmt.Errorf("get account: %w", err)
+	}
+	return account, nil
+}
 func (r *RBAC) UpdateProfile(ctx context.Context, profile internal.Profile) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Update")
 	defer span.End()
