@@ -116,7 +116,7 @@ func (a *RBAC) GetRole(ctx context.Context, roleId string) (internal.Roles, erro
 }
 
 func (a *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.List")
 	defer span.End()
 
 	req := esv7api.SearchRequest{

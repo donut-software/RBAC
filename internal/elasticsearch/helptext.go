@@ -121,7 +121,7 @@ func (a *RBAC) GetHelpText(ctx context.Context, helptextId string) (internal.Hel
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) HelpTextByTask(ctx context.Context, taskId string) (internal.HelpText, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountHelpTask.ByAccount")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "HelpText.byTask")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
@@ -192,7 +192,7 @@ func (a *RBAC) HelpTextByTask(ctx context.Context, taskId string) (internal.Help
 		res[i].CreatedAt = hit.Source.CreatedAt
 	}
 
-	if (len(hits.Hits.Hits) > 0){
+	if len(hits.Hits.Hits) > 0 {
 		return res[0], nil
 	}
 	return internal.HelpText{}, nil

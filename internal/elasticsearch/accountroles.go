@@ -210,7 +210,7 @@ func (a *RBAC) AccountRoleByAccount(ctx context.Context, username *string) (inte
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) AccountRoleByRole(ctx context.Context, roleId *string) (internal.AccountRoleByRoleResult, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByRole")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)

@@ -26,7 +26,7 @@ type indexedProfile struct {
 }
 
 func (a *RBAC) IndexProfile(ctx context.Context, profile internal.Profile) error {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Index")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Profile.Index")
 	defer span.End()
 	body := indexedProfile{
 		ProfileID:         profile.Id,
@@ -64,7 +64,7 @@ func (a *RBAC) IndexProfile(ctx context.Context, profile internal.Profile) error
 }
 
 func (a *RBAC) DeleteProfile(ctx context.Context, profileId string) error {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Delete")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Profile.Delete")
 	defer span.End()
 
 	req := esv7api.DeleteRequest{
@@ -88,7 +88,7 @@ func (a *RBAC) DeleteProfile(ctx context.Context, profileId string) error {
 }
 
 func (a *RBAC) GetProfile(ctx context.Context, profileId string) (internal.Profile, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Get")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Profile.Get")
 	defer span.End()
 	req := esv7api.GetRequest{
 		Index:      INDEX_PROFILE,

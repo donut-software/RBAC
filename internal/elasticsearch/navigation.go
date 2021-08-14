@@ -197,7 +197,7 @@ func (a *RBAC) NavigationByTask(ctx context.Context, taskId string) ([]internal.
 }
 
 func (a *RBAC) ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "HelpText.List")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Navigation.List")
 	defer span.End()
 
 	req := esv7api.SearchRequest{

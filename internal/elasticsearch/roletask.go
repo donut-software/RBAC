@@ -127,7 +127,7 @@ func (a *RBAC) GetRoleTask(ctx context.Context, roletaskId string) (internal.Rol
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.RoleTaskByRole, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.ByAccount")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
@@ -209,7 +209,7 @@ func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.Role
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) RoleTaskByTask(ctx context.Context, taskId string) (internal.RoleTaskByTask, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.ByAccount")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
@@ -372,7 +372,7 @@ func (a *RBAC) DeleteRoleTaskByTask(ctx context.Context, roletaskId string) erro
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) RoleTaskByTaskReturnIds(ctx context.Context, taskId string) ([]string, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.ByTaskReturningIds")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)

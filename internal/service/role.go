@@ -56,7 +56,7 @@ func (r *RBAC) UpdateRole(ctx context.Context, id string, rolename string) error
 	return err
 }
 func (r *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.List")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.List")
 	defer span.End()
 	lr, err := r.search.ListRole(ctx, args)
 	if err != nil {

@@ -58,7 +58,7 @@ func (r *RBAC) UpdateMenu(ctx context.Context, menu internal.Menu) error {
 }
 
 func (r *RBAC) ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.List")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Menu.List")
 	defer span.End()
 	lr, err := r.search.ListMenu(ctx, args)
 	if err != nil {
