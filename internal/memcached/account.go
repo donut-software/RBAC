@@ -96,7 +96,30 @@ func (t *RBAC) GetAccountById(ctx context.Context, id string) (internal.Account,
 	return res, nil
 }
 func (t *RBAC) DeleteAccount(ctx context.Context, username string) error {
-	return t.orig.DeleteAccount(ctx, username)
+	//get account first
+	acc, err := t.orig.GetAccount(ctx, username)
+	if err != nil {
+		internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetProfile")
+	}
+	//get account roles
+	ar, err := t.orig.AccountRoleByAccountReturnId(ctx, username)
+	if err != nil {
+		internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetAccountRoleByAccountReturnId")
+	}
+	err = t.orig.DeleteAccount(ctx, username)
+	if err != nil {
+		internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetProfile")
+	}
+	err = t.orig.DeleteProfile(ctx, acc.Profile.Id)
+	if err != nil {
+		internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetProfile")
+	}
+	for _, value := range ar {
+		if errs := t.orig.DeleteAccountRole(ctx, value); errs != nil {
+			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteAccountRole")
+		}
+	}
+	return nil
 }
 
 func (t *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error) {

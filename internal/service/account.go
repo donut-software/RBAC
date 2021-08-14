@@ -88,6 +88,10 @@ func (r *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	defer span.End()
 	err := r.repo.DeleteAccount(ctx, username)
 	if err != nil {
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteAccount(ctx, username)
+	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
 	return nil
