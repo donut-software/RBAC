@@ -217,6 +217,20 @@ type FakeRBACService struct {
 		result1 internal.ListAccountRole
 		result2 error
 	}
+	ListHelpTextStub        func(context.Context, internal.ListArgs) (internal.ListHelpText, error)
+	listHelpTextMutex       sync.RWMutex
+	listHelpTextArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listHelpTextReturns struct {
+		result1 internal.ListHelpText
+		result2 error
+	}
+	listHelpTextReturnsOnCall map[int]struct {
+		result1 internal.ListHelpText
+		result2 error
+	}
 	ListMenuStub        func(context.Context, internal.ListArgs) (internal.ListMenu, error)
 	listMenuMutex       sync.RWMutex
 	listMenuArgsForCall []struct {
@@ -285,20 +299,6 @@ type FakeRBACService struct {
 	}
 	listTaskReturnsOnCall map[int]struct {
 		result1 internal.ListTask
-		result2 error
-	}
-	ListhelpTextStub        func(context.Context, internal.ListArgs) (internal.ListHelpText, error)
-	listhelpTextMutex       sync.RWMutex
-	listhelpTextArgsForCall []struct {
-		arg1 context.Context
-		arg2 internal.ListArgs
-	}
-	listhelpTextReturns struct {
-		result1 internal.ListHelpText
-		result2 error
-	}
-	listhelpTextReturnsOnCall map[int]struct {
-		result1 internal.ListHelpText
 		result2 error
 	}
 	MenuStub        func(context.Context, string) (internal.Menu, error)
@@ -1491,6 +1491,71 @@ func (fake *FakeRBACService) ListAccountRoleReturnsOnCall(i int, result1 interna
 	}{result1, result2}
 }
 
+func (fake *FakeRBACService) ListHelpText(arg1 context.Context, arg2 internal.ListArgs) (internal.ListHelpText, error) {
+	fake.listHelpTextMutex.Lock()
+	ret, specificReturn := fake.listHelpTextReturnsOnCall[len(fake.listHelpTextArgsForCall)]
+	fake.listHelpTextArgsForCall = append(fake.listHelpTextArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListHelpTextStub
+	fakeReturns := fake.listHelpTextReturns
+	fake.recordInvocation("ListHelpText", []interface{}{arg1, arg2})
+	fake.listHelpTextMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListHelpTextCallCount() int {
+	fake.listHelpTextMutex.RLock()
+	defer fake.listHelpTextMutex.RUnlock()
+	return len(fake.listHelpTextArgsForCall)
+}
+
+func (fake *FakeRBACService) ListHelpTextCalls(stub func(context.Context, internal.ListArgs) (internal.ListHelpText, error)) {
+	fake.listHelpTextMutex.Lock()
+	defer fake.listHelpTextMutex.Unlock()
+	fake.ListHelpTextStub = stub
+}
+
+func (fake *FakeRBACService) ListHelpTextArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listHelpTextMutex.RLock()
+	defer fake.listHelpTextMutex.RUnlock()
+	argsForCall := fake.listHelpTextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListHelpTextReturns(result1 internal.ListHelpText, result2 error) {
+	fake.listHelpTextMutex.Lock()
+	defer fake.listHelpTextMutex.Unlock()
+	fake.ListHelpTextStub = nil
+	fake.listHelpTextReturns = struct {
+		result1 internal.ListHelpText
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListHelpTextReturnsOnCall(i int, result1 internal.ListHelpText, result2 error) {
+	fake.listHelpTextMutex.Lock()
+	defer fake.listHelpTextMutex.Unlock()
+	fake.ListHelpTextStub = nil
+	if fake.listHelpTextReturnsOnCall == nil {
+		fake.listHelpTextReturnsOnCall = make(map[int]struct {
+			result1 internal.ListHelpText
+			result2 error
+		})
+	}
+	fake.listHelpTextReturnsOnCall[i] = struct {
+		result1 internal.ListHelpText
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRBACService) ListMenu(arg1 context.Context, arg2 internal.ListArgs) (internal.ListMenu, error) {
 	fake.listMenuMutex.Lock()
 	ret, specificReturn := fake.listMenuReturnsOnCall[len(fake.listMenuArgsForCall)]
@@ -1812,71 +1877,6 @@ func (fake *FakeRBACService) ListTaskReturnsOnCall(i int, result1 internal.ListT
 	}
 	fake.listTaskReturnsOnCall[i] = struct {
 		result1 internal.ListTask
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRBACService) ListhelpText(arg1 context.Context, arg2 internal.ListArgs) (internal.ListHelpText, error) {
-	fake.listhelpTextMutex.Lock()
-	ret, specificReturn := fake.listhelpTextReturnsOnCall[len(fake.listhelpTextArgsForCall)]
-	fake.listhelpTextArgsForCall = append(fake.listhelpTextArgsForCall, struct {
-		arg1 context.Context
-		arg2 internal.ListArgs
-	}{arg1, arg2})
-	stub := fake.ListhelpTextStub
-	fakeReturns := fake.listhelpTextReturns
-	fake.recordInvocation("ListhelpText", []interface{}{arg1, arg2})
-	fake.listhelpTextMutex.Unlock()
-	if stub != nil {
-		return stub(arg1, arg2)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeRBACService) ListhelpTextCallCount() int {
-	fake.listhelpTextMutex.RLock()
-	defer fake.listhelpTextMutex.RUnlock()
-	return len(fake.listhelpTextArgsForCall)
-}
-
-func (fake *FakeRBACService) ListhelpTextCalls(stub func(context.Context, internal.ListArgs) (internal.ListHelpText, error)) {
-	fake.listhelpTextMutex.Lock()
-	defer fake.listhelpTextMutex.Unlock()
-	fake.ListhelpTextStub = stub
-}
-
-func (fake *FakeRBACService) ListhelpTextArgsForCall(i int) (context.Context, internal.ListArgs) {
-	fake.listhelpTextMutex.RLock()
-	defer fake.listhelpTextMutex.RUnlock()
-	argsForCall := fake.listhelpTextArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
-}
-
-func (fake *FakeRBACService) ListhelpTextReturns(result1 internal.ListHelpText, result2 error) {
-	fake.listhelpTextMutex.Lock()
-	defer fake.listhelpTextMutex.Unlock()
-	fake.ListhelpTextStub = nil
-	fake.listhelpTextReturns = struct {
-		result1 internal.ListHelpText
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRBACService) ListhelpTextReturnsOnCall(i int, result1 internal.ListHelpText, result2 error) {
-	fake.listhelpTextMutex.Lock()
-	defer fake.listhelpTextMutex.Unlock()
-	fake.ListhelpTextStub = nil
-	if fake.listhelpTextReturnsOnCall == nil {
-		fake.listhelpTextReturnsOnCall = make(map[int]struct {
-			result1 internal.ListHelpText
-			result2 error
-		})
-	}
-	fake.listhelpTextReturnsOnCall[i] = struct {
-		result1 internal.ListHelpText
 		result2 error
 	}{result1, result2}
 }
@@ -2743,6 +2743,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.listAccountMutex.RUnlock()
 	fake.listAccountRoleMutex.RLock()
 	defer fake.listAccountRoleMutex.RUnlock()
+	fake.listHelpTextMutex.RLock()
+	defer fake.listHelpTextMutex.RUnlock()
 	fake.listMenuMutex.RLock()
 	defer fake.listMenuMutex.RUnlock()
 	fake.listNavigationMutex.RLock()
@@ -2753,8 +2755,6 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.listRoleTaskMutex.RUnlock()
 	fake.listTaskMutex.RLock()
 	defer fake.listTaskMutex.RUnlock()
-	fake.listhelpTextMutex.RLock()
-	defer fake.listhelpTextMutex.RUnlock()
 	fake.menuMutex.RLock()
 	defer fake.menuMutex.RUnlock()
 	fake.navigationMutex.RLock()

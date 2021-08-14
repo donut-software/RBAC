@@ -209,7 +209,7 @@ func (a *RBAC) ListHelpText(ctx context.Context, args internal.ListArgs) (intern
 	defer span.End()
 
 	req := esv7api.SearchRequest{
-		Index: []string{INDEX_ROLE},
+		Index: []string{INDEX_HELPTEXT},
 		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
 		From:  args.From,
 		Size:  args.Size,

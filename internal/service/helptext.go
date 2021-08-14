@@ -68,8 +68,8 @@ func (r *RBAC) DeleteHelpText(ctx context.Context, id string) error {
 	return err
 }
 
-func (r *RBAC) ListhelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.List")
+func (r *RBAC) ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "HelpText.List")
 	defer span.End()
 	lr, err := r.search.ListHelpText(ctx, args)
 	if err != nil {

@@ -94,7 +94,7 @@ func (t *RBAC) GetHelpTextByTask(ctx context.Context, taskid string) (internal.H
 }
 
 func (t *RBAC) ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error) {
-	key := newKey("listtask", args)
+	key := newKey("listhelptext", args)
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {

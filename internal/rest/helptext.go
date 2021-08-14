@@ -12,6 +12,7 @@ import (
 type HelpText struct {
 	Id        string    `json:"id"`
 	HelpText  string    `json:"helpText"`
+	TaskId    string    `json:"taskId"`
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateHelpTextRequest struct {
@@ -57,6 +58,7 @@ func (rb *RBACHandler) helpText(w http.ResponseWriter, r *http.Request) {
 		HelpText: HelpText{
 			Id:        helpText.Id,
 			HelpText:  helpText.HelpText,
+			TaskId:    helpText.Task_id,
 			CreatedAt: helpText.CreatedAt,
 		},
 	}, http.StatusOK)
@@ -87,4 +89,42 @@ func (rb *RBACHandler) updateHelpText(w http.ResponseWriter, r *http.Request) {
 		&HelpTextResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListHelpTextRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListHelpTextResponse struct {
+	HelpText []HelpText `json:"helptexts"`
+	Total    int64      `json:"total"`
+}
+
+func (rb *RBACHandler) listHelpText(w http.ResponseWriter, r *http.Request) {
+	var req ListHelpTextRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListHelpText(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	helpText := []HelpText{}
+	for _, value := range la.HelpText {
+		helpText = append(helpText, HelpText{
+			Id:        value.Id,
+			HelpText:  value.HelpText,
+			TaskId:    value.Task_id,
+			CreatedAt: value.CreatedAt,
+		})
+	}
+	renderResponse(w, &ListHelpTextResponse{
+		HelpText: helpText,
+		Total:    la.Total,
+	}, http.StatusOK)
 }

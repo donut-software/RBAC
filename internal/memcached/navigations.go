@@ -92,7 +92,7 @@ func (t *RBAC) GetNavigationByTask(ctx context.Context, taskid string) (internal
 }
 
 func (t *RBAC) ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error) {
-	key := newKey("listtask", args)
+	key := newKey("listnavigation", args)
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {

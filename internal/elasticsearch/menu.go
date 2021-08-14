@@ -205,11 +205,11 @@ func (a *RBAC) MenuByTask(ctx context.Context, taskId *string) (internal.MenuByT
 }
 
 func (a *RBAC) ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "HelpText.List")
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Menu.List")
 	defer span.End()
 
 	req := esv7api.SearchRequest{
-		Index: []string{INDEX_ROLE},
+		Index: []string{INDEX_MENU},
 		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
 		From:  args.From,
 		Size:  args.Size,

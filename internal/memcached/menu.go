@@ -92,7 +92,7 @@ func (t *RBAC) GetMenuByTask(ctx context.Context, taskid string) (internal.MenuB
 }
 
 func (t *RBAC) ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error) {
-	key := newKey("listtask", args)
+	key := newKey("listmenu", args)
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {

@@ -12,6 +12,7 @@ import (
 type Navigation struct {
 	Id        string    `json:"id"`
 	Name      string    `json:"name"`
+	TaskId    string    `json:"taskId"`
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateNavigationRequest struct {
@@ -57,6 +58,7 @@ func (rb *RBACHandler) navigation(w http.ResponseWriter, r *http.Request) {
 		Navigation: Navigation{
 			Id:        navigation.Id,
 			Name:      navigation.Name,
+			TaskId:    navigation.Task_id,
 			CreatedAt: navigation.CreatedAt,
 		},
 	}, http.StatusOK)
@@ -87,4 +89,42 @@ func (rb *RBACHandler) updateNavigation(w http.ResponseWriter, r *http.Request) 
 		&NavigationResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListNavigationRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListNavigationResponse struct {
+	Navigation []Navigation `json:"navigations"`
+	Total      int64        `json:"total"`
+}
+
+func (rb *RBACHandler) listNavigation(w http.ResponseWriter, r *http.Request) {
+	var req ListNavigationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListNavigation(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	helpText := []Navigation{}
+	for _, value := range la.Navigation {
+		helpText = append(helpText, Navigation{
+			Id:        value.Id,
+			Name:      value.Name,
+			TaskId:    value.Task_id,
+			CreatedAt: value.CreatedAt,
+		})
+	}
+	renderResponse(w, &ListNavigationResponse{
+		Navigation: helpText,
+		Total:      la.Total,
+	}, http.StatusOK)
 }

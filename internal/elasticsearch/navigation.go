@@ -209,7 +209,7 @@ func (a *RBAC) ListNavigation(ctx context.Context, args internal.ListArgs) (inte
 	defer span.End()
 
 	req := esv7api.SearchRequest{
-		Index: []string{INDEX_ROLE},
+		Index: []string{INDEX_NAVIGATION},
 		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
 		From:  args.From,
 		Size:  args.Size,

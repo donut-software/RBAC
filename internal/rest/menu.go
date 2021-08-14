@@ -12,6 +12,7 @@ import (
 type Menu struct {
 	Id        string    `json:"id"`
 	Name      string    `json:"name"`
+	TaskId    string    `json:"taskId"`
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateMenuRequest struct {
@@ -57,6 +58,7 @@ func (rb *RBACHandler) menu(w http.ResponseWriter, r *http.Request) {
 		Menu: Menu{
 			Id:        menu.Id,
 			Name:      menu.Name,
+			TaskId:    menu.Task_id,
 			CreatedAt: menu.CreatedAt,
 		},
 	}, http.StatusOK)
@@ -87,4 +89,42 @@ func (rb *RBACHandler) updateMenu(w http.ResponseWriter, r *http.Request) {
 		&MenuResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListMenuRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListMenuResponse struct {
+	Menu  []Menu `json:"menus"`
+	Total int64  `json:"total"`
+}
+
+func (rb *RBACHandler) listMenu(w http.ResponseWriter, r *http.Request) {
+	var req ListMenuRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListMenu(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	helpText := []Menu{}
+	for _, value := range la.Menu {
+		helpText = append(helpText, Menu{
+			Id:        value.Id,
+			Name:      value.Name,
+			TaskId:    value.Task_id,
+			CreatedAt: value.CreatedAt,
+		})
+	}
+	renderResponse(w, &ListMenuResponse{
+		Menu:  helpText,
+		Total: la.Total,
+	}, http.StatusOK)
 }

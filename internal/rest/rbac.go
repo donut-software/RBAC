@@ -41,7 +41,7 @@ type RBACService interface {
 	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
 	HelpText(ctx context.Context, id string) (internal.HelpText, error)
 	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
-	ListhelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
+	ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
 
 	CreateMenu(ctx context.Context, menu internal.Menu) error
 	Menu(ctx context.Context, id string) (internal.Menu, error)
@@ -101,15 +101,18 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	helptextRouter.HandleFunc("/", rb.createHelpText).Methods(http.MethodPost)
 	helptextRouter.HandleFunc("/{helpTextId}", rb.helpText).Methods(http.MethodGet)
 	helptextRouter.HandleFunc("/", rb.updateHelpText).Methods(http.MethodPut)
+	helptextRouter.HandleFunc("/", rb.listHelpText).Methods(http.MethodGet)
 
 	menuRouter := r.PathPrefix("/menu/").Subrouter()
 	menuRouter.HandleFunc("/", rb.createMenu).Methods(http.MethodPost)
 	menuRouter.HandleFunc("/{menuId}", rb.menu).Methods(http.MethodGet)
 	menuRouter.HandleFunc("/", rb.updateMenu).Methods(http.MethodPut)
+	menuRouter.HandleFunc("/", rb.listMenu).Methods(http.MethodGet)
 
 	navigationRouter := r.PathPrefix("/navigation/").Subrouter()
 	navigationRouter.HandleFunc("/", rb.createNavigation).Methods(http.MethodPost)
-	navigationRouter.HandleFunc("/{menuId}", rb.navigation).Methods(http.MethodGet)
+	navigationRouter.HandleFunc("/{navigationId}", rb.navigation).Methods(http.MethodGet)
 	navigationRouter.HandleFunc("/", rb.updateNavigation).Methods(http.MethodPut)
+	navigationRouter.HandleFunc("/", rb.listNavigation).Methods(http.MethodGet)
 
 }
