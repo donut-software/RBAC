@@ -10,6 +10,8 @@ import (
 
 //go:generate counterfeiter -o resttesting/rbac_service.gen.go . RBACService
 type RBACService interface {
+	Logout(ctx context.Context) error
+	Login(ctx context.Context, username string, password string) error
 	CreateAccount(ctx context.Context, account internal.Account, password string) error
 	Account(ctx context.Context, username string) (internal.Account, error)
 	AccountByID(ctx context.Context, id string) (internal.Account, error)
@@ -75,6 +77,7 @@ func NewRBACHandler(svc RBACService) *RBACHandler {
 
 func (rb *RBACHandler) Register(r *mux.Router) {
 
+	r.HandleFunc("/login", rb.login).Methods(http.MethodPost)
 	accountRouter := r.PathPrefix("/accounts/").Subrouter()
 	accountRouter.HandleFunc("/register", rb.register).Methods(http.MethodPost)
 	accountRouter.HandleFunc("/{username}", rb.account).Methods(http.MethodGet)

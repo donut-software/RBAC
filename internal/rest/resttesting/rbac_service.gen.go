@@ -413,6 +413,30 @@ type FakeRBACService struct {
 		result1 internal.ListTask
 		result2 error
 	}
+	LoginStub        func(context.Context, string, string) error
+	loginMutex       sync.RWMutex
+	loginArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+	}
+	loginReturns struct {
+		result1 error
+	}
+	loginReturnsOnCall map[int]struct {
+		result1 error
+	}
+	LogoutStub        func(context.Context) error
+	logoutMutex       sync.RWMutex
+	logoutArgsForCall []struct {
+		arg1 context.Context
+	}
+	logoutReturns struct {
+		result1 error
+	}
+	logoutReturnsOnCall map[int]struct {
+		result1 error
+	}
 	MenuStub        func(context.Context, string) (internal.Menu, error)
 	menuMutex       sync.RWMutex
 	menuArgsForCall []struct {
@@ -2557,6 +2581,130 @@ func (fake *FakeRBACService) ListTaskReturnsOnCall(i int, result1 internal.ListT
 	}{result1, result2}
 }
 
+func (fake *FakeRBACService) Login(arg1 context.Context, arg2 string, arg3 string) error {
+	fake.loginMutex.Lock()
+	ret, specificReturn := fake.loginReturnsOnCall[len(fake.loginArgsForCall)]
+	fake.loginArgsForCall = append(fake.loginArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+	}{arg1, arg2, arg3})
+	stub := fake.LoginStub
+	fakeReturns := fake.loginReturns
+	fake.recordInvocation("Login", []interface{}{arg1, arg2, arg3})
+	fake.loginMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeRBACService) LoginCallCount() int {
+	fake.loginMutex.RLock()
+	defer fake.loginMutex.RUnlock()
+	return len(fake.loginArgsForCall)
+}
+
+func (fake *FakeRBACService) LoginCalls(stub func(context.Context, string, string) error) {
+	fake.loginMutex.Lock()
+	defer fake.loginMutex.Unlock()
+	fake.LoginStub = stub
+}
+
+func (fake *FakeRBACService) LoginArgsForCall(i int) (context.Context, string, string) {
+	fake.loginMutex.RLock()
+	defer fake.loginMutex.RUnlock()
+	argsForCall := fake.loginArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeRBACService) LoginReturns(result1 error) {
+	fake.loginMutex.Lock()
+	defer fake.loginMutex.Unlock()
+	fake.LoginStub = nil
+	fake.loginReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) LoginReturnsOnCall(i int, result1 error) {
+	fake.loginMutex.Lock()
+	defer fake.loginMutex.Unlock()
+	fake.LoginStub = nil
+	if fake.loginReturnsOnCall == nil {
+		fake.loginReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.loginReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) Logout(arg1 context.Context) error {
+	fake.logoutMutex.Lock()
+	ret, specificReturn := fake.logoutReturnsOnCall[len(fake.logoutArgsForCall)]
+	fake.logoutArgsForCall = append(fake.logoutArgsForCall, struct {
+		arg1 context.Context
+	}{arg1})
+	stub := fake.LogoutStub
+	fakeReturns := fake.logoutReturns
+	fake.recordInvocation("Logout", []interface{}{arg1})
+	fake.logoutMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeRBACService) LogoutCallCount() int {
+	fake.logoutMutex.RLock()
+	defer fake.logoutMutex.RUnlock()
+	return len(fake.logoutArgsForCall)
+}
+
+func (fake *FakeRBACService) LogoutCalls(stub func(context.Context) error) {
+	fake.logoutMutex.Lock()
+	defer fake.logoutMutex.Unlock()
+	fake.LogoutStub = stub
+}
+
+func (fake *FakeRBACService) LogoutArgsForCall(i int) context.Context {
+	fake.logoutMutex.RLock()
+	defer fake.logoutMutex.RUnlock()
+	argsForCall := fake.logoutArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRBACService) LogoutReturns(result1 error) {
+	fake.logoutMutex.Lock()
+	defer fake.logoutMutex.Unlock()
+	fake.LogoutStub = nil
+	fake.logoutReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) LogoutReturnsOnCall(i int, result1 error) {
+	fake.logoutMutex.Lock()
+	defer fake.logoutMutex.Unlock()
+	fake.LogoutStub = nil
+	if fake.logoutReturnsOnCall == nil {
+		fake.logoutReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.logoutReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeRBACService) Menu(arg1 context.Context, arg2 string) (internal.Menu, error) {
 	fake.menuMutex.Lock()
 	ret, specificReturn := fake.menuReturnsOnCall[len(fake.menuArgsForCall)]
@@ -3449,6 +3597,10 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.listRoleTaskMutex.RUnlock()
 	fake.listTaskMutex.RLock()
 	defer fake.listTaskMutex.RUnlock()
+	fake.loginMutex.RLock()
+	defer fake.loginMutex.RUnlock()
+	fake.logoutMutex.RLock()
+	defer fake.logoutMutex.RUnlock()
 	fake.menuMutex.RLock()
 	defer fake.menuMutex.RUnlock()
 	fake.navigationMutex.RLock()

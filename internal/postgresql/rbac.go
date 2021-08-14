@@ -7,6 +7,7 @@ import (
 )
 
 type RBAC interface {
+	Login(ctx context.Context, username string, password string) error
 	CreateAccount(ctx context.Context, account internal.Account, password string) error
 	Account(ctx context.Context, username string) (internal.Account, error)
 	UpdateProfile(ctx context.Context, profile internal.Profile) error

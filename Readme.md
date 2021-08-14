@@ -54,6 +54,9 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
   - [X] Error Handling
   - [X] OpenAPI 3 and Swagger-UI
   - [ ] Authorization
+- [ ] Tokens
+  - [ ] JWT
+  - [ ] PASETO
 - [ ] Events and Messaging
   - [ ] Apache Kafka
   - [ ] RabbitMq

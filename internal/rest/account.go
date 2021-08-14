@@ -9,6 +9,39 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type LoginResponse struct {
+	Message string `json:"message"`
+}
+
+func (a *RBACHandler) logout(w http.ResponseWriter, r *http.Request) {
+	renderResponse(w,
+		&LoginResponse{
+			Message: "Logout Succesfully",
+		}, http.StatusCreated)
+}
+
+func (a *RBACHandler) login(w http.ResponseWriter, r *http.Request) {
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	defer r.Body.Close()
+	err := a.svc.Login(r.Context(), req.Username, req.Password)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "login failed", err)
+		return
+	}
+	renderResponse(w,
+		&LoginResponse{
+			Message: "Login Succesfully",
+		}, http.StatusCreated)
+}
+
 type Profile struct {
 	Id                string    `json:"id"`
 	ProfilePicture    string    `json:"profile_picture"`

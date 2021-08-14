@@ -19,11 +19,12 @@ func (p *Profile) Validate() error {
 }
 
 type Account struct {
-	Id        string
-	UserName  string
-	Profile   Profile
-	IsBlocked bool
-	CreatedAt time.Time
+	Id             string
+	UserName       string
+	HashedPassword string
+	Profile        Profile
+	IsBlocked      bool
+	CreatedAt      time.Time
 }
 
 func (a *Account) Validate() error {

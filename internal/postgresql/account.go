@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"rbac/internal"
 
@@ -9,6 +10,25 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
+
+func (a *Store) Login(ctx context.Context, username string, password string) error {
+	err := a.execTx(ctx, func(q *Queries) error {
+		//find the account first
+		acc, err := q.SelectAccounts(ctx, username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return internal.WrapErrorf(err, internal.ErrorCodeNotFound, "login account no found")
+			}
+			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "login account")
+		}
+		err = CheckPassword(password, acc.Hashedpassword)
+		if err != nil {
+			return internal.WrapErrorf(err, internal.ErrorCodeInvalidArgument, "login account")
+		}
+		return nil
+	})
+	return err
+}
 
 func (s *Store) CreateAccount(ctx context.Context, account internal.Account, password string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")
@@ -56,6 +76,7 @@ func (s *Store) Account(ctx context.Context, username string) (internal.Account,
 		}
 		account.Id = acc.ID.String()
 		account.UserName = acc.Username
+		// account.HashedPassword = acc.Hashedpassword
 		account.IsBlocked = acc.IsBlocked
 		account.CreatedAt = acc.CreatedAt
 		prof, err := q.SelectProfile(ctx, acc.Profile)

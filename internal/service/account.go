@@ -8,6 +8,20 @@ import (
 	"golang.org/x/net/context"
 )
 
+func (a *RBAC) Logout(ctx context.Context) error {
+	_, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Logout")
+	defer span.End()
+	return nil
+}
+func (a *RBAC) Login(ctx context.Context, username string, password string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Login")
+	defer span.End()
+	err := a.repo.Login(ctx, username, password)
+	if err != nil {
+		return fmt.Errorf("repo login: %w", err)
+	}
+	return nil
+}
 func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, password string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")
 	defer span.End()
