@@ -131,7 +131,6 @@ func (a *RBAC) AccountRoleByAccount(ctx context.Context, username *string) (inte
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
-
 	if username != nil {
 		should = append(should, map[string]interface{}{
 			"match": map[string]interface{}{

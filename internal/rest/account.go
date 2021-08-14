@@ -205,3 +205,51 @@ func (rb *RBACHandler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		Message: "Deleted Successfully..",
 	}, http.StatusOK)
 }
+
+type AccountRoleByAccount struct {
+	Account Account `json:"account"`
+	Roles   []Role  `json:"roles"`
+}
+
+func (rb *RBACHandler) getAccountRoleByAccount(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["username"]
+	la, err := rb.svc.AccountRoleByAccount(r.Context(), id)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	prof := Profile{
+		Id:                la.Account.Profile.Id,
+		ProfilePicture:    la.Account.Profile.Profile_Picture,
+		ProfileBackground: la.Account.Profile.Profile_Background,
+		FirstName:         la.Account.Profile.First_Name,
+		LastName:          la.Account.Profile.Last_Name,
+		Mobile:            la.Account.Profile.Mobile,
+		Email:             la.Account.Profile.Email,
+		CreatedAt:         la.Account.CreatedAt,
+	}
+	acc := Account{
+		Id:        la.Account.Id,
+		Username:  la.Account.UserName,
+		Profile:   prof,
+		CreatedAt: la.Account.CreatedAt,
+	}
+	roles := []Role{}
+	for _, value := range la.Roles {
+		//get role
+		rl, err := rb.svc.Role(r.Context(), value.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting role", err)
+			return
+		}
+		roles = append(roles, Role{
+			Id:        rl.Id,
+			Role:      rl.Role,
+			CreatedAt: rl.CreatedAt,
+		})
+	}
+	renderResponse(w, &AccountRoleByAccount{
+		Account: acc,
+		Roles:   roles,
+	}, http.StatusOK)
+}

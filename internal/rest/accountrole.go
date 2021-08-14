@@ -63,6 +63,7 @@ func (rb *RBACHandler) accountRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	profile := Profile{
+		Id:                acc.Profile.Id,
 		ProfileBackground: acc.Profile.Profile_Background,
 		ProfilePicture:    acc.Profile.Profile_Picture,
 		FirstName:         acc.Profile.First_Name,
@@ -72,6 +73,7 @@ func (rb *RBACHandler) accountRole(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:         acc.CreatedAt,
 	}
 	account := Account{
+		Id:        acc.Id,
 		Username:  acc.UserName,
 		Profile:   profile,
 		CreatedAt: acc.CreatedAt,
@@ -147,6 +149,7 @@ func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		profile := Profile{
+			Id:                acc.Profile.Id,
 			ProfileBackground: acc.Profile.Profile_Background,
 			ProfilePicture:    acc.Profile.Profile_Picture,
 			FirstName:         acc.Profile.First_Name,
@@ -156,6 +159,7 @@ func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
 			CreatedAt:         acc.CreatedAt,
 		}
 		account := Account{
+			Id:        acc.Id,
 			Username:  acc.UserName,
 			Profile:   profile,
 			CreatedAt: acc.CreatedAt,

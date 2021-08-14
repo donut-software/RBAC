@@ -36,6 +36,20 @@ func (r *RBAC) AccountRole(ctx context.Context, accountRoleId string) (internal.
 	}
 	return role, err
 }
+func (r *RBAC) AccountRoleByAccount(ctx context.Context, username string) (internal.AccountRoleByAccountResult, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AccountRoleByAccount")
+	defer span.End()
+	// // role, err := r.repo.AccountRole(ctx, accountRoleId)
+	// acc, err := r.search.GetAccountById(ctx, accountId)
+	// if err != nil {
+	// 	return internal.AccountRoleByAccountResult{}, fmt.Errorf("search: %w", err)
+	// }
+	role, err := r.search.GetAccountRoleByAccount(ctx, username)
+	if err != nil {
+		return internal.AccountRoleByAccountResult{}, fmt.Errorf("search: %w", err)
+	}
+	return role, err
+}
 func (r *RBAC) UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Update")
 	defer span.End()
