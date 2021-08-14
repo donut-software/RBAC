@@ -128,3 +128,16 @@ func (rb *RBACHandler) listNavigation(w http.ResponseWriter, r *http.Request) {
 		Total:      la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteNavigation(w http.ResponseWriter, r *http.Request) {
+	navigationId := mux.Vars(r)["navigationId"]
+	err := rb.svc.DeleteNavigation(r.Context(), navigationId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting navigation", err)
+		return
+	}
+	renderResponse(w,
+		&NavigationResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

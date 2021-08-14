@@ -29,6 +29,7 @@ type RBACService interface {
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 	AccountRoleByAccount(ctx context.Context, accountRoleId string) (internal.AccountRoleByAccountResult, error)
 	AccountRoleByRole(ctx context.Context, id string) (internal.AccountRoleByRoleResult, error)
+	DeleteAccountRole(ctx context.Context, id string) error
 
 	CreateTask(ctx context.Context, taskname string) error
 	Task(ctx context.Context, id string) (internal.Tasks, error)
@@ -39,21 +40,25 @@ type RBACService interface {
 	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
 	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
 	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
+	DeleteRoleTask(ctx context.Context, id string) error
 
 	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
 	HelpText(ctx context.Context, id string) (internal.HelpText, error)
 	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
+	DeleteHelpText(ctx context.Context, id string) error
 	ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
 
 	CreateMenu(ctx context.Context, menu internal.Menu) error
 	Menu(ctx context.Context, id string) (internal.Menu, error)
 	UpdateMenu(ctx context.Context, menu internal.Menu) error
+	DeleteMenu(ctx context.Context, id string) error
 	ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error)
 
 	CreateNavigation(ctx context.Context, navigation internal.Navigation) error
 	Navigation(ctx context.Context, id string) (internal.Navigation, error)
 	UpdateNavigation(ctx context.Context, navigation internal.Navigation) error
 	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
+	DeleteNavigation(ctx context.Context, id string) error
 }
 
 type RBACHandler struct {
@@ -88,6 +93,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	accountroleRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
 	accountroleRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
 	accountroleRouter.HandleFunc("/", rb.listAccountRole).Methods(http.MethodGet)
+	accountroleRouter.HandleFunc("/{accountRoleId}", rb.deleteAccountRole).Methods(http.MethodDelete)
 
 	taskRouter := r.PathPrefix("/task/").Subrouter()
 	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)
@@ -100,23 +106,27 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	roletaskRouter.HandleFunc("/{roleTaskId}", rb.roleTask).Methods(http.MethodGet)
 	roletaskRouter.HandleFunc("/", rb.updateRoleTask).Methods(http.MethodPut)
 	roletaskRouter.HandleFunc("/", rb.listRoleTask).Methods(http.MethodGet)
+	roletaskRouter.HandleFunc("/{roleTaskId}", rb.deleteRoleTask).Methods(http.MethodDelete)
 
 	helptextRouter := r.PathPrefix("/helptext/").Subrouter()
 	helptextRouter.HandleFunc("/", rb.createHelpText).Methods(http.MethodPost)
 	helptextRouter.HandleFunc("/{helpTextId}", rb.helpText).Methods(http.MethodGet)
 	helptextRouter.HandleFunc("/", rb.updateHelpText).Methods(http.MethodPut)
 	helptextRouter.HandleFunc("/", rb.listHelpText).Methods(http.MethodGet)
+	helptextRouter.HandleFunc("/{helpTextId}", rb.deleteHelpText).Methods(http.MethodDelete)
 
 	menuRouter := r.PathPrefix("/menu/").Subrouter()
 	menuRouter.HandleFunc("/", rb.createMenu).Methods(http.MethodPost)
 	menuRouter.HandleFunc("/{menuId}", rb.menu).Methods(http.MethodGet)
 	menuRouter.HandleFunc("/", rb.updateMenu).Methods(http.MethodPut)
 	menuRouter.HandleFunc("/", rb.listMenu).Methods(http.MethodGet)
+	menuRouter.HandleFunc("/{menuId}", rb.deleteMenu).Methods(http.MethodDelete)
 
 	navigationRouter := r.PathPrefix("/navigation/").Subrouter()
 	navigationRouter.HandleFunc("/", rb.createNavigation).Methods(http.MethodPost)
 	navigationRouter.HandleFunc("/{navigationId}", rb.navigation).Methods(http.MethodGet)
 	navigationRouter.HandleFunc("/", rb.updateNavigation).Methods(http.MethodPut)
 	navigationRouter.HandleFunc("/", rb.listNavigation).Methods(http.MethodGet)
+	navigationRouter.HandleFunc("/{navigationId}", rb.deleteNavigation).Methods(http.MethodDelete)
 
 }

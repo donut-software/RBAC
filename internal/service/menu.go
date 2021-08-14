@@ -73,8 +73,11 @@ func (r *RBAC) DeleteMenu(ctx context.Context, id string) error {
 	defer span.End()
 	err := r.repo.DeleteMenu(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteMenu(ctx, id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
 	}
 	return err
 }

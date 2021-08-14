@@ -164,3 +164,16 @@ func (rb *RBACHandler) listRoleTask(w http.ResponseWriter, r *http.Request) {
 		Total:    la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteRoleTask(w http.ResponseWriter, r *http.Request) {
+	roleTaskId := mux.Vars(r)["roleTaskId"]
+	err := rb.svc.DeleteRoleTask(r.Context(), roleTaskId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting roletask", err)
+		return
+	}
+	renderResponse(w,
+		&RoleTaskResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

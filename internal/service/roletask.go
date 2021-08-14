@@ -61,8 +61,11 @@ func (r *RBAC) DeleteRoleTask(ctx context.Context, id string) error {
 	defer span.End()
 	err := r.repo.DeleteRoleTask(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteRoleTask(ctx, id)
+	if err != nil {
+		return fmt.Errorf("repo: %w", err)
 	}
 	return err
 }

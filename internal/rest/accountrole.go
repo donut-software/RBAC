@@ -188,3 +188,16 @@ func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
 		Total:       la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteAccountRole(w http.ResponseWriter, r *http.Request) {
+	accountRoleId := mux.Vars(r)["accountRoleId"]
+	err := rb.svc.DeleteAccountRole(r.Context(), accountRoleId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting accountRole", err)
+		return
+	}
+	renderResponse(w,
+		&AccountRoleResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

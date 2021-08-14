@@ -65,6 +65,10 @@ func (r *RBAC) DeleteHelpText(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
+	err = r.search.DeleteHelpText(ctx, id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
+	}
 	return err
 }
 

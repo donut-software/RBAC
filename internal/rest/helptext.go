@@ -128,3 +128,16 @@ func (rb *RBACHandler) listHelpText(w http.ResponseWriter, r *http.Request) {
 		Total:    la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteHelpText(w http.ResponseWriter, r *http.Request) {
+	htID := mux.Vars(r)["helpTextId"]
+	err := rb.svc.DeleteHelpText(r.Context(), htID)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting helptext", err)
+		return
+	}
+	renderResponse(w,
+		&HelpTextResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

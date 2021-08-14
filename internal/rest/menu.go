@@ -128,3 +128,16 @@ func (rb *RBACHandler) listMenu(w http.ResponseWriter, r *http.Request) {
 		Total: la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteMenu(w http.ResponseWriter, r *http.Request) {
+	menuId := mux.Vars(r)["menuId"]
+	err := rb.svc.DeleteMenu(r.Context(), menuId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting menu", err)
+		return
+	}
+	renderResponse(w,
+		&MenuResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

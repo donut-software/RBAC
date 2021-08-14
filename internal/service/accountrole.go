@@ -68,7 +68,11 @@ func (r *RBAC) DeleteAccountRole(ctx context.Context, id string) error {
 	defer span.End()
 	err := r.repo.DeleteAccountRole(ctx, id)
 	if err != nil {
-		return fmt.Errorf("search: %w", err)
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteAccountRole(ctx, id)
+	if err != nil {
+		return fmt.Errorf("repo: %w", err)
 	}
 	return err
 }
