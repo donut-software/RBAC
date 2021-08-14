@@ -217,6 +217,34 @@ type FakeRBACService struct {
 		result1 internal.ListAccountRole
 		result2 error
 	}
+	ListMenuStub        func(context.Context, internal.ListArgs) (internal.ListMenu, error)
+	listMenuMutex       sync.RWMutex
+	listMenuArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listMenuReturns struct {
+		result1 internal.ListMenu
+		result2 error
+	}
+	listMenuReturnsOnCall map[int]struct {
+		result1 internal.ListMenu
+		result2 error
+	}
+	ListNavigationStub        func(context.Context, internal.ListArgs) (internal.ListNavigation, error)
+	listNavigationMutex       sync.RWMutex
+	listNavigationArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listNavigationReturns struct {
+		result1 internal.ListNavigation
+		result2 error
+	}
+	listNavigationReturnsOnCall map[int]struct {
+		result1 internal.ListNavigation
+		result2 error
+	}
 	ListRoleStub        func(context.Context, internal.ListArgs) (internal.ListRole, error)
 	listRoleMutex       sync.RWMutex
 	listRoleArgsForCall []struct {
@@ -229,6 +257,48 @@ type FakeRBACService struct {
 	}
 	listRoleReturnsOnCall map[int]struct {
 		result1 internal.ListRole
+		result2 error
+	}
+	ListRoleTaskStub        func(context.Context, internal.ListArgs) (internal.ListRoleTask, error)
+	listRoleTaskMutex       sync.RWMutex
+	listRoleTaskArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listRoleTaskReturns struct {
+		result1 internal.ListRoleTask
+		result2 error
+	}
+	listRoleTaskReturnsOnCall map[int]struct {
+		result1 internal.ListRoleTask
+		result2 error
+	}
+	ListTaskStub        func(context.Context, internal.ListArgs) (internal.ListTask, error)
+	listTaskMutex       sync.RWMutex
+	listTaskArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listTaskReturns struct {
+		result1 internal.ListTask
+		result2 error
+	}
+	listTaskReturnsOnCall map[int]struct {
+		result1 internal.ListTask
+		result2 error
+	}
+	ListhelpTextStub        func(context.Context, internal.ListArgs) (internal.ListHelpText, error)
+	listhelpTextMutex       sync.RWMutex
+	listhelpTextArgsForCall []struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}
+	listhelpTextReturns struct {
+		result1 internal.ListHelpText
+		result2 error
+	}
+	listhelpTextReturnsOnCall map[int]struct {
+		result1 internal.ListHelpText
 		result2 error
 	}
 	MenuStub        func(context.Context, string) (internal.Menu, error)
@@ -1421,6 +1491,136 @@ func (fake *FakeRBACService) ListAccountRoleReturnsOnCall(i int, result1 interna
 	}{result1, result2}
 }
 
+func (fake *FakeRBACService) ListMenu(arg1 context.Context, arg2 internal.ListArgs) (internal.ListMenu, error) {
+	fake.listMenuMutex.Lock()
+	ret, specificReturn := fake.listMenuReturnsOnCall[len(fake.listMenuArgsForCall)]
+	fake.listMenuArgsForCall = append(fake.listMenuArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListMenuStub
+	fakeReturns := fake.listMenuReturns
+	fake.recordInvocation("ListMenu", []interface{}{arg1, arg2})
+	fake.listMenuMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListMenuCallCount() int {
+	fake.listMenuMutex.RLock()
+	defer fake.listMenuMutex.RUnlock()
+	return len(fake.listMenuArgsForCall)
+}
+
+func (fake *FakeRBACService) ListMenuCalls(stub func(context.Context, internal.ListArgs) (internal.ListMenu, error)) {
+	fake.listMenuMutex.Lock()
+	defer fake.listMenuMutex.Unlock()
+	fake.ListMenuStub = stub
+}
+
+func (fake *FakeRBACService) ListMenuArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listMenuMutex.RLock()
+	defer fake.listMenuMutex.RUnlock()
+	argsForCall := fake.listMenuArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListMenuReturns(result1 internal.ListMenu, result2 error) {
+	fake.listMenuMutex.Lock()
+	defer fake.listMenuMutex.Unlock()
+	fake.ListMenuStub = nil
+	fake.listMenuReturns = struct {
+		result1 internal.ListMenu
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListMenuReturnsOnCall(i int, result1 internal.ListMenu, result2 error) {
+	fake.listMenuMutex.Lock()
+	defer fake.listMenuMutex.Unlock()
+	fake.ListMenuStub = nil
+	if fake.listMenuReturnsOnCall == nil {
+		fake.listMenuReturnsOnCall = make(map[int]struct {
+			result1 internal.ListMenu
+			result2 error
+		})
+	}
+	fake.listMenuReturnsOnCall[i] = struct {
+		result1 internal.ListMenu
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListNavigation(arg1 context.Context, arg2 internal.ListArgs) (internal.ListNavigation, error) {
+	fake.listNavigationMutex.Lock()
+	ret, specificReturn := fake.listNavigationReturnsOnCall[len(fake.listNavigationArgsForCall)]
+	fake.listNavigationArgsForCall = append(fake.listNavigationArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListNavigationStub
+	fakeReturns := fake.listNavigationReturns
+	fake.recordInvocation("ListNavigation", []interface{}{arg1, arg2})
+	fake.listNavigationMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListNavigationCallCount() int {
+	fake.listNavigationMutex.RLock()
+	defer fake.listNavigationMutex.RUnlock()
+	return len(fake.listNavigationArgsForCall)
+}
+
+func (fake *FakeRBACService) ListNavigationCalls(stub func(context.Context, internal.ListArgs) (internal.ListNavigation, error)) {
+	fake.listNavigationMutex.Lock()
+	defer fake.listNavigationMutex.Unlock()
+	fake.ListNavigationStub = stub
+}
+
+func (fake *FakeRBACService) ListNavigationArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listNavigationMutex.RLock()
+	defer fake.listNavigationMutex.RUnlock()
+	argsForCall := fake.listNavigationArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListNavigationReturns(result1 internal.ListNavigation, result2 error) {
+	fake.listNavigationMutex.Lock()
+	defer fake.listNavigationMutex.Unlock()
+	fake.ListNavigationStub = nil
+	fake.listNavigationReturns = struct {
+		result1 internal.ListNavigation
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListNavigationReturnsOnCall(i int, result1 internal.ListNavigation, result2 error) {
+	fake.listNavigationMutex.Lock()
+	defer fake.listNavigationMutex.Unlock()
+	fake.ListNavigationStub = nil
+	if fake.listNavigationReturnsOnCall == nil {
+		fake.listNavigationReturnsOnCall = make(map[int]struct {
+			result1 internal.ListNavigation
+			result2 error
+		})
+	}
+	fake.listNavigationReturnsOnCall[i] = struct {
+		result1 internal.ListNavigation
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRBACService) ListRole(arg1 context.Context, arg2 internal.ListArgs) (internal.ListRole, error) {
 	fake.listRoleMutex.Lock()
 	ret, specificReturn := fake.listRoleReturnsOnCall[len(fake.listRoleArgsForCall)]
@@ -1482,6 +1682,201 @@ func (fake *FakeRBACService) ListRoleReturnsOnCall(i int, result1 internal.ListR
 	}
 	fake.listRoleReturnsOnCall[i] = struct {
 		result1 internal.ListRole
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListRoleTask(arg1 context.Context, arg2 internal.ListArgs) (internal.ListRoleTask, error) {
+	fake.listRoleTaskMutex.Lock()
+	ret, specificReturn := fake.listRoleTaskReturnsOnCall[len(fake.listRoleTaskArgsForCall)]
+	fake.listRoleTaskArgsForCall = append(fake.listRoleTaskArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListRoleTaskStub
+	fakeReturns := fake.listRoleTaskReturns
+	fake.recordInvocation("ListRoleTask", []interface{}{arg1, arg2})
+	fake.listRoleTaskMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListRoleTaskCallCount() int {
+	fake.listRoleTaskMutex.RLock()
+	defer fake.listRoleTaskMutex.RUnlock()
+	return len(fake.listRoleTaskArgsForCall)
+}
+
+func (fake *FakeRBACService) ListRoleTaskCalls(stub func(context.Context, internal.ListArgs) (internal.ListRoleTask, error)) {
+	fake.listRoleTaskMutex.Lock()
+	defer fake.listRoleTaskMutex.Unlock()
+	fake.ListRoleTaskStub = stub
+}
+
+func (fake *FakeRBACService) ListRoleTaskArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listRoleTaskMutex.RLock()
+	defer fake.listRoleTaskMutex.RUnlock()
+	argsForCall := fake.listRoleTaskArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListRoleTaskReturns(result1 internal.ListRoleTask, result2 error) {
+	fake.listRoleTaskMutex.Lock()
+	defer fake.listRoleTaskMutex.Unlock()
+	fake.ListRoleTaskStub = nil
+	fake.listRoleTaskReturns = struct {
+		result1 internal.ListRoleTask
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListRoleTaskReturnsOnCall(i int, result1 internal.ListRoleTask, result2 error) {
+	fake.listRoleTaskMutex.Lock()
+	defer fake.listRoleTaskMutex.Unlock()
+	fake.ListRoleTaskStub = nil
+	if fake.listRoleTaskReturnsOnCall == nil {
+		fake.listRoleTaskReturnsOnCall = make(map[int]struct {
+			result1 internal.ListRoleTask
+			result2 error
+		})
+	}
+	fake.listRoleTaskReturnsOnCall[i] = struct {
+		result1 internal.ListRoleTask
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListTask(arg1 context.Context, arg2 internal.ListArgs) (internal.ListTask, error) {
+	fake.listTaskMutex.Lock()
+	ret, specificReturn := fake.listTaskReturnsOnCall[len(fake.listTaskArgsForCall)]
+	fake.listTaskArgsForCall = append(fake.listTaskArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListTaskStub
+	fakeReturns := fake.listTaskReturns
+	fake.recordInvocation("ListTask", []interface{}{arg1, arg2})
+	fake.listTaskMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListTaskCallCount() int {
+	fake.listTaskMutex.RLock()
+	defer fake.listTaskMutex.RUnlock()
+	return len(fake.listTaskArgsForCall)
+}
+
+func (fake *FakeRBACService) ListTaskCalls(stub func(context.Context, internal.ListArgs) (internal.ListTask, error)) {
+	fake.listTaskMutex.Lock()
+	defer fake.listTaskMutex.Unlock()
+	fake.ListTaskStub = stub
+}
+
+func (fake *FakeRBACService) ListTaskArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listTaskMutex.RLock()
+	defer fake.listTaskMutex.RUnlock()
+	argsForCall := fake.listTaskArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListTaskReturns(result1 internal.ListTask, result2 error) {
+	fake.listTaskMutex.Lock()
+	defer fake.listTaskMutex.Unlock()
+	fake.ListTaskStub = nil
+	fake.listTaskReturns = struct {
+		result1 internal.ListTask
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListTaskReturnsOnCall(i int, result1 internal.ListTask, result2 error) {
+	fake.listTaskMutex.Lock()
+	defer fake.listTaskMutex.Unlock()
+	fake.ListTaskStub = nil
+	if fake.listTaskReturnsOnCall == nil {
+		fake.listTaskReturnsOnCall = make(map[int]struct {
+			result1 internal.ListTask
+			result2 error
+		})
+	}
+	fake.listTaskReturnsOnCall[i] = struct {
+		result1 internal.ListTask
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListhelpText(arg1 context.Context, arg2 internal.ListArgs) (internal.ListHelpText, error) {
+	fake.listhelpTextMutex.Lock()
+	ret, specificReturn := fake.listhelpTextReturnsOnCall[len(fake.listhelpTextArgsForCall)]
+	fake.listhelpTextArgsForCall = append(fake.listhelpTextArgsForCall, struct {
+		arg1 context.Context
+		arg2 internal.ListArgs
+	}{arg1, arg2})
+	stub := fake.ListhelpTextStub
+	fakeReturns := fake.listhelpTextReturns
+	fake.recordInvocation("ListhelpText", []interface{}{arg1, arg2})
+	fake.listhelpTextMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) ListhelpTextCallCount() int {
+	fake.listhelpTextMutex.RLock()
+	defer fake.listhelpTextMutex.RUnlock()
+	return len(fake.listhelpTextArgsForCall)
+}
+
+func (fake *FakeRBACService) ListhelpTextCalls(stub func(context.Context, internal.ListArgs) (internal.ListHelpText, error)) {
+	fake.listhelpTextMutex.Lock()
+	defer fake.listhelpTextMutex.Unlock()
+	fake.ListhelpTextStub = stub
+}
+
+func (fake *FakeRBACService) ListhelpTextArgsForCall(i int) (context.Context, internal.ListArgs) {
+	fake.listhelpTextMutex.RLock()
+	defer fake.listhelpTextMutex.RUnlock()
+	argsForCall := fake.listhelpTextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) ListhelpTextReturns(result1 internal.ListHelpText, result2 error) {
+	fake.listhelpTextMutex.Lock()
+	defer fake.listhelpTextMutex.Unlock()
+	fake.ListhelpTextStub = nil
+	fake.listhelpTextReturns = struct {
+		result1 internal.ListHelpText
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) ListhelpTextReturnsOnCall(i int, result1 internal.ListHelpText, result2 error) {
+	fake.listhelpTextMutex.Lock()
+	defer fake.listhelpTextMutex.Unlock()
+	fake.ListhelpTextStub = nil
+	if fake.listhelpTextReturnsOnCall == nil {
+		fake.listhelpTextReturnsOnCall = make(map[int]struct {
+			result1 internal.ListHelpText
+			result2 error
+		})
+	}
+	fake.listhelpTextReturnsOnCall[i] = struct {
+		result1 internal.ListHelpText
 		result2 error
 	}{result1, result2}
 }
@@ -2348,8 +2743,18 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.listAccountMutex.RUnlock()
 	fake.listAccountRoleMutex.RLock()
 	defer fake.listAccountRoleMutex.RUnlock()
+	fake.listMenuMutex.RLock()
+	defer fake.listMenuMutex.RUnlock()
+	fake.listNavigationMutex.RLock()
+	defer fake.listNavigationMutex.RUnlock()
 	fake.listRoleMutex.RLock()
 	defer fake.listRoleMutex.RUnlock()
+	fake.listRoleTaskMutex.RLock()
+	defer fake.listRoleTaskMutex.RUnlock()
+	fake.listTaskMutex.RLock()
+	defer fake.listTaskMutex.RUnlock()
+	fake.listhelpTextMutex.RLock()
+	defer fake.listhelpTextMutex.RUnlock()
 	fake.menuMutex.RLock()
 	defer fake.menuMutex.RUnlock()
 	fake.navigationMutex.RLock()

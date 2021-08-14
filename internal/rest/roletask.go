@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"rbac/internal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -102,4 +103,64 @@ func (rb *RBACHandler) updateRoleTask(w http.ResponseWriter, r *http.Request) {
 		&RoleTaskResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListRoleTaskRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListRoleTaskResponse struct {
+	RoleTask []RoleTask `json:"roletasks"`
+	Total    int64      `json:"total"`
+}
+
+func (rb *RBACHandler) listRoleTask(w http.ResponseWriter, r *http.Request) {
+	var req ListRoleTaskRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListRoleTask(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	roleTask := []RoleTask{}
+	for _, value := range la.RoleTasks {
+		//get task
+		tk, err := rb.svc.Task(r.Context(), value.Task.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting task", err)
+			return
+		}
+		task := Task{
+			Id:        tk.Id,
+			Task:      tk.Task,
+			CreatedAt: tk.CreatedAt,
+		}
+		//get role
+		rl, err := rb.svc.Role(r.Context(), value.Role.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting role", err)
+			return
+		}
+		role := Role{
+			Id:        rl.Id,
+			Role:      rl.Role,
+			CreatedAt: rl.CreatedAt,
+		}
+		roleTask = append(roleTask, RoleTask{
+			Id:        value.Id,
+			Task:      task,
+			Role:      role,
+			CreatedAt: value.CreatedAt,
+		})
+	}
+	renderResponse(w, &ListRoleTaskResponse{
+		RoleTask: roleTask,
+		Total:    la.Total,
+	}, http.StatusOK)
 }

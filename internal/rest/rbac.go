@@ -31,22 +31,27 @@ type RBACService interface {
 	CreateTask(ctx context.Context, taskname string) error
 	Task(ctx context.Context, id string) (internal.Tasks, error)
 	UpdateTask(ctx context.Context, id string, taskname string) error
+	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
 
 	CreateRoleTask(ctx context.Context, taskid string, roleid string) error
 	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
 	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
+	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
 
 	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
 	HelpText(ctx context.Context, id string) (internal.HelpText, error)
 	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
+	ListhelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
 
 	CreateMenu(ctx context.Context, menu internal.Menu) error
 	Menu(ctx context.Context, id string) (internal.Menu, error)
 	UpdateMenu(ctx context.Context, menu internal.Menu) error
+	ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error)
 
 	CreateNavigation(ctx context.Context, navigation internal.Navigation) error
 	Navigation(ctx context.Context, id string) (internal.Navigation, error)
 	UpdateNavigation(ctx context.Context, navigation internal.Navigation) error
+	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
 
 type RBACHandler struct {
@@ -84,11 +89,13 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)
 	taskRouter.HandleFunc("/{taskId}", rb.task).Methods(http.MethodGet)
 	taskRouter.HandleFunc("/", rb.updateTask).Methods(http.MethodPut)
+	taskRouter.HandleFunc("/", rb.listtask).Methods(http.MethodGet)
 
 	roletaskRouter := r.PathPrefix("/roletask/").Subrouter()
 	roletaskRouter.HandleFunc("/", rb.createRoleTask).Methods(http.MethodPost)
 	roletaskRouter.HandleFunc("/{roleTaskId}", rb.roleTask).Methods(http.MethodGet)
 	roletaskRouter.HandleFunc("/", rb.updateRoleTask).Methods(http.MethodPut)
+	roletaskRouter.HandleFunc("/", rb.listRoleTask).Methods(http.MethodGet)
 
 	helptextRouter := r.PathPrefix("/helptext/").Subrouter()
 	helptextRouter.HandleFunc("/", rb.createHelpText).Methods(http.MethodPost)

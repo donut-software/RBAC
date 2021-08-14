@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"rbac/internal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -77,4 +78,42 @@ func (rb *RBACHandler) updateTask(w http.ResponseWriter, r *http.Request) {
 		&TaskResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListTaskRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListTaskResponse struct {
+	Tasks []Task `json:"tasks"`
+	Total int64  `json:"total"`
+}
+
+func (rb *RBACHandler) listtask(w http.ResponseWriter, r *http.Request) {
+	var req ListTaskRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListTask(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	tasks := []Task{}
+	for _, value := range la.Task {
+		acc := Task{
+			Id:        value.Id,
+			Task:      value.Task,
+			CreatedAt: value.CreatedAt,
+		}
+		tasks = append(tasks, acc)
+	}
+	renderResponse(w, &ListTaskResponse{
+		Tasks: tasks,
+		Total: la.Total,
+	}, http.StatusOK)
 }
