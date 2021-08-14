@@ -28,6 +28,7 @@ type RBACService interface {
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 	AccountRoleByAccount(ctx context.Context, accountRoleId string) (internal.AccountRoleByAccountResult, error)
+	AccountRoleByRole(ctx context.Context, id string) (internal.AccountRoleByRoleResult, error)
 
 	CreateTask(ctx context.Context, taskname string) error
 	Task(ctx context.Context, id string) (internal.Tasks, error)
@@ -78,6 +79,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	roleRouter := r.PathPrefix("/roles/").Subrouter()
 	roleRouter.HandleFunc("/", rb.createRole).Methods(http.MethodPost)
 	roleRouter.HandleFunc("/{roleId}", rb.role).Methods(http.MethodGet)
+	roleRouter.HandleFunc("/accounts/{roleId}", rb.getAccountRoleByRole).Methods(http.MethodGet)
 	roleRouter.HandleFunc("/", rb.updateRole).Methods(http.MethodPut)
 	roleRouter.HandleFunc("/", rb.listrole).Methods(http.MethodGet)
 

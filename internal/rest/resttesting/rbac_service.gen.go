@@ -65,6 +65,20 @@ type FakeRBACService struct {
 		result1 internal.AccountRoleByAccountResult
 		result2 error
 	}
+	AccountRoleByRoleStub        func(context.Context, string) (internal.AccountRoleByRoleResult, error)
+	accountRoleByRoleMutex       sync.RWMutex
+	accountRoleByRoleArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+	}
+	accountRoleByRoleReturns struct {
+		result1 internal.AccountRoleByRoleResult
+		result2 error
+	}
+	accountRoleByRoleReturnsOnCall map[int]struct {
+		result1 internal.AccountRoleByRoleResult
+		result2 error
+	}
 	ChangePasswordStub        func(context.Context, string, string) error
 	changePasswordMutex       sync.RWMutex
 	changePasswordArgsForCall []struct {
@@ -747,6 +761,71 @@ func (fake *FakeRBACService) AccountRoleByAccountReturnsOnCall(i int, result1 in
 	}
 	fake.accountRoleByAccountReturnsOnCall[i] = struct {
 		result1 internal.AccountRoleByAccountResult
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) AccountRoleByRole(arg1 context.Context, arg2 string) (internal.AccountRoleByRoleResult, error) {
+	fake.accountRoleByRoleMutex.Lock()
+	ret, specificReturn := fake.accountRoleByRoleReturnsOnCall[len(fake.accountRoleByRoleArgsForCall)]
+	fake.accountRoleByRoleArgsForCall = append(fake.accountRoleByRoleArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.AccountRoleByRoleStub
+	fakeReturns := fake.accountRoleByRoleReturns
+	fake.recordInvocation("AccountRoleByRole", []interface{}{arg1, arg2})
+	fake.accountRoleByRoleMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) AccountRoleByRoleCallCount() int {
+	fake.accountRoleByRoleMutex.RLock()
+	defer fake.accountRoleByRoleMutex.RUnlock()
+	return len(fake.accountRoleByRoleArgsForCall)
+}
+
+func (fake *FakeRBACService) AccountRoleByRoleCalls(stub func(context.Context, string) (internal.AccountRoleByRoleResult, error)) {
+	fake.accountRoleByRoleMutex.Lock()
+	defer fake.accountRoleByRoleMutex.Unlock()
+	fake.AccountRoleByRoleStub = stub
+}
+
+func (fake *FakeRBACService) AccountRoleByRoleArgsForCall(i int) (context.Context, string) {
+	fake.accountRoleByRoleMutex.RLock()
+	defer fake.accountRoleByRoleMutex.RUnlock()
+	argsForCall := fake.accountRoleByRoleArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) AccountRoleByRoleReturns(result1 internal.AccountRoleByRoleResult, result2 error) {
+	fake.accountRoleByRoleMutex.Lock()
+	defer fake.accountRoleByRoleMutex.Unlock()
+	fake.AccountRoleByRoleStub = nil
+	fake.accountRoleByRoleReturns = struct {
+		result1 internal.AccountRoleByRoleResult
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) AccountRoleByRoleReturnsOnCall(i int, result1 internal.AccountRoleByRoleResult, result2 error) {
+	fake.accountRoleByRoleMutex.Lock()
+	defer fake.accountRoleByRoleMutex.Unlock()
+	fake.AccountRoleByRoleStub = nil
+	if fake.accountRoleByRoleReturnsOnCall == nil {
+		fake.accountRoleByRoleReturnsOnCall = make(map[int]struct {
+			result1 internal.AccountRoleByRoleResult
+			result2 error
+		})
+	}
+	fake.accountRoleByRoleReturnsOnCall[i] = struct {
+		result1 internal.AccountRoleByRoleResult
 		result2 error
 	}{result1, result2}
 }
@@ -2798,6 +2877,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.accountRoleMutex.RUnlock()
 	fake.accountRoleByAccountMutex.RLock()
 	defer fake.accountRoleByAccountMutex.RUnlock()
+	fake.accountRoleByRoleMutex.RLock()
+	defer fake.accountRoleByRoleMutex.RUnlock()
 	fake.changePasswordMutex.RLock()
 	defer fake.changePasswordMutex.RUnlock()
 	fake.createAccountMutex.RLock()

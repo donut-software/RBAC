@@ -117,3 +117,46 @@ func (rb *RBACHandler) listrole(w http.ResponseWriter, r *http.Request) {
 		Total: la.Total,
 	}, http.StatusOK)
 }
+
+type AccountRoleByRole struct {
+	Role    Role      `json:"role"`
+	Account []Account `json:"accounts"`
+}
+
+func (rb *RBACHandler) getAccountRoleByRole(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["roleId"]
+	la, err := rb.svc.AccountRoleByRole(r.Context(), id)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	role := Role{
+		Id:        la.Role.Id,
+		Role:      la.Role.Role,
+		CreatedAt: la.Role.CreatedAt,
+	}
+	account := []Account{}
+	for _, value := range la.Account {
+		prof := Profile{
+			Id:                value.Profile.Id,
+			ProfilePicture:    value.Profile.Profile_Picture,
+			ProfileBackground: value.Profile.Profile_Background,
+			FirstName:         value.Profile.First_Name,
+			LastName:          value.Profile.Last_Name,
+			Mobile:            value.Profile.Mobile,
+			Email:             value.Profile.Email,
+			CreatedAt:         value.CreatedAt,
+		}
+		acc := Account{
+			Id:        value.Id,
+			Username:  value.UserName,
+			Profile:   prof,
+			CreatedAt: value.CreatedAt,
+		}
+		account = append(account, acc)
+	}
+	renderResponse(w, &AccountRoleByRole{
+		Role:    role,
+		Account: account,
+	}, http.StatusOK)
+}
