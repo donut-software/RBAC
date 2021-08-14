@@ -49,7 +49,34 @@ func (t *RBAC) GetRole(ctx context.Context, roleId string) (internal.Roles, erro
 	return res, nil
 }
 func (t *RBAC) DeleteRole(ctx context.Context, roleId string) error {
-	return t.orig.DeleteRole(ctx, roleId)
+	//get all accountrole
+	ar, err := t.orig.AccountRoleByRoleReturnId(ctx, roleId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetAccountRoleByRoleReturnId")
+	}
+	//get all taskrole
+	rt, err := t.orig.RoleTaskByRoleReturnId(ctx, roleId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetRoleTaskByRoleReturnId")
+	}
+	//delete first the role
+	err = t.orig.DeleteRole(ctx, roleId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRole")
+	}
+	for _, value := range ar {
+		err = t.orig.DeleteAccountRole(ctx, value)
+		if err != nil {
+			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteAccountRole")
+		}
+	}
+	for _, value := range rt {
+		err = t.orig.DeleteRoleTask(ctx, value)
+		if err != nil {
+			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRoleTask")
+		}
+	}
+	return nil
 }
 
 func (t *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {

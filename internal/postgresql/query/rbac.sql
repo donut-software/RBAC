@@ -136,6 +136,10 @@ WHERE id = @id;
 DELETE FROM account_roles
 WHERE id = @id;
 
+-- name: DeleteAccountRoleByRole :exec
+DELETE FROM account_roles
+WHERE role_id = @role_id;
+
 
 -- name: SelectHelpText :one
 SELECT
@@ -352,6 +356,10 @@ WHERE id = @id;
 -- name: DeleteRoleTaskByTask :exec
 DELETE FROM role_tasks
 WHERE task_id = @task_id;
+
+-- name: DeleteRoleTaskByRole :exec
+DELETE FROM role_tasks
+WHERE role_id = @role_id;
 
 
 -- name: SelectTask :one

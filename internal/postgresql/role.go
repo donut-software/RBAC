@@ -85,6 +85,16 @@ func (s *Store) DeleteRole(ctx context.Context, id string) error {
 			fmt.Println(err)
 			return err
 		}
+		err = q.DeleteAccountRoleByRole(ctx, rid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		err = q.DeleteRoleTaskByRole(ctx, rid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 		err = q.DeleteRole(ctx, rid)
 		if err != nil {
 			fmt.Println(err)

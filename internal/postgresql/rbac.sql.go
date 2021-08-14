@@ -47,6 +47,16 @@ func (q *Queries) DeleteAccountRole(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteAccountRoleByRole = `-- name: DeleteAccountRoleByRole :exec
+DELETE FROM account_roles
+WHERE role_id = $1
+`
+
+func (q *Queries) DeleteAccountRoleByRole(ctx context.Context, roleID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteAccountRoleByRole, roleID)
+	return err
+}
+
 const deleteHelpText = `-- name: DeleteHelpText :exec
 DELETE FROM helptext
 WHERE id = $1
@@ -134,6 +144,16 @@ WHERE id = $1
 
 func (q *Queries) DeleteRoleTask(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteRoleTask, id)
+	return err
+}
+
+const deleteRoleTaskByRole = `-- name: DeleteRoleTaskByRole :exec
+DELETE FROM role_tasks
+WHERE role_id = $1
+`
+
+func (q *Queries) DeleteRoleTaskByRole(ctx context.Context, roleID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteRoleTaskByRole, roleID)
 	return err
 }
 

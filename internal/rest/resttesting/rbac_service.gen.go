@@ -251,6 +251,18 @@ type FakeRBACService struct {
 	deleteNavigationReturnsOnCall map[int]struct {
 		result1 error
 	}
+	DeleteRoleStub        func(context.Context, string) error
+	deleteRoleMutex       sync.RWMutex
+	deleteRoleArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+	}
+	deleteRoleReturns struct {
+		result1 error
+	}
+	deleteRoleReturnsOnCall map[int]struct {
+		result1 error
+	}
 	DeleteRoleTaskStub        func(context.Context, string) error
 	deleteRoleTaskMutex       sync.RWMutex
 	deleteRoleTaskArgsForCall []struct {
@@ -1770,6 +1782,68 @@ func (fake *FakeRBACService) DeleteNavigationReturnsOnCall(i int, result1 error)
 		})
 	}
 	fake.deleteNavigationReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) DeleteRole(arg1 context.Context, arg2 string) error {
+	fake.deleteRoleMutex.Lock()
+	ret, specificReturn := fake.deleteRoleReturnsOnCall[len(fake.deleteRoleArgsForCall)]
+	fake.deleteRoleArgsForCall = append(fake.deleteRoleArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.DeleteRoleStub
+	fakeReturns := fake.deleteRoleReturns
+	fake.recordInvocation("DeleteRole", []interface{}{arg1, arg2})
+	fake.deleteRoleMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeRBACService) DeleteRoleCallCount() int {
+	fake.deleteRoleMutex.RLock()
+	defer fake.deleteRoleMutex.RUnlock()
+	return len(fake.deleteRoleArgsForCall)
+}
+
+func (fake *FakeRBACService) DeleteRoleCalls(stub func(context.Context, string) error) {
+	fake.deleteRoleMutex.Lock()
+	defer fake.deleteRoleMutex.Unlock()
+	fake.DeleteRoleStub = stub
+}
+
+func (fake *FakeRBACService) DeleteRoleArgsForCall(i int) (context.Context, string) {
+	fake.deleteRoleMutex.RLock()
+	defer fake.deleteRoleMutex.RUnlock()
+	argsForCall := fake.deleteRoleArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) DeleteRoleReturns(result1 error) {
+	fake.deleteRoleMutex.Lock()
+	defer fake.deleteRoleMutex.Unlock()
+	fake.DeleteRoleStub = nil
+	fake.deleteRoleReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) DeleteRoleReturnsOnCall(i int, result1 error) {
+	fake.deleteRoleMutex.Lock()
+	defer fake.deleteRoleMutex.Unlock()
+	fake.DeleteRoleStub = nil
+	if fake.deleteRoleReturnsOnCall == nil {
+		fake.deleteRoleReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteRoleReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
 }
@@ -3351,6 +3425,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.deleteMenuMutex.RUnlock()
 	fake.deleteNavigationMutex.RLock()
 	defer fake.deleteNavigationMutex.RUnlock()
+	fake.deleteRoleMutex.RLock()
+	defer fake.deleteRoleMutex.RUnlock()
 	fake.deleteRoleTaskMutex.RLock()
 	defer fake.deleteRoleTaskMutex.RUnlock()
 	fake.deleteTaskMutex.RLock()

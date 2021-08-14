@@ -30,6 +30,7 @@ type Datastore interface {
 	AccountRoleByAccount(ctx context.Context, username *string) (internal.AccountRoleByAccountResult, error)
 	AccountRoleByRole(ctx context.Context, roleId *string) (internal.AccountRoleByRoleResult, error)
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
+	AccountRoleByRoleReturnId(ctx context.Context, roleId string) ([]string, error)
 
 	IndexTask(ctx context.Context, task internal.Tasks) error
 	DeleteTask(ctx context.Context, taskId string) error
@@ -43,6 +44,7 @@ type Datastore interface {
 	RoleTaskByTask(ctx context.Context, taskId string) (internal.RoleTaskByTask, error)
 	RoleTaskByTaskReturnIds(ctx context.Context, taskId string) ([]string, error)
 	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
+	RoleTaskByRoleReturnId(ctx context.Context, roleId string) ([]string, error)
 
 	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
 	DeleteHelpText(ctx context.Context, helptextId string) error

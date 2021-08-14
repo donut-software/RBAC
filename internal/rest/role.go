@@ -160,3 +160,16 @@ func (rb *RBACHandler) getAccountRoleByRole(w http.ResponseWriter, r *http.Reque
 		Account: account,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteRole(w http.ResponseWriter, r *http.Request) {
+	roleId := mux.Vars(r)["roleId"]
+	err := rb.svc.DeleteRole(r.Context(), roleId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting role", err)
+		return
+	}
+	renderResponse(w,
+		&RoleResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

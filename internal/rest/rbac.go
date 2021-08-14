@@ -22,6 +22,7 @@ type RBACService interface {
 	Role(ctx context.Context, id string) (internal.Roles, error)
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
+	DeleteRole(ctx context.Context, id string) error
 
 	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
@@ -88,6 +89,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	roleRouter.HandleFunc("/accounts/{roleId}", rb.getAccountRoleByRole).Methods(http.MethodGet)
 	roleRouter.HandleFunc("/", rb.updateRole).Methods(http.MethodPut)
 	roleRouter.HandleFunc("/", rb.listrole).Methods(http.MethodGet)
+	roleRouter.HandleFunc("/{roleId}", rb.deleteRole).Methods(http.MethodDelete)
 
 	accountroleRouter := r.PathPrefix("/accountroles/").Subrouter()
 	accountroleRouter.HandleFunc("/", rb.createAccountRole).Methods(http.MethodPost)
