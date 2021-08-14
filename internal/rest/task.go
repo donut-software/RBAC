@@ -136,3 +136,16 @@ func (rb *RBACHandler) listtask(w http.ResponseWriter, r *http.Request) {
 		Total: la.Total,
 	}, http.StatusOK)
 }
+
+func (rb *RBACHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
+	taskId := mux.Vars(r)["taskId"]
+	err := rb.svc.DeleteTask(r.Context(), taskId)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error deleting task", err)
+		return
+	}
+	renderResponse(w,
+		&TaskResponse{
+			Message: "Deleted Successfully",
+		}, http.StatusOK)
+}

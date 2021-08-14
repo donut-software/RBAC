@@ -61,7 +61,39 @@ func (t *RBAC) GetTask(ctx context.Context, taskId string) (internal.Tasks, erro
 	return res, nil
 }
 func (t *RBAC) DeleteTask(ctx context.Context, taskId string) error {
-	return t.orig.DeleteTask(ctx, taskId)
+	//get the task first
+	task, err := t.GetTask(ctx, taskId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
+	}
+	//get all the roletask
+	rt, err := t.orig.RoleTaskByTaskReturnIds(ctx, taskId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
+	}
+	//then delete the task before others
+	err = t.orig.DeleteTask(ctx, taskId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteTask")
+	}
+
+	//delete all roletask
+	for _, value := range rt {
+		err = t.orig.DeleteRoleTask(ctx, value)
+		if err != nil {
+			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRoleTask")
+		}
+	}
+
+	for _, value := range task.Menu {
+		//remove all menu
+		t.DeleteMenu(ctx, value.Id)
+	}
+	for _, value := range task.Navigation {
+		t.DeleteNavigation(ctx, value.Id)
+	}
+	t.DeleteHelpText(ctx, task.HelpText.Id)
+	return nil
 }
 
 func (t *RBAC) ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error) {

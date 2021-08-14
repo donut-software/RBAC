@@ -63,6 +63,10 @@ func (r *RBAC) DeleteTask(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
+	err = r.search.DeleteTask(ctx, id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
+	}
 	return err
 }
 

@@ -57,6 +57,16 @@ func (q *Queries) DeleteHelpText(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteHelpTextByTask = `-- name: DeleteHelpTextByTask :exec
+DELETE FROM helptext
+WHERE task_id = $1
+`
+
+func (q *Queries) DeleteHelpTextByTask(ctx context.Context, taskID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteHelpTextByTask, taskID)
+	return err
+}
+
 const deleteMenu = `-- name: DeleteMenu :exec
 DELETE FROM menu
 WHERE id = $1
@@ -67,6 +77,16 @@ func (q *Queries) DeleteMenu(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteMenuByTask = `-- name: DeleteMenuByTask :exec
+DELETE FROM menu
+WHERE task_id = $1
+`
+
+func (q *Queries) DeleteMenuByTask(ctx context.Context, taskID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteMenuByTask, taskID)
+	return err
+}
+
 const deleteNavigation = `-- name: DeleteNavigation :exec
 DELETE FROM navigation
 WHERE id = $1
@@ -74,6 +94,16 @@ WHERE id = $1
 
 func (q *Queries) DeleteNavigation(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteNavigation, id)
+	return err
+}
+
+const deleteNavigationByTask = `-- name: DeleteNavigationByTask :exec
+DELETE FROM navigation
+WHERE task_id = $1
+`
+
+func (q *Queries) DeleteNavigationByTask(ctx context.Context, taskID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteNavigationByTask, taskID)
 	return err
 }
 
@@ -104,6 +134,16 @@ WHERE id = $1
 
 func (q *Queries) DeleteRoleTask(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteRoleTask, id)
+	return err
+}
+
+const deleteRoleTaskByTask = `-- name: DeleteRoleTaskByTask :exec
+DELETE FROM role_tasks
+WHERE task_id = $1
+`
+
+func (q *Queries) DeleteRoleTaskByTask(ctx context.Context, taskID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteRoleTaskByTask, taskID)
 	return err
 }
 

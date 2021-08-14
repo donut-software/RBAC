@@ -126,19 +126,17 @@ func (a *RBAC) GetRoleTask(ctx context.Context, roletaskId string) (internal.Rol
 
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
-func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId *string) (internal.RoleTaskByRole, error) {
+func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.RoleTaskByRole, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
 
-	if roleId != nil {
-		should = append(should, map[string]interface{}{
-			"match": map[string]interface{}{
-				"roleid": roleId,
-			},
-		})
-	}
+	should = append(should, map[string]interface{}{
+		"match": map[string]interface{}{
+			"roleid": roleId,
+		},
+	})
 
 	var query map[string]interface{}
 
@@ -193,7 +191,7 @@ func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId *string) (internal.Rol
 	}
 
 	role := internal.Roles{
-		Id: *roleId,
+		Id: roleId,
 	}
 	res := make([]internal.Tasks, len(hits.Hits.Hits))
 
@@ -210,19 +208,17 @@ func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId *string) (internal.Rol
 
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
-func (a *RBAC) RoleTaskByTask(ctx context.Context, taskId *string) (internal.RoleTaskByTask, error) {
+func (a *RBAC) RoleTaskByTask(ctx context.Context, taskId string) (internal.RoleTaskByTask, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
 
-	if taskId != nil {
-		should = append(should, map[string]interface{}{
-			"match": map[string]interface{}{
-				"taskid": taskId,
-			},
-		})
-	}
+	should = append(should, map[string]interface{}{
+		"match": map[string]interface{}{
+			"taskid": taskId,
+		},
+	})
 
 	var query map[string]interface{}
 
@@ -277,7 +273,7 @@ func (a *RBAC) RoleTaskByTask(ctx context.Context, taskId *string) (internal.Rol
 	}
 
 	task := internal.Tasks{
-		Id: *taskId,
+		Id: taskId,
 	}
 	res := make([]internal.Roles, len(hits.Hits.Hits))
 
@@ -347,4 +343,101 @@ func (a *RBAC) ListRoleTask(ctx context.Context, args internal.ListArgs) (intern
 		RoleTasks: res,
 		Total:     hits.Hits.Total.Value,
 	}, nil
+}
+
+func (a *RBAC) DeleteRoleTaskByTask(ctx context.Context, roletaskId string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.DeleteByTask")
+	defer span.End()
+
+	req := esv7api.DeleteRequest{
+		Index:      INDEX_ROLE_TASK,
+		DocumentID: roletaskId,
+	}
+
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "DeleteRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		return internal.NewErrorf(internal.ErrorCodeUnknown, "DeleteRequest.Do %s", resp.StatusCode)
+	}
+
+	io.Copy(ioutil.Discard, resp.Body)
+
+	return nil
+}
+
+// Search returns tasks matching a query.
+// XXX: Pagination will be implemented in future episodes
+func (a *RBAC) RoleTaskByTaskReturnIds(ctx context.Context, taskId string) ([]string, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.ByAccount")
+	defer span.End()
+
+	should := make([]interface{}, 0, 4)
+
+	should = append(should, map[string]interface{}{
+		"match": map[string]interface{}{
+			"taskid": taskId,
+		},
+	})
+
+	var query map[string]interface{}
+
+	if len(should) > 1 {
+		query = map[string]interface{}{
+			"query": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"should": should,
+				},
+			},
+		}
+	} else {
+		query = map[string]interface{}{
+			"query": should[0],
+		}
+	}
+
+	fmt.Println(query)
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		return nil, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
+	}
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ROLE_TASK},
+		Body:  &buf,
+	}
+
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return nil, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return nil, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedRoleTask `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return nil, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	var res []string
+	for _, hit := range hits.Hits.Hits {
+		res = append(res, hit.Source.Id)
+	}
+	return res, nil
 }

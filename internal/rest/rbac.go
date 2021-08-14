@@ -35,6 +35,7 @@ type RBACService interface {
 	Task(ctx context.Context, id string) (internal.Tasks, error)
 	UpdateTask(ctx context.Context, id string, taskname string) error
 	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
+	DeleteTask(ctx context.Context, id string) error
 
 	CreateRoleTask(ctx context.Context, taskid string, roleid string) error
 	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
@@ -100,6 +101,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	taskRouter.HandleFunc("/{taskId}", rb.task).Methods(http.MethodGet)
 	taskRouter.HandleFunc("/", rb.updateTask).Methods(http.MethodPut)
 	taskRouter.HandleFunc("/", rb.listtask).Methods(http.MethodGet)
+	taskRouter.HandleFunc("/{taskId}", rb.deleteTask).Methods(http.MethodDelete)
 
 	roletaskRouter := r.PathPrefix("/roletask/").Subrouter()
 	roletaskRouter.HandleFunc("/", rb.createRoleTask).Methods(http.MethodPost)

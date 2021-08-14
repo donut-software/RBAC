@@ -182,6 +182,10 @@ WHERE id = @id;
 DELETE FROM helptext
 WHERE id = @id;
 
+-- name: DeleteHelpTextByTask :exec
+DELETE FROM helptext
+WHERE task_id = @task_id;
+
 
 -- name: SelectMenu :one
 SELECT
@@ -227,6 +231,10 @@ WHERE id = @id;
 DELETE FROM menu
 WHERE id = @id;
 
+-- name: DeleteMenuByTask :exec
+DELETE FROM menu
+WHERE task_id = @task_id;
+
 
 -- name: SelectNavigation :one
 SELECT
@@ -271,6 +279,10 @@ WHERE id = @id;
 -- name: DeleteNavigation :exec
 DELETE FROM navigation
 WHERE id = @id;
+
+-- name: DeleteNavigationByTask :exec
+DELETE FROM navigation
+WHERE task_id = @task_id;
 
 
 -- name: SelectRole :one
@@ -336,6 +348,10 @@ WHERE id = @id;
 -- name: DeleteRoleTask :exec
 DELETE FROM role_tasks
 WHERE id = @id;
+
+-- name: DeleteRoleTaskByTask :exec
+DELETE FROM role_tasks
+WHERE task_id = @task_id;
 
 
 -- name: SelectTask :one

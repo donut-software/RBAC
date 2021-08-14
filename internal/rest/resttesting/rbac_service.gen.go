@@ -263,6 +263,18 @@ type FakeRBACService struct {
 	deleteRoleTaskReturnsOnCall map[int]struct {
 		result1 error
 	}
+	DeleteTaskStub        func(context.Context, string) error
+	deleteTaskMutex       sync.RWMutex
+	deleteTaskArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+	}
+	deleteTaskReturns struct {
+		result1 error
+	}
+	deleteTaskReturnsOnCall map[int]struct {
+		result1 error
+	}
 	HelpTextStub        func(context.Context, string) (internal.HelpText, error)
 	helpTextMutex       sync.RWMutex
 	helpTextArgsForCall []struct {
@@ -1824,6 +1836,68 @@ func (fake *FakeRBACService) DeleteRoleTaskReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeRBACService) DeleteTask(arg1 context.Context, arg2 string) error {
+	fake.deleteTaskMutex.Lock()
+	ret, specificReturn := fake.deleteTaskReturnsOnCall[len(fake.deleteTaskArgsForCall)]
+	fake.deleteTaskArgsForCall = append(fake.deleteTaskArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.DeleteTaskStub
+	fakeReturns := fake.deleteTaskReturns
+	fake.recordInvocation("DeleteTask", []interface{}{arg1, arg2})
+	fake.deleteTaskMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeRBACService) DeleteTaskCallCount() int {
+	fake.deleteTaskMutex.RLock()
+	defer fake.deleteTaskMutex.RUnlock()
+	return len(fake.deleteTaskArgsForCall)
+}
+
+func (fake *FakeRBACService) DeleteTaskCalls(stub func(context.Context, string) error) {
+	fake.deleteTaskMutex.Lock()
+	defer fake.deleteTaskMutex.Unlock()
+	fake.DeleteTaskStub = stub
+}
+
+func (fake *FakeRBACService) DeleteTaskArgsForCall(i int) (context.Context, string) {
+	fake.deleteTaskMutex.RLock()
+	defer fake.deleteTaskMutex.RUnlock()
+	argsForCall := fake.deleteTaskArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRBACService) DeleteTaskReturns(result1 error) {
+	fake.deleteTaskMutex.Lock()
+	defer fake.deleteTaskMutex.Unlock()
+	fake.DeleteTaskStub = nil
+	fake.deleteTaskReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRBACService) DeleteTaskReturnsOnCall(i int, result1 error) {
+	fake.deleteTaskMutex.Lock()
+	defer fake.deleteTaskMutex.Unlock()
+	fake.DeleteTaskStub = nil
+	if fake.deleteTaskReturnsOnCall == nil {
+		fake.deleteTaskReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.deleteTaskReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeRBACService) HelpText(arg1 context.Context, arg2 string) (internal.HelpText, error) {
 	fake.helpTextMutex.Lock()
 	ret, specificReturn := fake.helpTextReturnsOnCall[len(fake.helpTextArgsForCall)]
@@ -3279,6 +3353,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.deleteNavigationMutex.RUnlock()
 	fake.deleteRoleTaskMutex.RLock()
 	defer fake.deleteRoleTaskMutex.RUnlock()
+	fake.deleteTaskMutex.RLock()
+	defer fake.deleteTaskMutex.RUnlock()
 	fake.helpTextMutex.RLock()
 	defer fake.helpTextMutex.RUnlock()
 	fake.listAccountMutex.RLock()

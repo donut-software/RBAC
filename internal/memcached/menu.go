@@ -48,8 +48,8 @@ func (t *RBAC) GetMenu(ctx context.Context, menuId string) (internal.Menu, error
 	}
 	return res, nil
 }
-func (t *RBAC) DeleteMenu(ctx context.Context, roleId string) error {
-	return t.orig.DeleteMenu(ctx, roleId)
+func (t *RBAC) DeleteMenu(ctx context.Context, menuId string) error {
+	return t.orig.DeleteMenu(ctx, menuId)
 }
 
 func (t *RBAC) GetMenuByTask(ctx context.Context, taskid string) ([]internal.Menu, error) {

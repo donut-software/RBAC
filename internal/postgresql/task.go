@@ -126,6 +126,26 @@ func (s *Store) DeleteTask(ctx context.Context, id string) error {
 			fmt.Println(err)
 			return err
 		}
+		err = q.DeleteRoleTaskByTask(ctx, tid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		err = q.DeleteHelpTextByTask(ctx, tid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		err = q.DeleteMenuByTask(ctx, tid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		err = q.DeleteNavigationByTask(ctx, tid)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 		err = q.DeleteTask(ctx, tid)
 		if err != nil {
 			fmt.Println(err)

@@ -58,7 +58,7 @@ func (t *RBAC) GetRoleTaskByRole(ctx context.Context, roleid string) (internal.R
 	if err != nil {
 		if err == memcache.ErrCacheMiss {
 			t.logger.Info("values NOT found", zap.String("key", string(key)))
-			res, err := t.orig.RoleTaskByRole(ctx, &roleid)
+			res, err := t.orig.RoleTaskByRole(ctx, roleid)
 			if err != nil {
 				return internal.RoleTaskByRole{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.RoleTaskByRole")
 			}
@@ -105,7 +105,7 @@ func (t *RBAC) GetRoleTaskByTask(ctx context.Context, taskid string) (internal.R
 	if err != nil {
 		if err == memcache.ErrCacheMiss {
 			t.logger.Info("values NOT found", zap.String("key", string(key)))
-			res, err := t.orig.RoleTaskByTask(ctx, &taskid)
+			res, err := t.orig.RoleTaskByTask(ctx, taskid)
 			if err != nil {
 				return internal.RoleTaskByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.RoleTaskByTask")
 			}
