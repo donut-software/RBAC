@@ -26,6 +26,18 @@ func (t *RBAC) GetTask(ctx context.Context, taskId string) (internal.Tasks, erro
 			if err != nil {
 				return internal.Tasks{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
 			}
+			res.HelpText, err = t.GetHelpTextByTask(ctx, taskId)
+			if err != nil {
+				return internal.Tasks{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetHelpText")
+			}
+			res.Menu, err = t.GetMenuByTask(ctx, taskId)
+			if err != nil {
+				return internal.Tasks{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetMenu")
+			}
+			res.Navigation, err = t.GetNavigationByTask(ctx, taskId)
+			if err != nil {
+				return internal.Tasks{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetNavigation")
+			}
 			var b bytes.Buffer
 			if err := gob.NewEncoder(&b).Encode(&res); err == nil {
 				t.logger.Info("settin value")

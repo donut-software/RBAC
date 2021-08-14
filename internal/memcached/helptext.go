@@ -52,23 +52,16 @@ func (t *RBAC) DeleteHelpText(ctx context.Context, roleId string) error {
 	return t.orig.DeleteHelpText(ctx, roleId)
 }
 
-func (t *RBAC) GetHelpTextByTask(ctx context.Context, taskid string) (internal.HelpTextByTask, error) {
+func (t *RBAC) GetHelpTextByTask(ctx context.Context, taskid string) (internal.HelpText, error) {
 	key := "helptextbytask_" + taskid
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {
 			t.logger.Info("values NOT found", zap.String("key", string(key)))
-			res, err := t.orig.HelpTextByTask(ctx, &taskid)
+			res, err := t.orig.HelpTextByTask(ctx, taskid)
 			if err != nil {
-				return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.AccountRoleByRole")
+				return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.AccountRoleByRole")
 			}
-			task, err := t.orig.GetTask(ctx, res.Task.Id)
-			if err != nil {
-				return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetRole")
-			}
-			res.Task = task
-			helptext, err := t.orig.GetHelpText(ctx, res.HelpText.Id)
-			res.HelpText = helptext
 
 			var b bytes.Buffer
 			if err := gob.NewEncoder(&b).Encode(&res); err == nil {
@@ -83,12 +76,12 @@ func (t *RBAC) GetHelpTextByTask(ctx context.Context, taskid string) (internal.H
 
 			return res, err
 		}
-		return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
+		return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
 	}
 	t.logger.Info("values found", zap.String("key", string(key)))
-	var res internal.HelpTextByTask
+	var res internal.HelpText
 	if err := gob.NewDecoder(bytes.NewReader(item.Value)).Decode(&res); err != nil {
-		return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
+		return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
 	}
 	return res, nil
 }

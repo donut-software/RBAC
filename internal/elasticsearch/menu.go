@@ -120,19 +120,17 @@ func (a *RBAC) GetMenu(ctx context.Context, menuId string) (internal.Menu, error
 
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
-func (a *RBAC) MenuByTask(ctx context.Context, taskId *string) (internal.MenuByTask, error) {
+func (a *RBAC) MenuByTask(ctx context.Context, taskId string) ([]internal.Menu, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Meny.ByTask")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
 
-	if taskId != nil {
-		should = append(should, map[string]interface{}{
-			"match": map[string]interface{}{
-				"taskid": taskId,
-			},
-		})
-	}
+	should = append(should, map[string]interface{}{
+		"match": map[string]interface{}{
+			"taskid": taskId,
+		},
+	})
 
 	var query map[string]interface{}
 
@@ -153,22 +151,22 @@ func (a *RBAC) MenuByTask(ctx context.Context, taskId *string) (internal.MenuByT
 	fmt.Println(query)
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return internal.MenuByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
+		return []internal.Menu{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
 	}
 	req := esv7api.SearchRequest{
-		Index: []string{INDEX_ROLE_TASK},
+		Index: []string{INDEX_MENU},
 		Body:  &buf,
 	}
 
 	resp, err := req.Do(ctx, a.client)
 	if err != nil {
-		return internal.MenuByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+		return []internal.Menu{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
 	}
 	defer resp.Body.Close()
 
 	if resp.IsError() {
 		fmt.Println(resp.String())
-		return internal.MenuByTask{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+		return []internal.Menu{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
 	}
 
 	var hits struct {
@@ -183,12 +181,9 @@ func (a *RBAC) MenuByTask(ctx context.Context, taskId *string) (internal.MenuByT
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
 		fmt.Println("Error here", err)
-		return internal.MenuByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+		return []internal.Menu{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
 	}
 
-	task := internal.Tasks{
-		Id: *taskId,
-	}
 	res := make([]internal.Menu, len(hits.Hits.Hits))
 
 	for i, hit := range hits.Hits.Hits {
@@ -198,10 +193,7 @@ func (a *RBAC) MenuByTask(ctx context.Context, taskId *string) (internal.MenuByT
 		res[i].CreatedAt = hit.Source.CreatedAt
 	}
 
-	return internal.MenuByTask{
-		Task: task,
-		Menu: res,
-	}, nil
+	return res, nil
 }
 
 func (a *RBAC) ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error) {

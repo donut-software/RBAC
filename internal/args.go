@@ -56,16 +56,17 @@ type RoleTaskByTask struct {
 	Task  Tasks
 	Roles []Roles
 }
-type HelpTextByTask struct {
-	Task     Tasks
-	HelpText HelpText
-}
 
-type MenuByTask struct {
-	Task Tasks
-	Menu []Menu
-}
-type NavigationByTask struct {
-	Task       Tasks
-	Navigation []Navigation
-}
+// type HelpTextByTask struct {
+// 	Task     Tasks
+// 	HelpText HelpText
+// }
+
+// type MenuByTask struct {
+// 	Task Tasks
+// 	Menu []Menu
+// }
+// type NavigationByTask struct {
+// 	Task       Tasks
+// 	Navigation []Navigation
+// }

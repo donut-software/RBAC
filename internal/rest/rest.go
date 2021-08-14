@@ -54,3 +54,30 @@ func renderResponse(w http.ResponseWriter, res interface{}, status int) {
 		fmt.Println(err)
 	}
 }
+
+func convertInternalNavigationList(list []internal.Navigation) []Navigation {
+	navlist := []Navigation{}
+	for _, value := range list {
+		n := Navigation{
+			Id:        value.Id,
+			Name:      value.Name,
+			TaskId:    value.Task_id,
+			CreatedAt: value.CreatedAt,
+		}
+		navlist = append(navlist, n)
+	}
+	return navlist
+}
+func convertInternalMenuList(list []internal.Menu) []Menu {
+	menulist := []Menu{}
+	for _, value := range list {
+		m := Menu{
+			Id:        value.Id,
+			Name:      value.Name,
+			TaskId:    value.Task_id,
+			CreatedAt: value.CreatedAt,
+		}
+		menulist = append(menulist, m)
+	}
+	return menulist
+}

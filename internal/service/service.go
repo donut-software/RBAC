@@ -87,20 +87,20 @@ type RBACSearchRepository interface {
 
 	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
 	GetHelpText(ctx context.Context, helptextId string) (internal.HelpText, error)
-	GetHelpTextByTask(ctx context.Context, taskid string) (internal.HelpTextByTask, error)
+	GetHelpTextByTask(ctx context.Context, taskid string) (internal.HelpText, error)
 	DeleteHelpText(ctx context.Context, roleId string) error
 	ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
 
 	IndexMenu(ctx context.Context, menu internal.Menu) error
 	GetMenu(ctx context.Context, menuId string) (internal.Menu, error)
 	DeleteMenu(ctx context.Context, roleId string) error
-	GetMenuByTask(ctx context.Context, taskid string) (internal.MenuByTask, error)
+	GetMenuByTask(ctx context.Context, taskid string) ([]internal.Menu, error)
 	ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error)
 
 	IndexNavigation(ctx context.Context, menu internal.Navigation) error
 	GetNavigation(ctx context.Context, navigationId string) (internal.Navigation, error)
 	DeleteNavigation(ctx context.Context, roleId string) error
-	GetNavigationByTask(ctx context.Context, taskid string) (internal.NavigationByTask, error)
+	GetNavigationByTask(ctx context.Context, taskid string) ([]internal.Navigation, error)
 	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
 type RBAC struct {

@@ -120,19 +120,16 @@ func (a *RBAC) GetHelpText(ctx context.Context, helptextId string) (internal.Hel
 
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
-func (a *RBAC) HelpTextByTask(ctx context.Context, taskId *string) (internal.HelpTextByTask, error) {
+func (a *RBAC) HelpTextByTask(ctx context.Context, taskId string) (internal.HelpText, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountHelpTask.ByAccount")
 	defer span.End()
 
 	should := make([]interface{}, 0, 4)
-
-	if taskId != nil {
-		should = append(should, map[string]interface{}{
-			"match": map[string]interface{}{
-				"taskid": taskId,
-			},
-		})
-	}
+	should = append(should, map[string]interface{}{
+		"match": map[string]interface{}{
+			"taskid": taskId,
+		},
+	})
 
 	var query map[string]interface{}
 
@@ -153,22 +150,22 @@ func (a *RBAC) HelpTextByTask(ctx context.Context, taskId *string) (internal.Hel
 	fmt.Println(query)
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
+		return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewEncoder.Encode")
 	}
 	req := esv7api.SearchRequest{
-		Index: []string{INDEX_ROLE_TASK},
+		Index: []string{INDEX_HELPTEXT},
 		Body:  &buf,
 	}
 
 	resp, err := req.Do(ctx, a.client)
 	if err != nil {
-		return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+		return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
 	}
 	defer resp.Body.Close()
 
 	if resp.IsError() {
 		fmt.Println(resp.String())
-		return internal.HelpTextByTask{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+		return internal.HelpText{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
 	}
 
 	var hits struct {
@@ -183,12 +180,9 @@ func (a *RBAC) HelpTextByTask(ctx context.Context, taskId *string) (internal.Hel
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
 		fmt.Println("Error here", err)
-		return internal.HelpTextByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+		return internal.HelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
 	}
 
-	task := internal.Tasks{
-		Id: *taskId,
-	}
 	res := make([]internal.HelpText, len(hits.Hits.Hits))
 
 	for i, hit := range hits.Hits.Hits {
@@ -198,10 +192,10 @@ func (a *RBAC) HelpTextByTask(ctx context.Context, taskId *string) (internal.Hel
 		res[i].CreatedAt = hit.Source.CreatedAt
 	}
 
-	return internal.HelpTextByTask{
-		Task:     task,
-		HelpText: res[0],
-	}, nil
+	if (len(hits.Hits.Hits) > 0){
+		return res[0], nil
+	}
+	return internal.HelpText{}, nil
 }
 
 func (a *RBAC) ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error) {

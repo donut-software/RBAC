@@ -10,9 +10,12 @@ import (
 )
 
 type Task struct {
-	Id        string    `json:"id"`
-	Task      string    `json:"task"`
-	CreatedAt time.Time `json:"created_at"`
+	Id         string       `json:"id"`
+	Task       string       `json:"task"`
+	HelpText   HelpText     `json:"helptext"`
+	Menus      []Menu       `json:"menus"`
+	Navigation []Navigation `json:"navigation"`
+	CreatedAt  time.Time    `json:"created_at"`
 }
 type CreateTaskRequest struct {
 	Task string `json:"task"`
@@ -51,9 +54,17 @@ func (rb *RBACHandler) task(w http.ResponseWriter, r *http.Request) {
 	}
 	renderResponse(w, &GetTaskResponse{
 		Task: Task{
-			Id:        task.Id,
-			Task:      task.Task,
-			CreatedAt: task.CreatedAt,
+			Id:   task.Id,
+			Task: task.Task,
+			HelpText: HelpText{
+				Id:        task.HelpText.Id,
+				HelpText:  task.HelpText.HelpText,
+				TaskId:    task.HelpText.Task_id,
+				CreatedAt: task.HelpText.CreatedAt,
+			},
+			Menus:      convertInternalMenuList(task.Menu),
+			Navigation: convertInternalNavigationList(task.Navigation),
+			CreatedAt:  task.CreatedAt,
 		},
 	}, http.StatusOK)
 }
@@ -106,9 +117,17 @@ func (rb *RBACHandler) listtask(w http.ResponseWriter, r *http.Request) {
 	tasks := []Task{}
 	for _, value := range la.Task {
 		acc := Task{
-			Id:        value.Id,
-			Task:      value.Task,
-			CreatedAt: value.CreatedAt,
+			Id:   value.Id,
+			Task: value.Task,
+			HelpText: HelpText{
+				Id:        value.HelpText.Id,
+				HelpText:  value.HelpText.HelpText,
+				TaskId:    value.HelpText.Task_id,
+				CreatedAt: value.HelpText.CreatedAt,
+			},
+			Menus:      convertInternalMenuList(value.Menu),
+			Navigation: convertInternalNavigationList(value.Navigation),
+			CreatedAt:  value.CreatedAt,
 		}
 		tasks = append(tasks, acc)
 	}

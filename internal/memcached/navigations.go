@@ -52,22 +52,16 @@ func (t *RBAC) DeleteNavigation(ctx context.Context, roleId string) error {
 	return t.orig.DeleteNavigation(ctx, roleId)
 }
 
-func (t *RBAC) GetNavigationByTask(ctx context.Context, taskid string) (internal.NavigationByTask, error) {
-	key := "menubytask_" + taskid
+func (t *RBAC) GetNavigationByTask(ctx context.Context, taskid string) ([]internal.Navigation, error) {
+	key := "navigationsbytask_" + taskid
 	item, err := t.client.Get(key)
 	if err != nil {
 		if err == memcache.ErrCacheMiss {
 			t.logger.Info("values NOT found", zap.String("key", string(key)))
-			res, err := t.orig.NavigationByTask(ctx, &taskid)
+			res, err := t.orig.NavigationByTask(ctx, taskid)
 			if err != nil {
-				return internal.NavigationByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.AccountRoleByRole")
+				return []internal.Navigation{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.AccountRoleByRole")
 			}
-			task, err := t.orig.GetTask(ctx, res.Task.Id)
-			if err != nil {
-				return internal.NavigationByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetRole")
-			}
-			res.Task = task
-
 			var b bytes.Buffer
 			if err := gob.NewEncoder(&b).Encode(&res); err == nil {
 				t.logger.Info("settin value")
@@ -81,12 +75,12 @@ func (t *RBAC) GetNavigationByTask(ctx context.Context, taskid string) (internal
 
 			return res, err
 		}
-		return internal.NavigationByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
+		return []internal.Navigation{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
 	}
 	t.logger.Info("values found", zap.String("key", string(key)))
-	var res internal.NavigationByTask
+	var res []internal.Navigation
 	if err := gob.NewDecoder(bytes.NewReader(item.Value)).Decode(&res); err != nil {
-		return internal.NavigationByTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
+		return []internal.Navigation{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
 	}
 	return res, nil
 }
