@@ -74,6 +74,20 @@ func (t *RBAC) ListTask(ctx context.Context, args internal.ListArgs) (internal.L
 			if err != nil {
 				return internal.ListTask{}, err
 			}
+			for i, value := range listacc.Task {
+				listacc.Task[i].HelpText, err = t.GetHelpTextByTask(ctx, value.Id)
+				if err != nil {
+					return internal.ListTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetHelpText")
+				}
+				listacc.Task[i].Menu, err = t.GetMenuByTask(ctx, value.Id)
+				if err != nil {
+					return internal.ListTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetMenu")
+				}
+				listacc.Task[i].Navigation, err = t.GetNavigationByTask(ctx, value.Id)
+				if err != nil {
+					return internal.ListTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetNavigation")
+				}
+			}
 			var b bytes.Buffer
 			if err := gob.NewEncoder(&b).Encode(&listacc); err == nil {
 				t.logger.Info("settin value")
