@@ -21,11 +21,12 @@ type RBACService interface {
 	CreateRole(ctx context.Context, rolename string) error
 	Role(ctx context.Context, id string) (internal.Roles, error)
 	UpdateRole(ctx context.Context, id string, rolename string) error
+	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 
 	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
-	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
+	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 
 	CreateTask(ctx context.Context, taskname string) error
 	Task(ctx context.Context, id string) (internal.Tasks, error)
@@ -64,6 +65,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	accountRouter.HandleFunc("/register", rb.register).Methods(http.MethodPost)
 	accountRouter.HandleFunc("/{username}", rb.account).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/", rb.listaccount).Methods(http.MethodGet)
+	accountRouter.HandleFunc("/", rb.updateProfile).Methods(http.MethodPut)
 	accountRouter.HandleFunc("/{username}", rb.deleteAccount).Methods(http.MethodDelete)
 
 	roleRouter := r.PathPrefix("/roles/").Subrouter()
@@ -76,6 +78,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	accountroleRouter.HandleFunc("/", rb.createAccountRole).Methods(http.MethodPost)
 	accountroleRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
 	accountroleRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
+	accountroleRouter.HandleFunc("/", rb.listAccountRole).Methods(http.MethodGet)
 
 	taskRouter := r.PathPrefix("/task/").Subrouter()
 	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)

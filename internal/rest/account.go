@@ -10,6 +10,7 @@ import (
 )
 
 type Profile struct {
+	Id                string    `json:"id"`
 	ProfilePicture    string    `json:"profile_picture"`
 	ProfileBackground string    `json:"profile_background"`
 	FirstName         string    `json:"first_name"`
@@ -20,6 +21,7 @@ type Profile struct {
 }
 
 type Account struct {
+	Id        string    `json:"id"`
 	Username  string    `json:"username"`
 	Profile   Profile   `json:"profile"`
 	CreatedAt time.Time `json:"created_at"`
@@ -79,6 +81,7 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := Profile{
+		Id:                account.Profile.Id,
 		ProfileBackground: account.Profile.Profile_Background,
 		ProfilePicture:    account.Profile.Profile_Picture,
 		FirstName:         account.Profile.First_Name,
@@ -89,6 +92,7 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 	}
 	renderResponse(w, &ReadAccountResponse{
 		Account: Account{
+			Id:        account.Id,
 			Username:  account.UserName,
 			Profile:   profile,
 			CreatedAt: account.CreatedAt,
@@ -122,6 +126,7 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 	accounts := []Account{}
 	for _, value := range la.Accounts {
 		prof := Profile{
+			Id:                value.Profile.Id,
 			ProfilePicture:    value.Profile.Profile_Picture,
 			ProfileBackground: value.Profile.Profile_Background,
 			FirstName:         value.Profile.First_Name,
@@ -131,6 +136,7 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 			CreatedAt:         value.CreatedAt,
 		}
 		acc := Account{
+			Id:        value.Id,
 			Username:  value.UserName,
 			Profile:   prof,
 			CreatedAt: value.CreatedAt,
@@ -141,6 +147,41 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 		Accounts: accounts,
 		Total:    la.Total,
 	}, http.StatusOK)
+}
+
+type UpdateProfileRequest struct {
+	Id                string `json:"id"`
+	ProfilePicture    string `json:"profile_picture"`
+	ProfileBackground string `json:"profile_background"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	Mobile            string `json:"mobile"`
+	Email             string `json:"email"`
+}
+
+func (rb *RBACHandler) updateProfile(w http.ResponseWriter, r *http.Request) {
+	var req UpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	err := rb.svc.UpdateProfile(r.Context(), internal.Profile{
+		Id:                 req.Id,
+		Profile_Picture:    req.ProfilePicture,
+		Profile_Background: req.ProfileBackground,
+		First_Name:         req.FirstName,
+		Last_Name:          req.LastName,
+		Mobile:             req.Mobile,
+		Email:              req.Email,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error updating profile", err)
+		return
+	}
+	renderResponse(w,
+		&AccountResponse{
+			Message: "Updated Successfully",
+		}, http.StatusCreated)
 }
 
 type DeleteAccountResponse struct {

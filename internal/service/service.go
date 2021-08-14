@@ -18,7 +18,7 @@ type RBACRepository interface {
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	DeleteRole(ctx context.Context, id string) error
 
-	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
+	CreateAccountRole(ctx context.Context, accountId string, roleId string) (string, error)
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
 	DeleteAccountRole(ctx context.Context, id string) error
@@ -57,10 +57,21 @@ type RBACSearchRepository interface {
 	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
 	// IndexProfile(ctx context.Context, profile internal.Profile) error
 
+	IndexProfile(ctx context.Context, profile internal.Profile) error
+	GetProfile(ctx context.Context, profileid string) (internal.Profile, error)
+	DeleteProfile(ctx context.Context, roleId string) error
+
 	IndexRole(ctx context.Context, role internal.Roles) error
 	GetRole(ctx context.Context, roleId string) (internal.Roles, error)
 	DeleteRole(ctx context.Context, roleId string) error
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
+
+	IndexAccountRole(ctx context.Context, accRole internal.AccountRoles) error
+	GetAccountRole(ctx context.Context, accRoleId string) (internal.AccountRoles, error)
+	GetAccountRoleByAccount(ctx context.Context, username string) (internal.AccountRoleByAccountResult, error)
+	GetAccountRoleByRole(ctx context.Context, roleid string) (internal.AccountRoleByRoleResult, error)
+	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
+	DeleteAccountRole(ctx context.Context, accRoleId string) error
 }
 type RBAC struct {
 	repo   RBACRepository

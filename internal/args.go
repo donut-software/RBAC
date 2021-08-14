@@ -8,6 +8,10 @@ type ListAccount struct {
 	Accounts []Account
 	Total    int64
 }
+type ListAccountRole struct {
+	AccountRoles []AccountRoles
+	Total        int64
+}
 
 type ListRole struct {
 	Roles []Roles

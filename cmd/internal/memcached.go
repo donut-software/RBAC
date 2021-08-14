@@ -21,8 +21,8 @@ func NewMemcached(conf *envvar.Configuration) (*memcache.Client, error) {
 		return nil, err
 	}
 
-	// client.Timeout = 100 * time.Millisecond
-	client.Timeout = 1 * time.Second
+	client.Timeout = 100 * time.Millisecond
+	// client.Timeout = 1 * time.Second
 	client.MaxIdleConns = 100
 
 	return client, nil

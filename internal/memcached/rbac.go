@@ -29,6 +29,7 @@ type Datastore interface {
 	DeleteAccountRole(ctx context.Context, accRoleId string) error
 	AccountRoleByAccount(ctx context.Context, username *string) (internal.AccountRoleByAccountResult, error)
 	AccountRoleByRole(ctx context.Context, roleId *string) (internal.AccountRoleByRoleResult, error)
+	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 
 	IndexTask(ctx context.Context, task internal.Tasks) error
 	DeleteTask(ctx context.Context, taskId string) error

@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"rbac/internal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -112,4 +113,74 @@ func (rb *RBACHandler) updateAccountRole(w http.ResponseWriter, r *http.Request)
 		&RoleResponse{
 			Message: "Updated Successfully",
 		}, http.StatusCreated)
+}
+
+type ListAccountRoleRequest struct {
+	From int `json:"from"`
+	Size int `json:"size"`
+}
+type ListAccountRoleResponse struct {
+	AccoutRoles []AccountRole `json:"accountRoles"`
+	Total       int64         `json:"total"`
+}
+
+func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
+	var req ListRoleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	la, err := rb.svc.ListAccountRole(r.Context(), internal.ListArgs{
+		From: &req.From,
+		Size: &req.Size,
+	})
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	acRoles := []AccountRole{}
+	for _, value := range la.AccountRoles {
+		//get profile
+		acc, err := rb.svc.Account(r.Context(), value.Account.UserName)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting account", err)
+			return
+		}
+		profile := Profile{
+			ProfileBackground: acc.Profile.Profile_Background,
+			ProfilePicture:    acc.Profile.Profile_Picture,
+			FirstName:         acc.Profile.First_Name,
+			LastName:          acc.Profile.Last_Name,
+			Mobile:            acc.Profile.Mobile,
+			Email:             acc.Profile.Email,
+			CreatedAt:         acc.CreatedAt,
+		}
+		account := Account{
+			Username:  acc.UserName,
+			Profile:   profile,
+			CreatedAt: acc.CreatedAt,
+		}
+
+		//get role
+		rl, err := rb.svc.Role(r.Context(), value.Role.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting role", err)
+			return
+		}
+		role := Role{
+			Id:        rl.Id,
+			Role:      rl.Role,
+			CreatedAt: rl.CreatedAt,
+		}
+		acRoles = append(acRoles, AccountRole{
+			Id:        value.Id,
+			Account:   account,
+			Role:      role,
+			CreatedAt: value.CreatedAt,
+		})
+	}
+	renderResponse(w, &ListAccountRoleResponse{
+		AccoutRoles: acRoles,
+		Total:       la.Total,
+	}, http.StatusOK)
 }

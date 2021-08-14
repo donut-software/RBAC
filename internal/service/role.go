@@ -39,8 +39,19 @@ func (r *RBAC) UpdateRole(ctx context.Context, id string, rolename string) error
 	defer span.End()
 	err := r.repo.UpdateRole(ctx, id, rolename)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	role, err := r.repo.Role(ctx, id)
+	if err != nil {
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteRole(ctx, id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
+	}
+	err = r.search.IndexRole(ctx, role)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
 	}
 	return err
 }
@@ -59,8 +70,7 @@ func (r *RBAC) DeleteRole(ctx context.Context, id string) error {
 	defer span.End()
 	err := r.repo.DeleteRole(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("search: %w", err)
 	}
 	return err
 }

@@ -10,10 +10,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId string) error {
+func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
+	var arid string
 	err := s.execTx(ctx, func(q *Queries) error {
 		aid, err := uuid.Parse(accountId)
 		if err != nil {
@@ -25,7 +26,7 @@ func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId 
 			fmt.Println(err)
 			return err
 		}
-		_, err = q.InsertAccountRole(ctx, InsertAccountRoleParams{
+		id, err := q.InsertAccountRole(ctx, InsertAccountRoleParams{
 			AccountID: aid,
 			RoleID:    rid,
 		})
@@ -33,9 +34,10 @@ func (s *Store) CreateAccountRole(ctx context.Context, accountId string, roleId 
 			fmt.Println(err)
 			return err
 		}
+		arid = id.String()
 		return nil
 	})
-	return err
+	return arid, err
 }
 func (s *Store) AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AcountRole")
@@ -56,7 +58,7 @@ func (s *Store) AccountRole(ctx context.Context, accountRoleId string) (internal
 		accountrole.Id = ar.ID.String()
 		accountrole.CreatedAt = ar.CreatedAt
 
-		acc, err := q.SelectAccountsById(ctx, ar.ID)
+		acc, err := q.SelectAccountsById(ctx, ar.AccountID)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -91,7 +93,7 @@ func (s *Store) AccountRole(ctx context.Context, accountRoleId string) (internal
 			return err
 		}
 		role := internal.Roles{
-			Id:        account.Id,
+			Id:        rl.ID.String(),
 			Role:      rl.Role,
 			CreatedAt: rl.CreatedAt,
 		}

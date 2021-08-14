@@ -18,7 +18,7 @@ type RBAC interface {
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	DeleteRole(ctx context.Context, id string) error
 
-	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
+	CreateAccountRole(ctx context.Context, accountId string, roleId string) (string, error)
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
 	DeleteAccountRole(ctx context.Context, id string) error
