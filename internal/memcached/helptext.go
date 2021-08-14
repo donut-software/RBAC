@@ -92,3 +92,36 @@ func (t *RBAC) GetHelpTextByTask(ctx context.Context, taskid string) (internal.H
 	}
 	return res, nil
 }
+
+func (t *RBAC) ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error) {
+	key := newKey("listtask", args)
+	item, err := t.client.Get(key)
+	if err != nil {
+		if err == memcache.ErrCacheMiss {
+			t.logger.Info("values NOT found", zap.String("key", string(key)))
+			listacc, err := t.orig.ListHelpText(ctx, args)
+			if err != nil {
+				return internal.ListHelpText{}, err
+			}
+			var b bytes.Buffer
+			if err := gob.NewEncoder(&b).Encode(&listacc); err == nil {
+				t.logger.Info("settin value")
+
+				t.client.Set(&memcache.Item{
+					Key:        key,
+					Value:      b.Bytes(),
+					Expiration: int32(time.Now().Add(25 * time.Second).Unix()),
+				})
+			}
+
+			return listacc, err
+		}
+		return internal.ListHelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
+	}
+	t.logger.Info("values found", zap.String("key", string(key)))
+	var res internal.ListHelpText
+	if err := gob.NewDecoder(bytes.NewReader(item.Value)).Decode(&res); err != nil {
+		return internal.ListHelpText{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
+	}
+	return res, nil
+}

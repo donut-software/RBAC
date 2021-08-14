@@ -145,3 +145,49 @@ func (t *RBAC) GetRoleTaskByTask(ctx context.Context, taskid string) (internal.R
 	}
 	return res, nil
 }
+
+func (t *RBAC) ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error) {
+	key := newKey("listaccountrole", args)
+	item, err := t.client.Get(key)
+	if err != nil {
+		if err == memcache.ErrCacheMiss {
+			t.logger.Info("values NOT found", zap.String("key", string(key)))
+			listrltask, err := t.orig.ListRoleTask(ctx, args)
+			if err != nil {
+				return internal.ListRoleTask{}, err
+			}
+			for i, value := range listrltask.RoleTasks {
+				rl, err := t.GetRole(ctx, value.Role.Id)
+				if err != nil {
+					return internal.ListRoleTask{}, err
+				}
+				tk, err := t.GetTask(ctx, value.Task.Id)
+				if err != nil {
+					return internal.ListRoleTask{}, err
+				}
+				listrltask.RoleTasks[i].Task = tk
+				listrltask.RoleTasks[i].Role = rl
+			}
+
+			var b bytes.Buffer
+			if err := gob.NewEncoder(&b).Encode(&listrltask); err == nil {
+				t.logger.Info("settin value")
+
+				t.client.Set(&memcache.Item{
+					Key:        key,
+					Value:      b.Bytes(),
+					Expiration: int32(time.Now().Add(25 * time.Second).Unix()),
+				})
+			}
+
+			return listrltask, err
+		}
+		return internal.ListRoleTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "client.Get")
+	}
+	t.logger.Info("values found", zap.String("key", string(key)))
+	var res internal.ListRoleTask
+	if err := gob.NewDecoder(bytes.NewReader(item.Value)).Decode(&res); err != nil {
+		return internal.ListRoleTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
+	}
+	return res, nil
+}

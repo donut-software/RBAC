@@ -21,6 +21,22 @@ type ListTask struct {
 	Task  []Tasks
 	Total int64
 }
+type ListRoleTask struct {
+	RoleTasks []RoleTasks
+	Total     int64
+}
+type ListHelpText struct {
+	HelpText []HelpText
+	Total    int64
+}
+type ListMenu struct {
+	Menu  []Menu
+	Total int64
+}
+type ListNavigation struct {
+	Navigation []Navigation
+	Total      int64
+}
 
 type AccountRoleByAccountResult struct {
 	Account Account

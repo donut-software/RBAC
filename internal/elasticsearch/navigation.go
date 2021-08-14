@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"rbac/internal"
+	"strings"
 	"time"
 
 	esv7api "github.com/elastic/go-elasticsearch/v7/esapi"
@@ -200,5 +201,56 @@ func (a *RBAC) NavigationByTask(ctx context.Context, taskId *string) (internal.N
 	return internal.NavigationByTask{
 		Task:       task,
 		Navigation: res,
+	}, nil
+}
+
+func (a *RBAC) ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "HelpText.List")
+	defer span.End()
+
+	req := esv7api.SearchRequest{
+		Index: []string{INDEX_ROLE},
+		Body:  strings.NewReader(`{"query":{"match_all": {}}}`),
+		From:  args.From,
+		Size:  args.Size,
+	}
+	resp, err := req.Do(ctx, a.client)
+	if err != nil {
+		return internal.ListNavigation{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "SearchRequest.Do")
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		fmt.Println(resp.String())
+		return internal.ListNavigation{}, internal.NewErrorf(internal.ErrorCodeUnknown, "SearchRequest.Do %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Total struct {
+				Value int64 `json:"value"`
+			} `json:"total"`
+			Hits []struct {
+				Source indexedNavigation `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&hits); err != nil {
+		fmt.Println("Error here", err)
+		return internal.ListNavigation{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "json.NewDecoder.Decode")
+	}
+
+	res := make([]internal.Navigation, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+		res[i].Id = hit.Source.Id
+		res[i].Name = hit.Source.Name
+		res[i].Task_id = hit.Source.TaskId
+		res[i].CreatedAt = hit.Source.CreatedAt
+	}
+
+	return internal.ListNavigation{
+		Navigation: res,
+		Total:      hits.Hits.Total.Value,
 	}, nil
 }

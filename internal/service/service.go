@@ -23,27 +23,27 @@ type RBACRepository interface {
 	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
 	DeleteAccountRole(ctx context.Context, id string) error
 
-	CreateTask(ctx context.Context, taskname string) error
+	CreateTask(ctx context.Context, taskname string) (string, error)
 	Task(ctx context.Context, id string) (internal.Tasks, error)
 	UpdateTask(ctx context.Context, id string, taskname string) error
 	DeleteTask(ctx context.Context, id string) error
 
-	CreateRoleTasks(ctx context.Context, taskid string, roleid string) error
+	CreateRoleTasks(ctx context.Context, taskid string, roleid string) (string, error)
 	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
 	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
 	DeleteRoleTask(ctx context.Context, id string) error
 
-	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
+	CreateHelpText(ctx context.Context, helptext internal.HelpText) (string, error)
 	HelpText(ctx context.Context, id string) (internal.HelpText, error)
 	UpdateHelpText(ctx context.Context, helptext internal.HelpText) error
 	DeleteHelpText(ctx context.Context, id string) error
 
-	CreateMenu(ctx context.Context, menu internal.Menu) error
+	CreateMenu(ctx context.Context, menu internal.Menu) (string, error)
 	Menu(ctx context.Context, id string) (internal.Menu, error)
 	UpdateMenu(ctx context.Context, menu internal.Menu) error
 	DeleteMenu(ctx context.Context, id string) error
 
-	CreateNavigation(ctx context.Context, menu internal.Navigation) error
+	CreateNavigation(ctx context.Context, menu internal.Navigation) (string, error)
 	Navigation(ctx context.Context, id string) (internal.Navigation, error)
 	UpdateNavigation(ctx context.Context, menu internal.Navigation) error
 	DeleteNavigation(ctx context.Context, id string) error
@@ -72,6 +72,36 @@ type RBACSearchRepository interface {
 	GetAccountRoleByRole(ctx context.Context, roleid string) (internal.AccountRoleByRoleResult, error)
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 	DeleteAccountRole(ctx context.Context, accRoleId string) error
+
+	IndexTask(ctx context.Context, role internal.Tasks) error
+	GetTask(ctx context.Context, taskId string) (internal.Tasks, error)
+	DeleteTask(ctx context.Context, roleId string) error
+	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
+
+	IndexRoleTask(ctx context.Context, roletask internal.RoleTasks) error
+	GetRoleTask(ctx context.Context, roletaskId string) (internal.RoleTasks, error)
+	DeleteRoleTask(ctx context.Context, roletaskId string) error
+	GetRoleTaskByRole(ctx context.Context, roleid string) (internal.RoleTaskByRole, error)
+	GetRoleTaskByTask(ctx context.Context, taskid string) (internal.RoleTaskByTask, error)
+	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
+
+	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
+	GetHelpText(ctx context.Context, helptextId string) (internal.HelpText, error)
+	GetHelpTextByTask(ctx context.Context, taskid string) (internal.HelpTextByTask, error)
+	DeleteHelpText(ctx context.Context, roleId string) error
+	ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
+
+	IndexMenu(ctx context.Context, menu internal.Menu) error
+	GetMenu(ctx context.Context, menuId string) (internal.Menu, error)
+	DeleteMenu(ctx context.Context, roleId string) error
+	GetMenuByTask(ctx context.Context, taskid string) (internal.MenuByTask, error)
+	ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error)
+
+	IndexNavigation(ctx context.Context, menu internal.Navigation) error
+	GetNavigation(ctx context.Context, navigationId string) (internal.Navigation, error)
+	DeleteNavigation(ctx context.Context, roleId string) error
+	GetNavigationByTask(ctx context.Context, taskid string) (internal.NavigationByTask, error)
+	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
 type RBAC struct {
 	repo   RBACRepository

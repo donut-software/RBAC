@@ -10,17 +10,18 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *Store) CreateMenu(ctx context.Context, menu internal.Menu) error {
+func (s *Store) CreateMenu(ctx context.Context, menu internal.Menu) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Menu.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
+	var mid string
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(menu.Task_id)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
-		_, err = q.InsertMenu(ctx, InsertMenuParams{
+		id, err := q.InsertMenu(ctx, InsertMenuParams{
 			Name:   menu.Name,
 			TaskID: htId,
 		})
@@ -28,9 +29,10 @@ func (s *Store) CreateMenu(ctx context.Context, menu internal.Menu) error {
 			fmt.Println(err)
 			return err
 		}
+		mid = id.String()
 		return nil
 	})
-	return err
+	return mid, err
 }
 func (s *Store) Menu(ctx context.Context, id string) (internal.Menu, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Menu.Menu")

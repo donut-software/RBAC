@@ -11,20 +11,27 @@ import (
 func (r *RBAC) CreateTask(ctx context.Context, taskname string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Create")
 	defer span.End()
-	err := r.repo.CreateTask(ctx, taskname)
+	id, err := r.repo.CreateTask(ctx, taskname)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	task, err := r.repo.Task(ctx, id)
+	if err != nil {
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.IndexTask(ctx, task)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
 	}
 	return nil
 }
 func (r *RBAC) Task(ctx context.Context, id string) (internal.Tasks, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Task")
 	defer span.End()
-	role, err := r.repo.Task(ctx, id)
+	// role, err := r.repo.Task(ctx, id)
+	role, err := r.search.GetTask(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return internal.Tasks{}, err
+		return internal.Tasks{}, fmt.Errorf("search: %w", err)
 	}
 	return role, err
 }
@@ -33,8 +40,19 @@ func (r *RBAC) UpdateTask(ctx context.Context, id string, taskname string) error
 	defer span.End()
 	err := r.repo.UpdateTask(ctx, id, taskname)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
+	}
+	task, err := r.repo.Task(ctx, id)
+	if err != nil {
+		return fmt.Errorf("repo: %w", err)
+	}
+	err = r.search.DeleteTask(ctx, task.Id)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
+	}
+	err = r.search.IndexTask(ctx, task)
+	if err != nil {
+		return fmt.Errorf("search: %w", err)
 	}
 	return err
 }
@@ -43,8 +61,18 @@ func (r *RBAC) DeleteTask(ctx context.Context, id string) error {
 	defer span.End()
 	err := r.repo.DeleteTask(ctx, id)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("repo: %w", err)
 	}
 	return err
+}
+
+func (r *RBAC) ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.List")
+	defer span.End()
+	lr, err := r.search.ListTask(ctx, args)
+	if err != nil {
+		return internal.ListTask{}, fmt.Errorf("search: %w", err)
+	}
+	return lr, nil
+
 }

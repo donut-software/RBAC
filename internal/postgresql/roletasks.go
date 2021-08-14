@@ -10,10 +10,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid string) error {
+func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
+	var rtid string
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(taskid)
 		if err != nil {
@@ -25,7 +26,7 @@ func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid strin
 			fmt.Println(err)
 			return err
 		}
-		_, err = q.InsertRoleTask(ctx, InsertRoleTaskParams{
+		id, err := q.InsertRoleTask(ctx, InsertRoleTaskParams{
 			RoleID: rid,
 			TaskID: tid,
 		})
@@ -33,9 +34,10 @@ func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid strin
 			fmt.Println(err)
 			return err
 		}
+		rtid = id.String()
 		return nil
 	})
-	return err
+	return rtid, err
 }
 func (s *Store) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.RoleTask")
@@ -58,54 +60,54 @@ func (s *Store) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleT
 		if err != nil {
 			fmt.Println(err)
 		}
-		ht, err := q.SelectHelpTextByTasks(ctx, rt.TaskID)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		helptext := internal.HelpText{
-			Id:        ht.ID.String(),
-			Task_id:   ht.TaskID.String(),
-			HelpText:  ht.Helptext,
-			CreatedAt: ht.CreatedAt,
-		}
+		// ht, err := q.SelectHelpTextByTasks(ctx, rt.TaskID)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return err
+		// }
+		// helptext := internal.HelpText{
+		// 	Id:        ht.ID.String(),
+		// 	Task_id:   ht.TaskID.String(),
+		// 	HelpText:  ht.Helptext,
+		// 	CreatedAt: ht.CreatedAt,
+		// }
 
-		m, err := q.SelectMenuByTask(ctx, rt.TaskID)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		menu := []internal.Menu{}
-		for _, value := range m {
-			menu = append(menu, internal.Menu{
-				Id:        value.ID.String(),
-				Name:      value.Name,
-				Task_id:   value.TaskID.String(),
-				CreatedAt: value.CreatedAt,
-			})
-		}
+		// m, err := q.SelectMenuByTask(ctx, rt.TaskID)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return err
+		// }
+		// menu := []internal.Menu{}
+		// for _, value := range m {
+		// 	menu = append(menu, internal.Menu{
+		// 		Id:        value.ID.String(),
+		// 		Name:      value.Name,
+		// 		Task_id:   value.TaskID.String(),
+		// 		CreatedAt: value.CreatedAt,
+		// 	})
+		// }
 
-		n, err := q.SelectNavigationByTask(ctx, rt.TaskID)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		nav := []internal.Navigation{}
-		for _, value := range n {
-			nav = append(nav, internal.Navigation{
-				Id:        value.ID.String(),
-				Name:      value.Name,
-				Task_id:   value.TaskID.String(),
-				CreatedAt: value.CreatedAt,
-			})
-		}
+		// n, err := q.SelectNavigationByTask(ctx, rt.TaskID)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return err
+		// }
+		// nav := []internal.Navigation{}
+		// for _, value := range n {
+		// 	nav = append(nav, internal.Navigation{
+		// 		Id:        value.ID.String(),
+		// 		Name:      value.Name,
+		// 		Task_id:   value.TaskID.String(),
+		// 		CreatedAt: value.CreatedAt,
+		// 	})
+		// }
 		task := internal.Tasks{
-			Id:         t.ID.String(),
-			Task:       t.Task,
-			HelpText:   helptext,
-			Menu:       menu,
-			Navigation: nav,
-			CreatedAt:  t.CreatedAt,
+			Id:   t.ID.String(),
+			Task: t.Task,
+			// HelpText:   helptext,
+			// Menu:       menu,
+			// Navigation: nav,
+			CreatedAt: t.CreatedAt,
 		}
 		roletask.Task = task
 

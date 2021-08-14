@@ -10,27 +10,29 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (s *Store) CreateHelpText(ctx context.Context, helptext internal.HelpText) error {
+func (s *Store) CreateHelpText(ctx context.Context, helptext internal.HelpText) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
+	var htid string
 	err := s.execTx(ctx, func(q *Queries) error {
-		htId, err := uuid.Parse(helptext.Task_id)
+		tid, err := uuid.Parse(helptext.Task_id)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
-		_, err = q.InsertHelpText(ctx, InsertHelpTextParams{
+		id, err := q.InsertHelpText(ctx, InsertHelpTextParams{
 			Helptext: helptext.HelpText,
-			TaskID:   htId,
+			TaskID:   tid,
 		})
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
+		htid = id.String()
 		return nil
 	})
-	return err
+	return htid, err
 }
 func (s *Store) HelpText(ctx context.Context, id string) (internal.HelpText, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Helptext.HelpText")

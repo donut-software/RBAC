@@ -34,27 +34,32 @@ type Datastore interface {
 	IndexTask(ctx context.Context, task internal.Tasks) error
 	DeleteTask(ctx context.Context, taskId string) error
 	GetTask(ctx context.Context, taskId string) (internal.Tasks, error)
+	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
 
 	IndexRoleTask(ctx context.Context, roletask internal.RoleTasks) error
 	DeleteRoleTask(ctx context.Context, roletaskId string) error
 	GetRoleTask(ctx context.Context, roletaskId string) (internal.RoleTasks, error)
 	RoleTaskByRole(ctx context.Context, roleId *string) (internal.RoleTaskByRole, error)
 	RoleTaskByTask(ctx context.Context, taskId *string) (internal.RoleTaskByTask, error)
+	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
 
 	IndexHelpText(ctx context.Context, helptext internal.HelpText) error
 	DeleteHelpText(ctx context.Context, helptextId string) error
 	GetHelpText(ctx context.Context, helptextId string) (internal.HelpText, error)
 	HelpTextByTask(ctx context.Context, taskId *string) (internal.HelpTextByTask, error)
+	ListHelpText(ctx context.Context, args internal.ListArgs) (internal.ListHelpText, error)
 
 	IndexMenu(ctx context.Context, menu internal.Menu) error
 	DeleteMenu(ctx context.Context, menuId string) error
 	GetMenu(ctx context.Context, menuId string) (internal.Menu, error)
 	MenuByTask(ctx context.Context, taskId *string) (internal.MenuByTask, error)
+	ListMenu(ctx context.Context, args internal.ListArgs) (internal.ListMenu, error)
 
 	IndexNavigation(ctx context.Context, navigation internal.Navigation) error
 	DeleteNavigation(ctx context.Context, navigationId string) error
 	GetNavigation(ctx context.Context, navigationId string) (internal.Navigation, error)
 	NavigationByTask(ctx context.Context, taskId *string) (internal.NavigationByTask, error)
+	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
 type RBAC struct {
 	client *memcache.Client
