@@ -282,6 +282,38 @@ func (rb *RBACHandler) updateProfile(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusCreated)
 }
 
+type ChangePasswordRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (rb *RBACHandler) changePassword(w http.ResponseWriter, r *http.Request) {
+	var req ChangePasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.UPDATE_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed && authusername != req.Username {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
+	err = rb.svc.ChangePassword(r.Context(), req.Username, req.Password)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error changing password", err)
+		return
+	}
+	renderResponse(w,
+		&AccountResponse{
+			Message: "Updated Successfully",
+		}, http.StatusCreated)
+}
+
 type DeleteAccountResponse struct {
 	Message string `json:"message"`
 }

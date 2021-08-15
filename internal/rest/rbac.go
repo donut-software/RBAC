@@ -96,6 +96,7 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	accountRouter.HandleFunc("/roles/{username}", rb.getAccountRoleByAccount).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/", rb.listaccount).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/", rb.updateProfile).Methods(http.MethodPut)
+	accountRouter.HandleFunc("/changepassword", rb.changePassword).Methods(http.MethodPut)
 	accountRouter.HandleFunc("/{username}", rb.deleteAccount).Methods(http.MethodDelete)
 
 	roleRouter := v0.PathPrefix("/roles/").Subrouter()
