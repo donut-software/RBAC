@@ -116,6 +116,28 @@ func main() {
 		if err != nil {
 			log.Fatal(fmt.Errorf("new task %w", err))
 		}
+		//create helptext for the task
+		err = svc.CreateHelpText(ctx, internaldomain.HelpText{
+			Task_id:  tid,
+			HelpText: "Helptext " + value,
+		})
+		if err != nil {
+			log.Fatal(fmt.Errorf("new helptext %w", err))
+		}
+		err = svc.CreateMenu(ctx, internaldomain.Menu{
+			Task_id: tid,
+			Name:    value,
+		})
+		if err != nil {
+			log.Fatal(fmt.Errorf("new menu %w", err))
+		}
+		err = svc.CreateNavigation(ctx, internaldomain.Navigation{
+			Task_id: tid,
+			Name:    value,
+		})
+		if err != nil {
+			log.Fatal(fmt.Errorf("new navigation %w", err))
+		}
 		//create new roletask
 		err = svc.CreateRoleTask(ctx, tid, rid)
 		if err != nil {
