@@ -22,12 +22,22 @@ type RoleResponse struct {
 }
 
 func (rb *RBACHandler) createRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.CREATE_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req CreateRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	_, err := rb.svc.CreateRole(r.Context(), req.Role)
+	_, err = rb.svc.CreateRole(r.Context(), req.Role)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create role failed", err)
 		return
@@ -43,6 +53,16 @@ type GetRoleResponse struct {
 }
 
 func (rb *RBACHandler) role(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	roleId := mux.Vars(r)["roleId"]
 	role, err := rb.svc.Role(r.Context(), roleId)
 	if err != nil {
@@ -64,12 +84,22 @@ type UpdateRoleRequest struct {
 }
 
 func (rb *RBACHandler) updateRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.UPDATE_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req UpdateRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.UpdateRole(r.Context(), req.RoleId, req.Role)
+	err = rb.svc.UpdateRole(r.Context(), req.RoleId, req.Role)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating role", err)
 		return
@@ -90,6 +120,16 @@ type ListRoleResponse struct {
 }
 
 func (rb *RBACHandler) listrole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.LIST_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req ListRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
@@ -124,6 +164,16 @@ type AccountRoleByRole struct {
 }
 
 func (rb *RBACHandler) getAccountRoleByRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	id := mux.Vars(r)["roleId"]
 	la, err := rb.svc.AccountRoleByRole(r.Context(), id)
 	if err != nil {
@@ -162,8 +212,18 @@ func (rb *RBACHandler) getAccountRoleByRole(w http.ResponseWriter, r *http.Reque
 }
 
 func (rb *RBACHandler) deleteRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.DELETE_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	roleId := mux.Vars(r)["roleId"]
-	err := rb.svc.DeleteRole(r.Context(), roleId)
+	err = rb.svc.DeleteRole(r.Context(), roleId)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error deleting role", err)
 		return

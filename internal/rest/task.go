@@ -25,12 +25,22 @@ type TaskResponse struct {
 }
 
 func (rb *RBACHandler) createTask(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.CREATE_TASK)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req CreateTaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	_, err := rb.svc.CreateTask(r.Context(), req.Task)
+	_, err = rb.svc.CreateTask(r.Context(), req.Task)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create task failed", err)
 		return
@@ -46,6 +56,16 @@ type GetTaskResponse struct {
 }
 
 func (rb *RBACHandler) task(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_TASK)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	taskId := mux.Vars(r)["taskId"]
 	task, err := rb.svc.Task(r.Context(), taskId)
 	if err != nil {
@@ -75,12 +95,22 @@ type UpdateTaskRequest struct {
 }
 
 func (rb *RBACHandler) updateTask(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.UPDATE_TASK)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req UpdateTaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.UpdateTask(r.Context(), req.TaskId, req.Task)
+	err = rb.svc.UpdateTask(r.Context(), req.TaskId, req.Task)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating task", err)
 		return
@@ -101,6 +131,16 @@ type ListTaskResponse struct {
 }
 
 func (rb *RBACHandler) listtask(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.LIST_TASK)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req ListTaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
@@ -138,8 +178,18 @@ func (rb *RBACHandler) listtask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rb *RBACHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.DELETE_TASK)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	taskId := mux.Vars(r)["taskId"]
-	err := rb.svc.DeleteTask(r.Context(), taskId)
+	err = rb.svc.DeleteTask(r.Context(), taskId)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error deleting task", err)
 		return

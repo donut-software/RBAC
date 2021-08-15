@@ -141,14 +141,8 @@ type ReadAccountResponse struct {
 }
 
 func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
-	//username from payload
 	authusername := r.Header.Get("username")
 	username := mux.Vars(r)["username"]
-	// acrole, err := rb.svc.AccountRoleByAccount(r.Context(), authusername)
-	// if err != nil {
-	// 	renderErrorResponse(r.Context(), w, "error getting the auth account", err)
-	// 	return
-	// }
 	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ACCOUNT)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
@@ -163,9 +157,6 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "error getting the account", err)
 		return
 	}
-
-	//check if the user is allowed to get the user info
-
 	profile := Profile{
 		Id:                account.Profile.Id,
 		ProfileBackground: account.Profile.Profile_Background,
@@ -199,6 +190,16 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 	var req ListAccountRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
+		return
+	}
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.LIST_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
 		return
 	}
 	la, err := rb.svc.ListAccount(r.Context(), internal.ListArgs{
@@ -237,6 +238,7 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 
 type UpdateProfileRequest struct {
 	Id                string `json:"id"`
+	Username          string `json:"username"`
 	ProfilePicture    string `json:"profile_picture"`
 	ProfileBackground string `json:"profile_background"`
 	FirstName         string `json:"first_name"`
@@ -251,7 +253,17 @@ func (rb *RBACHandler) updateProfile(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.UpdateProfile(r.Context(), internal.Profile{
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.UPDATE_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed && authusername != req.Username {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
+	err = rb.svc.UpdateProfile(r.Context(), internal.Profile{
 		Id:                 req.Id,
 		Profile_Picture:    req.ProfilePicture,
 		Profile_Background: req.ProfileBackground,
@@ -275,8 +287,18 @@ type DeleteAccountResponse struct {
 }
 
 func (rb *RBACHandler) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
 	username := mux.Vars(r)["username"]
-	_, err := rb.svc.Account(r.Context(), username)
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.DELETE_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed && authusername != username {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
+	_, err = rb.svc.Account(r.Context(), username)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error getting the account", err)
 		return
@@ -298,8 +320,18 @@ type AccountRoleByAccount struct {
 }
 
 func (rb *RBACHandler) getAccountRoleByAccount(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["username"]
-	la, err := rb.svc.AccountRoleByAccount(r.Context(), id)
+	authusername := r.Header.Get("username")
+	username := mux.Vars(r)["username"]
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed && authusername != username {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
+	la, err := rb.svc.AccountRoleByAccount(r.Context(), username)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
@@ -322,7 +354,6 @@ func (rb *RBACHandler) getAccountRoleByAccount(w http.ResponseWriter, r *http.Re
 	}
 	roles := []Role{}
 	for _, value := range la.Roles {
-		//get role
 		rl, err := rb.svc.Role(r.Context(), value.Id)
 		if err != nil {
 			renderErrorResponse(r.Context(), w, "error getting role", err)
