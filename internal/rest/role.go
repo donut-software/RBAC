@@ -27,7 +27,7 @@ func (rb *RBACHandler) createRole(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.CreateRole(r.Context(), req.Role)
+	_, err := rb.svc.CreateRole(r.Context(), req.Role)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create role failed", err)
 		return

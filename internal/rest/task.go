@@ -30,7 +30,7 @@ func (rb *RBACHandler) createTask(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.CreateTask(r.Context(), req.Task)
+	_, err := rb.svc.CreateTask(r.Context(), req.Task)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create task failed", err)
 		return

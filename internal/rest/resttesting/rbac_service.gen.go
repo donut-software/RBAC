@@ -93,7 +93,7 @@ type FakeRBACService struct {
 	changePasswordReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateAccountStub        func(context.Context, internal.Account, string) error
+	CreateAccountStub        func(context.Context, internal.Account, string) (string, error)
 	createAccountMutex       sync.RWMutex
 	createAccountArgsForCall []struct {
 		arg1 context.Context
@@ -101,10 +101,12 @@ type FakeRBACService struct {
 		arg3 string
 	}
 	createAccountReturns struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	createAccountReturnsOnCall map[int]struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	CreateAccountRoleStub        func(context.Context, string, string) error
 	createAccountRoleMutex       sync.RWMutex
@@ -155,17 +157,19 @@ type FakeRBACService struct {
 	createNavigationReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateRoleStub        func(context.Context, string) error
+	CreateRoleStub        func(context.Context, string) (string, error)
 	createRoleMutex       sync.RWMutex
 	createRoleArgsForCall []struct {
 		arg1 context.Context
 		arg2 string
 	}
 	createRoleReturns struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	createRoleReturnsOnCall map[int]struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	CreateRoleTaskStub        func(context.Context, string, string) error
 	createRoleTaskMutex       sync.RWMutex
@@ -180,17 +184,19 @@ type FakeRBACService struct {
 	createRoleTaskReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateTaskStub        func(context.Context, string) error
+	CreateTaskStub        func(context.Context, string) (string, error)
 	createTaskMutex       sync.RWMutex
 	createTaskArgsForCall []struct {
 		arg1 context.Context
 		arg2 string
 	}
 	createTaskReturns struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	createTaskReturnsOnCall map[int]struct {
-		result1 error
+		result1 string
+		result2 error
 	}
 	CreateTokenStub        func(string) (string, error)
 	createTokenMutex       sync.RWMutex
@@ -1028,7 +1034,7 @@ func (fake *FakeRBACService) ChangePasswordReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeRBACService) CreateAccount(arg1 context.Context, arg2 internal.Account, arg3 string) error {
+func (fake *FakeRBACService) CreateAccount(arg1 context.Context, arg2 internal.Account, arg3 string) (string, error) {
 	fake.createAccountMutex.Lock()
 	ret, specificReturn := fake.createAccountReturnsOnCall[len(fake.createAccountArgsForCall)]
 	fake.createAccountArgsForCall = append(fake.createAccountArgsForCall, struct {
@@ -1044,9 +1050,9 @@ func (fake *FakeRBACService) CreateAccount(arg1 context.Context, arg2 internal.A
 		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeRBACService) CreateAccountCallCount() int {
@@ -1055,7 +1061,7 @@ func (fake *FakeRBACService) CreateAccountCallCount() int {
 	return len(fake.createAccountArgsForCall)
 }
 
-func (fake *FakeRBACService) CreateAccountCalls(stub func(context.Context, internal.Account, string) error) {
+func (fake *FakeRBACService) CreateAccountCalls(stub func(context.Context, internal.Account, string) (string, error)) {
 	fake.createAccountMutex.Lock()
 	defer fake.createAccountMutex.Unlock()
 	fake.CreateAccountStub = stub
@@ -1068,27 +1074,30 @@ func (fake *FakeRBACService) CreateAccountArgsForCall(i int) (context.Context, i
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
-func (fake *FakeRBACService) CreateAccountReturns(result1 error) {
+func (fake *FakeRBACService) CreateAccountReturns(result1 string, result2 error) {
 	fake.createAccountMutex.Lock()
 	defer fake.createAccountMutex.Unlock()
 	fake.CreateAccountStub = nil
 	fake.createAccountReturns = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeRBACService) CreateAccountReturnsOnCall(i int, result1 error) {
+func (fake *FakeRBACService) CreateAccountReturnsOnCall(i int, result1 string, result2 error) {
 	fake.createAccountMutex.Lock()
 	defer fake.createAccountMutex.Unlock()
 	fake.CreateAccountStub = nil
 	if fake.createAccountReturnsOnCall == nil {
 		fake.createAccountReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 string
+			result2 error
 		})
 	}
 	fake.createAccountReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeRBACService) CreateAccountRole(arg1 context.Context, arg2 string, arg3 string) error {
@@ -1340,7 +1349,7 @@ func (fake *FakeRBACService) CreateNavigationReturnsOnCall(i int, result1 error)
 	}{result1}
 }
 
-func (fake *FakeRBACService) CreateRole(arg1 context.Context, arg2 string) error {
+func (fake *FakeRBACService) CreateRole(arg1 context.Context, arg2 string) (string, error) {
 	fake.createRoleMutex.Lock()
 	ret, specificReturn := fake.createRoleReturnsOnCall[len(fake.createRoleArgsForCall)]
 	fake.createRoleArgsForCall = append(fake.createRoleArgsForCall, struct {
@@ -1355,9 +1364,9 @@ func (fake *FakeRBACService) CreateRole(arg1 context.Context, arg2 string) error
 		return stub(arg1, arg2)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeRBACService) CreateRoleCallCount() int {
@@ -1366,7 +1375,7 @@ func (fake *FakeRBACService) CreateRoleCallCount() int {
 	return len(fake.createRoleArgsForCall)
 }
 
-func (fake *FakeRBACService) CreateRoleCalls(stub func(context.Context, string) error) {
+func (fake *FakeRBACService) CreateRoleCalls(stub func(context.Context, string) (string, error)) {
 	fake.createRoleMutex.Lock()
 	defer fake.createRoleMutex.Unlock()
 	fake.CreateRoleStub = stub
@@ -1379,27 +1388,30 @@ func (fake *FakeRBACService) CreateRoleArgsForCall(i int) (context.Context, stri
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeRBACService) CreateRoleReturns(result1 error) {
+func (fake *FakeRBACService) CreateRoleReturns(result1 string, result2 error) {
 	fake.createRoleMutex.Lock()
 	defer fake.createRoleMutex.Unlock()
 	fake.CreateRoleStub = nil
 	fake.createRoleReturns = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeRBACService) CreateRoleReturnsOnCall(i int, result1 error) {
+func (fake *FakeRBACService) CreateRoleReturnsOnCall(i int, result1 string, result2 error) {
 	fake.createRoleMutex.Lock()
 	defer fake.createRoleMutex.Unlock()
 	fake.CreateRoleStub = nil
 	if fake.createRoleReturnsOnCall == nil {
 		fake.createRoleReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 string
+			result2 error
 		})
 	}
 	fake.createRoleReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeRBACService) CreateRoleTask(arg1 context.Context, arg2 string, arg3 string) error {
@@ -1465,7 +1477,7 @@ func (fake *FakeRBACService) CreateRoleTaskReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeRBACService) CreateTask(arg1 context.Context, arg2 string) error {
+func (fake *FakeRBACService) CreateTask(arg1 context.Context, arg2 string) (string, error) {
 	fake.createTaskMutex.Lock()
 	ret, specificReturn := fake.createTaskReturnsOnCall[len(fake.createTaskArgsForCall)]
 	fake.createTaskArgsForCall = append(fake.createTaskArgsForCall, struct {
@@ -1480,9 +1492,9 @@ func (fake *FakeRBACService) CreateTask(arg1 context.Context, arg2 string) error
 		return stub(arg1, arg2)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeRBACService) CreateTaskCallCount() int {
@@ -1491,7 +1503,7 @@ func (fake *FakeRBACService) CreateTaskCallCount() int {
 	return len(fake.createTaskArgsForCall)
 }
 
-func (fake *FakeRBACService) CreateTaskCalls(stub func(context.Context, string) error) {
+func (fake *FakeRBACService) CreateTaskCalls(stub func(context.Context, string) (string, error)) {
 	fake.createTaskMutex.Lock()
 	defer fake.createTaskMutex.Unlock()
 	fake.CreateTaskStub = stub
@@ -1504,27 +1516,30 @@ func (fake *FakeRBACService) CreateTaskArgsForCall(i int) (context.Context, stri
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeRBACService) CreateTaskReturns(result1 error) {
+func (fake *FakeRBACService) CreateTaskReturns(result1 string, result2 error) {
 	fake.createTaskMutex.Lock()
 	defer fake.createTaskMutex.Unlock()
 	fake.CreateTaskStub = nil
 	fake.createTaskReturns = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeRBACService) CreateTaskReturnsOnCall(i int, result1 error) {
+func (fake *FakeRBACService) CreateTaskReturnsOnCall(i int, result1 string, result2 error) {
 	fake.createTaskMutex.Lock()
 	defer fake.createTaskMutex.Unlock()
 	fake.CreateTaskStub = nil
 	if fake.createTaskReturnsOnCall == nil {
 		fake.createTaskReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 string
+			result2 error
 		})
 	}
 	fake.createTaskReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeRBACService) CreateToken(arg1 string) (string, error) {

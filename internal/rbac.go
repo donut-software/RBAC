@@ -2,6 +2,26 @@ package internal
 
 import "time"
 
+const (
+	CREATE_ACCOUNT = "create account"
+	GET_ACCOUNT    = "get account"
+	UPDATE_ACCOUNT = "update account"
+	DELETE_ACCOUNT = "delete account"
+	LIST_ACCOUNT   = "list account"
+
+	CREATE_ROLE = "create role"
+	GET_ROLE    = "get role"
+	UPDATE_ROLE = "update role"
+	DELETE_ROLE = "delete role"
+	LIST_ROLE   = "list role"
+
+	CREATE_TASK = "create task"
+	GET_TASK    = "get task"
+	UPDATE_TASK = "update task"
+	DELETE_TASK = "delete task"
+	LIST_TASK   = "list task"
+)
+
 type Profile struct {
 	Id                 string
 	Profile_Picture    string

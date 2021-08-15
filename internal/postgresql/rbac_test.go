@@ -40,7 +40,7 @@ func TestAccount_Create(t *testing.T) {
 	t.Run("Create: OK", func(t *testing.T) {
 		t.Parallel()
 
-		err := postgresql.NewRBAC(newDB(t)).CreateAccount(context.Background(), createAcc(), "test")
+		_, err := postgresql.NewRBAC(newDB(t)).CreateAccount(context.Background(), createAcc(), "test")
 		if err != nil {
 			t.Fatalf("expected no error, got %s", err)
 		}
@@ -58,7 +58,7 @@ func TestAccount_Create(t *testing.T) {
 		t.Parallel()
 		acc := createAcc()
 		db := newDB(t)
-		err := postgresql.NewRBAC(db).CreateAccount(context.Background(), acc, "test")
+		_, err := postgresql.NewRBAC(db).CreateAccount(context.Background(), acc, "test")
 		if err != nil {
 			t.Fatalf("expected no error, got %s", err)
 		}
@@ -78,7 +78,7 @@ func TestAccount_Create(t *testing.T) {
 		t.Parallel()
 		acc := createAcc()
 		db := newDB(t)
-		err := postgresql.NewRBAC(db).CreateAccount(context.Background(), acc, "test")
+		_, err := postgresql.NewRBAC(db).CreateAccount(context.Background(), acc, "test")
 		if err != nil {
 			t.Fatalf("expected no error, got %s", err)
 		}

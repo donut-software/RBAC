@@ -33,7 +33,7 @@ func TestTasks_Post(t *testing.T) {
 		{
 			"OK: 201",
 			func(s *resttesting.FakeRBACService) {
-				s.CreateAccountReturns(nil)
+				s.CreateAccountReturns("", nil)
 			},
 			func() []byte {
 				b, _ := json.Marshal(&rest.RegisterRequest{

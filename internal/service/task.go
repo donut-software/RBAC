@@ -8,22 +8,22 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (r *RBAC) CreateTask(ctx context.Context, taskname string) error {
+func (r *RBAC) CreateTask(ctx context.Context, taskname string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Create")
 	defer span.End()
 	id, err := r.repo.CreateTask(ctx, taskname)
 	if err != nil {
-		return fmt.Errorf("repo: %w", err)
+		return id, fmt.Errorf("repo: %w", err)
 	}
 	task, err := r.repo.Task(ctx, id)
 	if err != nil {
-		return fmt.Errorf("repo: %w", err)
+		return id, fmt.Errorf("repo: %w", err)
 	}
 	err = r.search.IndexTask(ctx, task)
 	if err != nil {
-		return fmt.Errorf("search: %w", err)
+		return id, fmt.Errorf("search: %w", err)
 	}
-	return nil
+	return id, nil
 }
 func (r *RBAC) Task(ctx context.Context, id string) (internal.Tasks, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Task")

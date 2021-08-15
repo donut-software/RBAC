@@ -13,7 +13,7 @@ import (
 type RBACService interface {
 	Logout(ctx context.Context) error
 	Login(ctx context.Context, username string, password string) error
-	CreateAccount(ctx context.Context, account internal.Account, password string) error
+	CreateAccount(ctx context.Context, account internal.Account, password string) (string, error)
 	Account(ctx context.Context, username string) (internal.Account, error)
 	AccountByID(ctx context.Context, id string) (internal.Account, error)
 	UpdateProfile(ctx context.Context, profile internal.Profile) error
@@ -21,7 +21,7 @@ type RBACService interface {
 	DeleteAccount(ctx context.Context, username string) error
 	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
 
-	CreateRole(ctx context.Context, rolename string) error
+	CreateRole(ctx context.Context, rolename string) (string, error)
 	Role(ctx context.Context, id string) (internal.Roles, error)
 	UpdateRole(ctx context.Context, id string, rolename string) error
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
@@ -35,7 +35,7 @@ type RBACService interface {
 	AccountRoleByRole(ctx context.Context, id string) (internal.AccountRoleByRoleResult, error)
 	DeleteAccountRole(ctx context.Context, id string) error
 
-	CreateTask(ctx context.Context, taskname string) error
+	CreateTask(ctx context.Context, taskname string) (string, error)
 	Task(ctx context.Context, id string) (internal.Tasks, error)
 	UpdateTask(ctx context.Context, id string, taskname string) error
 	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)

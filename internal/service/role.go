@@ -8,22 +8,22 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (r *RBAC) CreateRole(ctx context.Context, rolename string) error {
+func (r *RBAC) CreateRole(ctx context.Context, rolename string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Create")
 	defer span.End()
 	id, err := r.repo.CreateRole(ctx, rolename)
 	if err != nil {
-		return fmt.Errorf("repo: %w", err)
+		return id, fmt.Errorf("repo: %w", err)
 	}
 	role, err := r.repo.Role(ctx, id)
 	if err != nil {
-		return fmt.Errorf("search: %w", err)
+		return id, fmt.Errorf("search: %w", err)
 	}
 	err = r.search.IndexRole(ctx, role)
 	if err != nil {
-		return fmt.Errorf("search: %w", err)
+		return id, fmt.Errorf("search: %w", err)
 	}
-	return nil
+	return id, nil
 }
 func (r *RBAC) Role(ctx context.Context, id string) (internal.Roles, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Role")

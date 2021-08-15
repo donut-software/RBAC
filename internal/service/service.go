@@ -9,7 +9,7 @@ import (
 
 type RBACRepository interface {
 	Login(ctx context.Context, username string, password string) error
-	CreateAccount(ctx context.Context, account internal.Account, password string) error
+	CreateAccount(ctx context.Context, account internal.Account, password string) (string, error)
 	Account(ctx context.Context, username string) (internal.Account, error)
 	UpdateProfile(ctx context.Context, profile internal.Profile) error
 	ChangePassword(ctx context.Context, username string, password string) error

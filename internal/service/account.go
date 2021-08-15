@@ -22,26 +22,26 @@ func (a *RBAC) Login(ctx context.Context, username string, password string) erro
 	}
 	return nil
 }
-func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, password string) error {
+func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, password string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")
 	defer span.End()
-	err := r.repo.CreateAccount(ctx, account, password)
+	id, err := r.repo.CreateAccount(ctx, account, password)
 	if err != nil {
-		return fmt.Errorf("repo create account: %w", err)
+		return id, fmt.Errorf("repo create account: %w", err)
 	}
 	acc, err := r.repo.Account(ctx, account.UserName)
 	if err != nil {
-		return fmt.Errorf("repo create account: %w", err)
+		return id, fmt.Errorf("repo create account: %w", err)
 	}
 	err = r.search.IndexAccount(ctx, acc)
 	if err != nil {
-		return fmt.Errorf("search indexed account: %w", err)
+		return id, fmt.Errorf("search indexed account: %w", err)
 	}
 	err = r.search.IndexProfile(ctx, acc.Profile)
 	if err != nil {
-		return fmt.Errorf("search indexed account: %w", err)
+		return id, fmt.Errorf("search indexed account: %w", err)
 	}
-	return nil
+	return id, nil
 }
 func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")

@@ -122,7 +122,7 @@ func (rb *RBACHandler) register(w http.ResponseWriter, r *http.Request) {
 		Mobile:             req.Mobile,
 		Email:              req.Email,
 	}
-	err := rb.svc.CreateAccount(r.Context(), internal.Account{
+	_, err := rb.svc.CreateAccount(r.Context(), internal.Account{
 		UserName: req.Username,
 		Profile:  profile,
 	}, req.Password)

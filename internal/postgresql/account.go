@@ -30,11 +30,11 @@ func (a *Store) Login(ctx context.Context, username string, password string) err
 	return err
 }
 
-func (s *Store) CreateAccount(ctx context.Context, account internal.Account, password string) error {
+func (s *Store) CreateAccount(ctx context.Context, account internal.Account, password string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
 	defer span.End()
-
+	var accId string
 	err := s.execTx(ctx, func(q *Queries) error {
 		profileId, err := q.InsertProfile(ctx, InsertProfileParams{
 			ProfilePicture:    account.Profile.Profile_Picture,
@@ -51,7 +51,7 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 		if err != nil {
 			fmt.Println(err)
 		}
-		_, err = q.InsertAccounts(ctx, InsertAccountsParams{
+		aid, err := q.InsertAccounts(ctx, InsertAccountsParams{
 			Username:       account.UserName,
 			Hashedpassword: hashedPassword,
 			Profile:        profileId,
@@ -59,9 +59,10 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 		if err != nil {
 			fmt.Println(err)
 		}
+		accId = aid.String()
 		return nil
 	})
-	return err
+	return accId, err
 }
 func (s *Store) Account(ctx context.Context, username string) (internal.Account, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
