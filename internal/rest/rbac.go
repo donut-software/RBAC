@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"rbac/internal"
+	"rbac/internal/tokenmaker"
 
 	"github.com/gorilla/mux"
 )
@@ -63,6 +64,9 @@ type RBACService interface {
 	UpdateNavigation(ctx context.Context, navigation internal.Navigation) error
 	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 	DeleteNavigation(ctx context.Context, id string) error
+
+	CreateToken(username string) (string, error)
+	VerifyToken(token string) (*tokenmaker.Payload, error)
 }
 
 type RBACHandler struct {

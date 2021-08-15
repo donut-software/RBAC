@@ -5,6 +5,7 @@ import (
 	"context"
 	"rbac/internal"
 	"rbac/internal/rest"
+	"rbac/internal/tokenmaker"
 	"sync"
 )
 
@@ -190,6 +191,19 @@ type FakeRBACService struct {
 	}
 	createTaskReturnsOnCall map[int]struct {
 		result1 error
+	}
+	CreateTokenStub        func(string) (string, error)
+	createTokenMutex       sync.RWMutex
+	createTokenArgsForCall []struct {
+		arg1 string
+	}
+	createTokenReturns struct {
+		result1 string
+		result2 error
+	}
+	createTokenReturnsOnCall map[int]struct {
+		result1 string
+		result2 error
 	}
 	DeleteAccountStub        func(context.Context, string) error
 	deleteAccountMutex       sync.RWMutex
@@ -608,6 +622,19 @@ type FakeRBACService struct {
 	}
 	updateTaskReturnsOnCall map[int]struct {
 		result1 error
+	}
+	VerifyTokenStub        func(string) (*tokenmaker.Payload, error)
+	verifyTokenMutex       sync.RWMutex
+	verifyTokenArgsForCall []struct {
+		arg1 string
+	}
+	verifyTokenReturns struct {
+		result1 *tokenmaker.Payload
+		result2 error
+	}
+	verifyTokenReturnsOnCall map[int]struct {
+		result1 *tokenmaker.Payload
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -1498,6 +1525,70 @@ func (fake *FakeRBACService) CreateTaskReturnsOnCall(i int, result1 error) {
 	fake.createTaskReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
+}
+
+func (fake *FakeRBACService) CreateToken(arg1 string) (string, error) {
+	fake.createTokenMutex.Lock()
+	ret, specificReturn := fake.createTokenReturnsOnCall[len(fake.createTokenArgsForCall)]
+	fake.createTokenArgsForCall = append(fake.createTokenArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.CreateTokenStub
+	fakeReturns := fake.createTokenReturns
+	fake.recordInvocation("CreateToken", []interface{}{arg1})
+	fake.createTokenMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) CreateTokenCallCount() int {
+	fake.createTokenMutex.RLock()
+	defer fake.createTokenMutex.RUnlock()
+	return len(fake.createTokenArgsForCall)
+}
+
+func (fake *FakeRBACService) CreateTokenCalls(stub func(string) (string, error)) {
+	fake.createTokenMutex.Lock()
+	defer fake.createTokenMutex.Unlock()
+	fake.CreateTokenStub = stub
+}
+
+func (fake *FakeRBACService) CreateTokenArgsForCall(i int) string {
+	fake.createTokenMutex.RLock()
+	defer fake.createTokenMutex.RUnlock()
+	argsForCall := fake.createTokenArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRBACService) CreateTokenReturns(result1 string, result2 error) {
+	fake.createTokenMutex.Lock()
+	defer fake.createTokenMutex.Unlock()
+	fake.CreateTokenStub = nil
+	fake.createTokenReturns = struct {
+		result1 string
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) CreateTokenReturnsOnCall(i int, result1 string, result2 error) {
+	fake.createTokenMutex.Lock()
+	defer fake.createTokenMutex.Unlock()
+	fake.CreateTokenStub = nil
+	if fake.createTokenReturnsOnCall == nil {
+		fake.createTokenReturnsOnCall = make(map[int]struct {
+			result1 string
+			result2 error
+		})
+	}
+	fake.createTokenReturnsOnCall[i] = struct {
+		result1 string
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeRBACService) DeleteAccount(arg1 context.Context, arg2 string) error {
@@ -3532,6 +3623,70 @@ func (fake *FakeRBACService) UpdateTaskReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeRBACService) VerifyToken(arg1 string) (*tokenmaker.Payload, error) {
+	fake.verifyTokenMutex.Lock()
+	ret, specificReturn := fake.verifyTokenReturnsOnCall[len(fake.verifyTokenArgsForCall)]
+	fake.verifyTokenArgsForCall = append(fake.verifyTokenArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.VerifyTokenStub
+	fakeReturns := fake.verifyTokenReturns
+	fake.recordInvocation("VerifyToken", []interface{}{arg1})
+	fake.verifyTokenMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) VerifyTokenCallCount() int {
+	fake.verifyTokenMutex.RLock()
+	defer fake.verifyTokenMutex.RUnlock()
+	return len(fake.verifyTokenArgsForCall)
+}
+
+func (fake *FakeRBACService) VerifyTokenCalls(stub func(string) (*tokenmaker.Payload, error)) {
+	fake.verifyTokenMutex.Lock()
+	defer fake.verifyTokenMutex.Unlock()
+	fake.VerifyTokenStub = stub
+}
+
+func (fake *FakeRBACService) VerifyTokenArgsForCall(i int) string {
+	fake.verifyTokenMutex.RLock()
+	defer fake.verifyTokenMutex.RUnlock()
+	argsForCall := fake.verifyTokenArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRBACService) VerifyTokenReturns(result1 *tokenmaker.Payload, result2 error) {
+	fake.verifyTokenMutex.Lock()
+	defer fake.verifyTokenMutex.Unlock()
+	fake.VerifyTokenStub = nil
+	fake.verifyTokenReturns = struct {
+		result1 *tokenmaker.Payload
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) VerifyTokenReturnsOnCall(i int, result1 *tokenmaker.Payload, result2 error) {
+	fake.verifyTokenMutex.Lock()
+	defer fake.verifyTokenMutex.Unlock()
+	fake.VerifyTokenStub = nil
+	if fake.verifyTokenReturnsOnCall == nil {
+		fake.verifyTokenReturnsOnCall = make(map[int]struct {
+			result1 *tokenmaker.Payload
+			result2 error
+		})
+	}
+	fake.verifyTokenReturnsOnCall[i] = struct {
+		result1 *tokenmaker.Payload
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -3563,6 +3718,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.createRoleTaskMutex.RUnlock()
 	fake.createTaskMutex.RLock()
 	defer fake.createTaskMutex.RUnlock()
+	fake.createTokenMutex.RLock()
+	defer fake.createTokenMutex.RUnlock()
 	fake.deleteAccountMutex.RLock()
 	defer fake.deleteAccountMutex.RUnlock()
 	fake.deleteAccountRoleMutex.RLock()
@@ -3627,6 +3784,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.updateRoleTaskMutex.RUnlock()
 	fake.updateTaskMutex.RLock()
 	defer fake.updateTaskMutex.RUnlock()
+	fake.verifyTokenMutex.RLock()
+	defer fake.verifyTokenMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
