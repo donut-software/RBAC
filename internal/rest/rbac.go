@@ -81,16 +81,23 @@ func NewRBACHandler(svc RBACService) *RBACHandler {
 
 func (rb *RBACHandler) Register(r *mux.Router) {
 
-	r.HandleFunc("/login", rb.login).Methods(http.MethodPost)
-	accountRouter := r.PathPrefix("/accounts/").Subrouter()
-	accountRouter.HandleFunc("/register", rb.register).Methods(http.MethodPost)
+	v0 := r.PathPrefix("/v0/").Subrouter()
+
+	r.HandleFunc("/v0/login", rb.login).Methods(http.MethodPost)
+	r.HandleFunc("/v0/register", rb.register).Methods(http.MethodPost)
+
+	v0.Use(rb.middleware)
+	accountRouter := v0.PathPrefix("/accounts/").Subrouter()
+	accountRouter.HandleFunc("/logout", rb.logout).Methods(http.MethodPost)
+	accountRouter.HandleFunc("/me", rb.me).Methods(http.MethodGet)
+
 	accountRouter.HandleFunc("/{username}", rb.account).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/roles/{username}", rb.getAccountRoleByAccount).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/", rb.listaccount).Methods(http.MethodGet)
 	accountRouter.HandleFunc("/", rb.updateProfile).Methods(http.MethodPut)
 	accountRouter.HandleFunc("/{username}", rb.deleteAccount).Methods(http.MethodDelete)
 
-	roleRouter := r.PathPrefix("/roles/").Subrouter()
+	roleRouter := v0.PathPrefix("/roles/").Subrouter()
 	roleRouter.HandleFunc("/", rb.createRole).Methods(http.MethodPost)
 	roleRouter.HandleFunc("/{roleId}", rb.role).Methods(http.MethodGet)
 	roleRouter.HandleFunc("/accounts/{roleId}", rb.getAccountRoleByRole).Methods(http.MethodGet)
@@ -98,42 +105,42 @@ func (rb *RBACHandler) Register(r *mux.Router) {
 	roleRouter.HandleFunc("/", rb.listrole).Methods(http.MethodGet)
 	roleRouter.HandleFunc("/{roleId}", rb.deleteRole).Methods(http.MethodDelete)
 
-	accountroleRouter := r.PathPrefix("/accountroles/").Subrouter()
+	accountroleRouter := v0.PathPrefix("/accountroles/").Subrouter()
 	accountroleRouter.HandleFunc("/", rb.createAccountRole).Methods(http.MethodPost)
 	accountroleRouter.HandleFunc("/{accountRoleId}", rb.accountRole).Methods(http.MethodGet)
 	accountroleRouter.HandleFunc("/", rb.updateAccountRole).Methods(http.MethodPut)
 	accountroleRouter.HandleFunc("/", rb.listAccountRole).Methods(http.MethodGet)
 	accountroleRouter.HandleFunc("/{accountRoleId}", rb.deleteAccountRole).Methods(http.MethodDelete)
 
-	taskRouter := r.PathPrefix("/task/").Subrouter()
+	taskRouter := v0.PathPrefix("/task/").Subrouter()
 	taskRouter.HandleFunc("/", rb.createTask).Methods(http.MethodPost)
 	taskRouter.HandleFunc("/{taskId}", rb.task).Methods(http.MethodGet)
 	taskRouter.HandleFunc("/", rb.updateTask).Methods(http.MethodPut)
 	taskRouter.HandleFunc("/", rb.listtask).Methods(http.MethodGet)
 	taskRouter.HandleFunc("/{taskId}", rb.deleteTask).Methods(http.MethodDelete)
 
-	roletaskRouter := r.PathPrefix("/roletask/").Subrouter()
+	roletaskRouter := v0.PathPrefix("/roletask/").Subrouter()
 	roletaskRouter.HandleFunc("/", rb.createRoleTask).Methods(http.MethodPost)
 	roletaskRouter.HandleFunc("/{roleTaskId}", rb.roleTask).Methods(http.MethodGet)
 	roletaskRouter.HandleFunc("/", rb.updateRoleTask).Methods(http.MethodPut)
 	roletaskRouter.HandleFunc("/", rb.listRoleTask).Methods(http.MethodGet)
 	roletaskRouter.HandleFunc("/{roleTaskId}", rb.deleteRoleTask).Methods(http.MethodDelete)
 
-	helptextRouter := r.PathPrefix("/helptext/").Subrouter()
+	helptextRouter := v0.PathPrefix("/helptext/").Subrouter()
 	helptextRouter.HandleFunc("/", rb.createHelpText).Methods(http.MethodPost)
 	helptextRouter.HandleFunc("/{helpTextId}", rb.helpText).Methods(http.MethodGet)
 	helptextRouter.HandleFunc("/", rb.updateHelpText).Methods(http.MethodPut)
 	helptextRouter.HandleFunc("/", rb.listHelpText).Methods(http.MethodGet)
 	helptextRouter.HandleFunc("/{helpTextId}", rb.deleteHelpText).Methods(http.MethodDelete)
 
-	menuRouter := r.PathPrefix("/menu/").Subrouter()
+	menuRouter := v0.PathPrefix("/menu/").Subrouter()
 	menuRouter.HandleFunc("/", rb.createMenu).Methods(http.MethodPost)
 	menuRouter.HandleFunc("/{menuId}", rb.menu).Methods(http.MethodGet)
 	menuRouter.HandleFunc("/", rb.updateMenu).Methods(http.MethodPut)
 	menuRouter.HandleFunc("/", rb.listMenu).Methods(http.MethodGet)
 	menuRouter.HandleFunc("/{menuId}", rb.deleteMenu).Methods(http.MethodDelete)
 
-	navigationRouter := r.PathPrefix("/navigation/").Subrouter()
+	navigationRouter := v0.PathPrefix("/navigation/").Subrouter()
 	navigationRouter.HandleFunc("/", rb.createNavigation).Methods(http.MethodPost)
 	navigationRouter.HandleFunc("/{navigationId}", rb.navigation).Methods(http.MethodGet)
 	navigationRouter.HandleFunc("/", rb.updateNavigation).Methods(http.MethodPut)

@@ -50,13 +50,13 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 - [ ] Rest APIs
   - [X] HTTP Handlers
   - [X] Custom JSON Types
-  - [ ] Versioning 
+  - [X] Versioning 
   - [X] Error Handling
   - [X] OpenAPI 3 and Swagger-UI
   - [ ] Authorization
-- [ ] Tokens
-  - [ ] JWT
-  - [ ] PASETO
+- [X] Tokens
+  - [X] JWT
+  - [X] PASETO
 - [ ] Events and Messaging
   - [ ] Apache Kafka
   - [ ] RabbitMq

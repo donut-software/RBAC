@@ -18,6 +18,7 @@ type LoginResponse struct {
 }
 
 func (a *RBACHandler) logout(w http.ResponseWriter, r *http.Request) {
+	addCookie(w, "token", "")
 	renderResponse(w,
 		&LoginResponse{
 			Message: "Logout Succesfully",
@@ -36,10 +37,43 @@ func (a *RBACHandler) login(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "login failed", err)
 		return
 	}
+	cookie, err := a.svc.CreateToken(req.Username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "token creation failed", err)
+		return
+	}
+	addCookie(w, "token", cookie)
 	renderResponse(w,
 		&LoginResponse{
 			Message: "Login Succesfully",
 		}, http.StatusCreated)
+}
+
+func (a *RBACHandler) me(w http.ResponseWriter, r *http.Request) {
+	username := r.Header.Get("username")
+	account, err := a.svc.Account(r.Context(), username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting the account", err)
+		return
+	}
+	profile := Profile{
+		Id:                account.Profile.Id,
+		ProfileBackground: account.Profile.Profile_Background,
+		ProfilePicture:    account.Profile.Profile_Picture,
+		FirstName:         account.Profile.First_Name,
+		LastName:          account.Profile.Last_Name,
+		Mobile:            account.Profile.Mobile,
+		Email:             account.Profile.Email,
+		CreatedAt:         account.CreatedAt,
+	}
+	renderResponse(w, &ReadAccountResponse{
+		Account: Account{
+			Id:        account.Id,
+			Username:  account.UserName,
+			Profile:   profile,
+			CreatedAt: account.CreatedAt,
+		},
+	}, http.StatusOK)
 }
 
 type Profile struct {

@@ -81,3 +81,13 @@ func convertInternalMenuList(list []internal.Menu) []Menu {
 	}
 	return menulist
 }
+
+func addCookie(w http.ResponseWriter, name, value string) {
+	cookie := http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+}
