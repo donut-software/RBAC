@@ -15,11 +15,23 @@ const (
 	DELETE_ROLE = "delete role"
 	LIST_ROLE   = "list role"
 
+	CREATE_ACCOUNT_ROLE = "create account role"
+	GET_ACCOUNT_ROLE    = "get account role"
+	UPDATE_ACCOUNT_ROLE = "update account role"
+	DELETE_ACCOUNT_ROLE = "delete account role"
+	LIST_ACCOUNT_ROLE   = "list account role"
+
 	CREATE_TASK = "create task"
 	GET_TASK    = "get task"
 	UPDATE_TASK = "update task"
 	DELETE_TASK = "delete task"
 	LIST_TASK   = "list task"
+
+	CREATE_ROLE_TASK = "create role task"
+	GET_ROLE_TASK    = "get role task"
+	UPDATE_ROLE_TASK = "update role task"
+	DELETE_ROLE_TASK = "delete role task"
+	LIST_ROLE_TASK   = "list role task"
 )
 
 type Profile struct {

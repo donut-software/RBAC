@@ -24,12 +24,22 @@ type AccountRoleResponse struct {
 }
 
 func (rb *RBACHandler) createAccountRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.CREATE_ACCOUNT_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req CreateAccountRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.CreateAccountRole(r.Context(), req.AccountId, req.RoleId)
+	err = rb.svc.CreateAccountRole(r.Context(), req.AccountId, req.RoleId)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create accountrole failed", err)
 		return
@@ -45,6 +55,16 @@ type GetAccountRoleResponse struct {
 }
 
 func (rb *RBACHandler) accountRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ACCOUNT_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	accountRoleId := mux.Vars(r)["accountRoleId"]
 	accountRole, err := rb.svc.AccountRole(r.Context(), accountRoleId)
 	if err != nil {
@@ -101,12 +121,22 @@ type UpdateAccountRoleRequest struct {
 }
 
 func (rb *RBACHandler) updateAccountRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.UPDATE_ACCOUNT_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req UpdateAccountRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err := rb.svc.UpdateAccountRole(r.Context(), req.AccountId, req.RoleId, req.Id)
+	err = rb.svc.UpdateAccountRole(r.Context(), req.AccountId, req.RoleId, req.Id)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating role", err)
 		return
@@ -127,6 +157,16 @@ type ListAccountRoleResponse struct {
 }
 
 func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.LIST_ACCOUNT_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	var req ListRoleRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
@@ -190,8 +230,18 @@ func (rb *RBACHandler) listAccountRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rb *RBACHandler) deleteAccountRole(w http.ResponseWriter, r *http.Request) {
+	authusername := r.Header.Get("username")
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.DELETE_ACCOUNT_ROLE)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	accountRoleId := mux.Vars(r)["accountRoleId"]
-	err := rb.svc.DeleteAccountRole(r.Context(), accountRoleId)
+	err = rb.svc.DeleteAccountRole(r.Context(), accountRoleId)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error deleting accountRole", err)
 		return

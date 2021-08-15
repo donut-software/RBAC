@@ -40,17 +40,29 @@ func newTask() []string {
 	tasks = append(tasks, internaldomain.DELETE_ACCOUNT)
 	tasks = append(tasks, internaldomain.LIST_ACCOUNT)
 
+	tasks = append(tasks, internaldomain.CREATE_ROLE)
+	tasks = append(tasks, internaldomain.GET_ROLE)
+	tasks = append(tasks, internaldomain.UPDATE_ROLE)
+	tasks = append(tasks, internaldomain.DELETE_ROLE)
+	tasks = append(tasks, internaldomain.LIST_ROLE)
+
+	tasks = append(tasks, internaldomain.CREATE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.GET_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.UPDATE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.DELETE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.LIST_ACCOUNT_ROLE)
+
 	tasks = append(tasks, internaldomain.CREATE_TASK)
 	tasks = append(tasks, internaldomain.GET_TASK)
 	tasks = append(tasks, internaldomain.UPDATE_TASK)
 	tasks = append(tasks, internaldomain.DELETE_TASK)
 	tasks = append(tasks, internaldomain.LIST_TASK)
 
-	tasks = append(tasks, internaldomain.CREATE_ROLE)
-	tasks = append(tasks, internaldomain.GET_ROLE)
-	tasks = append(tasks, internaldomain.UPDATE_ROLE)
-	tasks = append(tasks, internaldomain.DELETE_ROLE)
-	tasks = append(tasks, internaldomain.LIST_ROLE)
+	tasks = append(tasks, internaldomain.CREATE_ROLE_TASK)
+	tasks = append(tasks, internaldomain.GET_ROLE_TASK)
+	tasks = append(tasks, internaldomain.UPDATE_ROLE_TASK)
+	tasks = append(tasks, internaldomain.DELETE_ROLE_TASK)
+	tasks = append(tasks, internaldomain.LIST_ROLE_TASK)
 
 	return tasks
 }
