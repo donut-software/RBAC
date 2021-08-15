@@ -8,19 +8,39 @@ import (
 	"golang.org/x/net/context"
 )
 
-func (a *RBAC) Logout(ctx context.Context) error {
+func (r *RBAC) Logout(ctx context.Context) error {
 	_, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Logout")
 	defer span.End()
 	return nil
 }
-func (a *RBAC) Login(ctx context.Context, username string, password string) error {
+func (r *RBAC) Login(ctx context.Context, username string, password string) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Login")
 	defer span.End()
-	err := a.repo.Login(ctx, username, password)
+	err := r.repo.Login(ctx, username, password)
 	if err != nil {
 		return fmt.Errorf("repo login: %w", err)
 	}
 	return nil
+}
+func (r *RBAC) IsAllowed(ctx context.Context, username string, task string) (bool, error) {
+	acrole, err := r.search.GetAccountRoleByAccount(ctx, username)
+	if err != nil {
+		return false, fmt.Errorf("search: %w", err)
+	}
+	var tasks []internal.Tasks
+	for _, value := range acrole.Roles {
+		rt, err := r.search.GetRoleTaskByRole(ctx, value.Id)
+		if err != nil {
+			return false, fmt.Errorf("search: %w", err)
+		}
+		tasks = append(tasks, rt.Tasks...)
+	}
+	for _, value := range tasks {
+		if value.Task == task {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, password string) (string, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Create")

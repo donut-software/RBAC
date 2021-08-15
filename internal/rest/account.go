@@ -141,12 +141,31 @@ type ReadAccountResponse struct {
 }
 
 func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
+	//username from payload
+	authusername := r.Header.Get("username")
 	username := mux.Vars(r)["username"]
+	// acrole, err := rb.svc.AccountRoleByAccount(r.Context(), authusername)
+	// if err != nil {
+	// 	renderErrorResponse(r.Context(), w, "error getting the auth account", err)
+	// 	return
+	// }
+	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.GET_ACCOUNT)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting user tasks", err)
+		return
+	}
+	if !allowed && authusername != username {
+		renderErrorResponse(r.Context(), w, "user is not allowed", err)
+		return
+	}
 	account, err := rb.svc.Account(r.Context(), username)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error getting the account", err)
 		return
 	}
+
+	//check if the user is allowed to get the user info
+
 	profile := Profile{
 		Id:                account.Profile.Id,
 		ProfileBackground: account.Profile.Profile_Background,

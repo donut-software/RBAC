@@ -321,6 +321,21 @@ type FakeRBACService struct {
 		result1 internal.HelpText
 		result2 error
 	}
+	IsAllowedStub        func(context.Context, string, string) (bool, error)
+	isAllowedMutex       sync.RWMutex
+	isAllowedArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+	}
+	isAllowedReturns struct {
+		result1 bool
+		result2 error
+	}
+	isAllowedReturnsOnCall map[int]struct {
+		result1 bool
+		result2 error
+	}
 	ListAccountStub        func(context.Context, internal.ListArgs) (internal.ListAccount, error)
 	listAccountMutex       sync.RWMutex
 	listAccountArgsForCall []struct {
@@ -2167,6 +2182,72 @@ func (fake *FakeRBACService) HelpTextReturnsOnCall(i int, result1 internal.HelpT
 	}{result1, result2}
 }
 
+func (fake *FakeRBACService) IsAllowed(arg1 context.Context, arg2 string, arg3 string) (bool, error) {
+	fake.isAllowedMutex.Lock()
+	ret, specificReturn := fake.isAllowedReturnsOnCall[len(fake.isAllowedArgsForCall)]
+	fake.isAllowedArgsForCall = append(fake.isAllowedArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+	}{arg1, arg2, arg3})
+	stub := fake.IsAllowedStub
+	fakeReturns := fake.isAllowedReturns
+	fake.recordInvocation("IsAllowed", []interface{}{arg1, arg2, arg3})
+	fake.isAllowedMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRBACService) IsAllowedCallCount() int {
+	fake.isAllowedMutex.RLock()
+	defer fake.isAllowedMutex.RUnlock()
+	return len(fake.isAllowedArgsForCall)
+}
+
+func (fake *FakeRBACService) IsAllowedCalls(stub func(context.Context, string, string) (bool, error)) {
+	fake.isAllowedMutex.Lock()
+	defer fake.isAllowedMutex.Unlock()
+	fake.IsAllowedStub = stub
+}
+
+func (fake *FakeRBACService) IsAllowedArgsForCall(i int) (context.Context, string, string) {
+	fake.isAllowedMutex.RLock()
+	defer fake.isAllowedMutex.RUnlock()
+	argsForCall := fake.isAllowedArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeRBACService) IsAllowedReturns(result1 bool, result2 error) {
+	fake.isAllowedMutex.Lock()
+	defer fake.isAllowedMutex.Unlock()
+	fake.IsAllowedStub = nil
+	fake.isAllowedReturns = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRBACService) IsAllowedReturnsOnCall(i int, result1 bool, result2 error) {
+	fake.isAllowedMutex.Lock()
+	defer fake.isAllowedMutex.Unlock()
+	fake.IsAllowedStub = nil
+	if fake.isAllowedReturnsOnCall == nil {
+		fake.isAllowedReturnsOnCall = make(map[int]struct {
+			result1 bool
+			result2 error
+		})
+	}
+	fake.isAllowedReturnsOnCall[i] = struct {
+		result1 bool
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRBACService) ListAccount(arg1 context.Context, arg2 internal.ListArgs) (internal.ListAccount, error) {
 	fake.listAccountMutex.Lock()
 	ret, specificReturn := fake.listAccountReturnsOnCall[len(fake.listAccountArgsForCall)]
@@ -3753,6 +3834,8 @@ func (fake *FakeRBACService) Invocations() map[string][][]interface{} {
 	defer fake.deleteTaskMutex.RUnlock()
 	fake.helpTextMutex.RLock()
 	defer fake.helpTextMutex.RUnlock()
+	fake.isAllowedMutex.RLock()
+	defer fake.isAllowedMutex.RUnlock()
 	fake.listAccountMutex.RLock()
 	defer fake.listAccountMutex.RUnlock()
 	fake.listAccountRoleMutex.RLock()

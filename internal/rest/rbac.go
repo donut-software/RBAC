@@ -20,6 +20,7 @@ type RBACService interface {
 	ChangePassword(ctx context.Context, username string, password string) error
 	DeleteAccount(ctx context.Context, username string) error
 	ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error)
+	IsAllowed(ctx context.Context, username string, task string) (bool, error)
 
 	CreateRole(ctx context.Context, rolename string) (string, error)
 	Role(ctx context.Context, id string) (internal.Roles, error)
