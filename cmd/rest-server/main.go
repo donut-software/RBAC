@@ -18,6 +18,7 @@ import (
 	"rbac/internal/postgresql"
 	"rbac/internal/rest"
 	"rbac/internal/service"
+	"rbac/internal/tokenmaker"
 	"syscall"
 	"time"
 
@@ -90,9 +91,15 @@ func run(env, address string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("internal.NewMemcached %w", err)
 	}
+
+	token, err := internal.NewTokenMaker(conf)
+	if err != nil {
+		return nil, fmt.Errorf("newTokenMaker %w", err)
+	}
 	srv, err := newServer(serverConfig{
 		Address:       address,
 		Db:            db,
+		Token:         token,
 		ElasticSearch: es,
 		Metrics:       promExporter,
 		Middlewares:   []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
@@ -156,6 +163,7 @@ func run(env, address string) (<-chan error, error) {
 type serverConfig struct {
 	Address       string
 	Db            *sql.DB
+	Token         tokenmaker.TokenMaker
 	ElasticSearch *esv7.Client
 	Metrics       http.Handler
 	Middlewares   []mux.MiddlewareFunc
@@ -172,7 +180,7 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	repo := postgresql.NewRBAC(conf.Db)
 	search := elasticsearch.NewRBAC(conf.ElasticSearch)
 	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
-	svc := service.NewRBAC(repo, mclient)
+	svc := service.NewRBAC(repo, mclient, conf.Token)
 
 	rest.RegisterOpenAPI(r)
 	rest.NewRBACHandler(svc).Register(r)

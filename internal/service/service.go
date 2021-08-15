@@ -2,6 +2,7 @@ package service
 
 import (
 	"rbac/internal"
+	"rbac/internal/tokenmaker"
 
 	"golang.org/x/net/context"
 )
@@ -103,14 +104,22 @@ type RBACSearchRepository interface {
 	GetNavigationByTask(ctx context.Context, taskid string) ([]internal.Navigation, error)
 	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
+
+type TokenMaker interface {
+	CreateToken(username string) (string, error)
+	VerifyToken(token string) (*tokenmaker.Payload, error)
+}
+
 type RBAC struct {
 	repo   RBACRepository
 	search RBACSearchRepository
+	token  TokenMaker
 }
 
-func NewRBAC(repo RBACRepository, search RBACSearchRepository) *RBAC {
+func NewRBAC(repo RBACRepository, search RBACSearchRepository, token TokenMaker) *RBAC {
 	return &RBAC{
 		repo:   repo,
 		search: search,
+		token:  token,
 	}
 }
