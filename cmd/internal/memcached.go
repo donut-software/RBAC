@@ -18,6 +18,7 @@ func NewMemcached(conf *envvar.Configuration) (*memcache.Client, error) {
 	client := memcache.New(host)
 
 	if err := client.Ping(); err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 

@@ -66,7 +66,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
   - [X] Equality with [`google/go-cmp`](https://github.com/google/go-cmp)
   - [X] Integration tests for Datastores with [`ory/dockertest`](https://github.com/ory/dockertest)
   - [X] REST APIs
-- [ ] Containerization using Docker
+- [X] Containerization using Docker
 - [X] Graceful Shutdown
 - [X] Search Engine using [ElasticSearch](https://www.elastic.co/elasticsearch/)
 - [ ] Documentation

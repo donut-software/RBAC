@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"rbac/cmd/internal"
@@ -68,11 +69,16 @@ func newTask() []string {
 }
 
 func main() {
+	var env string
+
+	flag.StringVar(&env, "env", "", "Environment Variables filename")
+	flag.Parse()
+
 	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Fatal(fmt.Errorf("new logger %w", err))
 	}
-	if err := envvar.Load("env.example"); err != nil {
+	if err := envvar.Load(env); err != nil {
 		log.Fatal(fmt.Errorf("envvar.Load %w", err))
 	}
 	vault, err := internal.NewVaultProvider()
