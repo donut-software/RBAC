@@ -24,7 +24,7 @@ type RBACService interface {
 
 	CreateRole(ctx context.Context, rolename string) (string, error)
 	Role(ctx context.Context, id string) (internal.Roles, error)
-	UpdateRole(ctx context.Context, id string, rolename string) error
+	UpdateRole(ctx context.Context, rl internal.Roles) error
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 	DeleteRole(ctx context.Context, id string) error
 
@@ -38,7 +38,7 @@ type RBACService interface {
 
 	CreateTask(ctx context.Context, taskname string) (string, error)
 	Task(ctx context.Context, id string) (internal.Tasks, error)
-	UpdateTask(ctx context.Context, id string, taskname string) error
+	UpdateTask(ctx context.Context, task internal.Tasks) error
 	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
 	DeleteTask(ctx context.Context, id string) error
 

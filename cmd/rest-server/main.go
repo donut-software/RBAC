@@ -16,6 +16,7 @@ import (
 	"rbac/internal/envvar"
 	"rbac/internal/memcached"
 	"rbac/internal/postgresql"
+	"rbac/internal/redis"
 	"rbac/internal/rest"
 	"rbac/internal/service"
 	"rbac/internal/tokenmaker"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/bradfitz/gomemcache/memcache"
 	esv7 "github.com/elastic/go-elasticsearch/v7"
+	rv8 "github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.uber.org/zap"
@@ -96,6 +98,10 @@ func run(env, address string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("newTokenMaker %w", err)
 	}
+	rdb, err := internal.NewRedis(conf)
+	if err != nil {
+		return nil, fmt.Errorf("internal.NewRabbitMQ %w", err)
+	}
 	srv, err := newServer(serverConfig{
 		Address:       address,
 		Db:            db,
@@ -105,6 +111,7 @@ func run(env, address string) (<-chan error, error) {
 		Middlewares:   []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
 		Logger:        logger,
 		Memcached:     memcached,
+		Redis:         rdb,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -169,6 +176,7 @@ type serverConfig struct {
 	Middlewares   []mux.MiddlewareFunc
 	Logger        *zap.Logger
 	Memcached     *memcache.Client
+	Redis         *rv8.Client
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
@@ -176,11 +184,12 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	for _, mw := range conf.Middlewares {
 		r.Use(mw)
 	}
+	msgBroker := redis.NewAccount(conf.Redis)
 
 	repo := postgresql.NewRBAC(conf.Db)
 	search := elasticsearch.NewRBAC(conf.ElasticSearch)
 	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
-	svc := service.NewRBAC(repo, mclient, conf.Token)
+	svc := service.NewRBAC(repo, mclient, conf.Token, msgBroker)
 
 	rest.RegisterOpenAPI(r)
 	rest.NewRBACHandler(svc).Register(r)

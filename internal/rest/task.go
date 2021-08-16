@@ -110,7 +110,11 @@ func (rb *RBACHandler) updateTask(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.UpdateTask(r.Context(), req.TaskId, req.Task)
+	// err = rb.svc.UpdateTask(r.Context(), req.TaskId, req.Task)
+	err = rb.svc.UpdateTask(r.Context(), internal.Tasks{
+		Id:   req.TaskId,
+		Task: req.Task,
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating task", err)
 		return

@@ -105,21 +105,32 @@ type RBACSearchRepository interface {
 	ListNavigation(ctx context.Context, args internal.ListArgs) (internal.ListNavigation, error)
 }
 
+type RBACMessageBrokerRepository interface {
+	AccountCreated(ctx context.Context, accounts internal.Account) error
+	AccountDeleted(ctx context.Context, id string) error
+	AccountUpdated(ctx context.Context, profile internal.Account) error
+
+	ProfileCreated(ctx context.Context, profile internal.Profile) error
+	ProfileDeleted(ctx context.Context, id string) error
+	ProfileUpdated(ctx context.Context, profile internal.Profile) error
+}
 type TokenMaker interface {
 	CreateToken(username string) (string, error)
 	VerifyToken(token string) (*tokenmaker.Payload, error)
 }
 
 type RBAC struct {
-	repo   RBACRepository
-	search RBACSearchRepository
-	token  TokenMaker
+	repo      RBACRepository
+	search    RBACSearchRepository
+	token     TokenMaker
+	msgBroker RBACMessageBrokerRepository
 }
 
-func NewRBAC(repo RBACRepository, search RBACSearchRepository, token TokenMaker) *RBAC {
+func NewRBAC(repo RBACRepository, search RBACSearchRepository, token TokenMaker, msgBroker RBACMessageBrokerRepository) *RBAC {
 	return &RBAC{
-		repo:   repo,
-		search: search,
-		token:  token,
+		repo:      repo,
+		search:    search,
+		token:     token,
+		msgBroker: msgBroker,
 	}
 }

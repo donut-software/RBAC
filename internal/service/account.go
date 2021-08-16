@@ -53,14 +53,16 @@ func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, pass
 	if err != nil {
 		return id, fmt.Errorf("repo create account: %w", err)
 	}
-	err = r.search.IndexAccount(ctx, acc)
-	if err != nil {
-		return id, fmt.Errorf("search indexed account: %w", err)
-	}
-	err = r.search.IndexProfile(ctx, acc.Profile)
-	if err != nil {
-		return id, fmt.Errorf("search indexed account: %w", err)
-	}
+	// err = r.search.IndexAccount(ctx, acc)
+	// if err != nil {
+	// 	return id, fmt.Errorf("search indexed account: %w", err)
+	// }
+	_ = r.msgBroker.AccountCreated(ctx, acc) // XXX: Ignoring errors on purpose
+	// err = r.search.IndexProfile(ctx, acc.Profile)
+	// if err != nil {
+	// 	return id, fmt.Errorf("search indexed account: %w", err)
+	// }
+	_ = r.msgBroker.ProfileCreated(ctx, acc.Profile)
 	return id, nil
 }
 func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, error) {

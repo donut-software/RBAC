@@ -11,6 +11,7 @@ import (
 	"rbac/internal/envvar"
 	"rbac/internal/memcached"
 	"rbac/internal/postgresql"
+	"rbac/internal/redis"
 	"rbac/internal/service"
 
 	"go.uber.org/zap"
@@ -104,10 +105,17 @@ func main() {
 	if err != nil {
 		log.Fatal(fmt.Errorf("newTokenMaker %w", err))
 	}
+
+	rdb, err := internal.NewRedis(conf)
+	if err != nil {
+		log.Fatal(fmt.Errorf("internal.NewRabbitMQ %w", err))
+	}
+
+	msgBroker := redis.NewAccount(rdb)
 	repo := postgresql.NewRBAC(db)
 	search := elasticsearch.NewRBAC(es)
 	mclient := memcached.NewRBAC(m, search, logger)
-	svc := service.NewRBAC(repo, mclient, token)
+	svc := service.NewRBAC(repo, mclient, token, msgBroker)
 
 	//create new user
 	ctx := context.Background()

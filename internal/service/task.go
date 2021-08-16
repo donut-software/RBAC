@@ -35,22 +35,22 @@ func (r *RBAC) Task(ctx context.Context, id string) (internal.Tasks, error) {
 	}
 	return role, err
 }
-func (r *RBAC) UpdateTask(ctx context.Context, id string, taskname string) error {
+func (r *RBAC) UpdateTask(ctx context.Context, task internal.Tasks) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Update")
 	defer span.End()
-	err := r.repo.UpdateTask(ctx, id, taskname)
+	err := r.repo.UpdateTask(ctx, task.Id, task.Task)
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	task, err := r.repo.Task(ctx, id)
+	rt, err := r.repo.Task(ctx, task.Id)
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteTask(ctx, task.Id)
+	err = r.search.DeleteTask(ctx, rt.Id)
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
-	err = r.search.IndexTask(ctx, task)
+	err = r.search.IndexTask(ctx, rt)
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}

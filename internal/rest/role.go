@@ -99,7 +99,11 @@ func (rb *RBACHandler) updateRole(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.UpdateRole(r.Context(), req.RoleId, req.Role)
+	// err = rb.svc.UpdateRole(r.Context(), req.RoleId, req.Role)
+	err = rb.svc.UpdateRole(r.Context(), internal.Roles{
+		Id:   req.RoleId,
+		Role: req.Role,
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating role", err)
 		return

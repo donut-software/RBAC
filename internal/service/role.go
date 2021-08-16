@@ -34,18 +34,18 @@ func (r *RBAC) Role(ctx context.Context, id string) (internal.Roles, error) {
 	}
 	return role, err
 }
-func (r *RBAC) UpdateRole(ctx context.Context, id string, rolename string) error {
+func (r *RBAC) UpdateRole(ctx context.Context, rl internal.Roles) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Role.Update")
 	defer span.End()
-	err := r.repo.UpdateRole(ctx, id, rolename)
+	err := r.repo.UpdateRole(ctx, rl.Id, rl.Role)
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	role, err := r.repo.Role(ctx, id)
+	role, err := r.repo.Role(ctx, rl.Id)
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteRole(ctx, id)
+	err = r.search.DeleteRole(ctx, rl.Id)
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
