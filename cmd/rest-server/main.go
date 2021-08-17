@@ -16,7 +16,7 @@ import (
 	"rbac/internal/envvar"
 	"rbac/internal/memcached"
 	"rbac/internal/postgresql"
-	"rbac/internal/redis"
+	"rbac/internal/rabbitmq"
 	"rbac/internal/rest"
 	"rbac/internal/service"
 	"rbac/internal/tokenmaker"
@@ -102,6 +102,10 @@ func run(env, address string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("internal.NewRabbitMQ %w", err)
 	}
+	rmq, err := internal.NewRabbitMQ(conf)
+	if err != nil {
+		return nil, fmt.Errorf("newRabbitMq %w", err)
+	}
 	srv, err := newServer(serverConfig{
 		Address:       address,
 		Db:            db,
@@ -112,6 +116,7 @@ func run(env, address string) (<-chan error, error) {
 		Logger:        logger,
 		Memcached:     memcached,
 		Redis:         rdb,
+		RabbitMQ:      rmq,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -177,6 +182,7 @@ type serverConfig struct {
 	Logger        *zap.Logger
 	Memcached     *memcache.Client
 	Redis         *rv8.Client
+	RabbitMQ      *internal.RabbitMQ
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
@@ -184,11 +190,16 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	for _, mw := range conf.Middlewares {
 		r.Use(mw)
 	}
-	msgBroker := redis.NewAccount(conf.Redis)
+	// msgBroker := redis.NewAccount(conf.Redis)
 
 	repo := postgresql.NewRBAC(conf.Db)
 	search := elasticsearch.NewRBAC(conf.ElasticSearch, 100)
 	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
+
+	msgBroker, err := rabbitmq.NewRBAC(conf.RabbitMQ.Channel)
+	if err != nil {
+		return nil, fmt.Errorf("rabbitmq.NewAccount %w", err)
+	}
 	svc := service.NewRBAC(repo, mclient, conf.Token, msgBroker)
 
 	rest.RegisterOpenAPI(r)

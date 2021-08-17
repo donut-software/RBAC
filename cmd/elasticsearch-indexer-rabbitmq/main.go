@@ -1,8 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -14,13 +15,14 @@ import (
 	"rbac/internal/elasticsearch"
 	"rbac/internal/envvar"
 	"rbac/internal/memcached"
-	"strings"
 	"syscall"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
+
+const rabbitMQConsumerName = "elasticsearch-indexer"
 
 func main() {
 	var env string
@@ -57,9 +59,14 @@ func run(env string) (<-chan error, error) {
 
 	//-
 
-	rdb, err := internal.NewRedis(conf)
+	es, err := internal.NewElasticSearch(conf)
 	if err != nil {
-		return nil, fmt.Errorf("newRedis %w", err)
+		return nil, fmt.Errorf("internal.NewElasticSearch %w", err)
+	}
+
+	rmq, err := internal.NewRabbitMQ(conf)
+	if err != nil {
+		return nil, fmt.Errorf("newRabbitMQ %w", err)
 	}
 
 	//-
@@ -70,12 +77,6 @@ func run(env string) (<-chan error, error) {
 	}
 
 	//-
-
-	es, err := internal.NewElasticSearch(conf)
-	if err != nil {
-		return nil, fmt.Errorf("internal.NewElasticSearch %w", err)
-	}
-
 	mem, err := internal.NewMemcached(conf)
 	if err != nil {
 		return nil, fmt.Errorf("internal.NewMemcached %w", err)
@@ -86,8 +87,8 @@ func run(env string) (<-chan error, error) {
 	rbEvents := events.NewRBACEvents(mClient)
 	srv := &Server{
 		logger: logger,
-		rdb:    rdb,
-		cache:  mClient,
+		rmq:    rmq,
+		rbac:   mClient,
 		events: rbEvents,
 		done:   make(chan struct{}),
 	}
@@ -108,7 +109,7 @@ func run(env string) (<-chan error, error) {
 
 		defer func() {
 			logger.Sync()
-			rdb.Close()
+			rmq.Close()
 			stop()
 			cancel()
 			close(errC)
@@ -134,166 +135,221 @@ func run(env string) (<-chan error, error) {
 
 type Server struct {
 	logger *zap.Logger
-	rdb    *redis.Client
-	pubsub *redis.PubSub
-	cache  *memcached.RBAC
+	rmq    *internal.RabbitMQ
+	rbac   *memcached.RBAC
+	queue  amqp.Queue
 	events *events.RBACEvents
 	done   chan struct{}
 }
 
 // ListenAndServe ...
 func (s *Server) ListenAndServe() error {
-	pubsub := s.rdb.PSubscribe(context.Background(), "rbac.*")
-
-	_, err := pubsub.Receive(context.Background())
+	// XXX: Dead Letter Exchange will be implemented in future
+	q, err := s.rmq.Channel.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
 	if err != nil {
-		return fmt.Errorf("pubsub.Receive %w", err)
+		return fmt.Errorf("channel.QueueDeclare %w", err)
 	}
 
-	s.pubsub = pubsub
+	err = s.rmq.Channel.QueueBind(
+		q.Name,       // queue name
+		"rbac.*.*.*", // routing key
+		"rbac",       // exchange
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("channel.QueueBind %w", err)
+	}
 
-	ch := pubsub.Channel()
+	msgs, err := s.rmq.Channel.Consume(
+		q.Name,               // queue
+		rabbitMQConsumerName, // consumer
+		false,                // auto-ack
+		false,                // exclusive
+		false,                // no-local
+		false,                // no-wait
+		nil,                  // args
+	)
+	if err != nil {
+		return fmt.Errorf("channel.Consume %w", err)
+	}
 
 	go func() {
-		for msg := range ch {
-			s.logger.Info(fmt.Sprintf("Received message: %s", msg.Channel))
+		for msg := range msgs {
+			s.logger.Info(fmt.Sprintf("Received message: %s", msg.RoutingKey))
 
-			switch msg.Channel {
+			var nack bool
+
+			// XXX: Instrumentation to be added in a future
+			// XXX: We will revisit defining these topics in a better way in future episodes
+			switch msg.RoutingKey {
 			case internaldomain.EVENT_ACCOUNT_CREATED:
-				var account internaldomain.Account
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&account); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				var res internaldomain.Account
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&res); err != nil {
+					nack = true
+					return
 				}
-				if err := s.events.AccountCreated(account); err != nil {
+				if err := s.events.AccountCreated(res); err != nil {
 					s.logger.Info("Couldn't index account", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_PROFILE_UPDATED:
 				var profile internaldomain.Profile
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&profile); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&profile); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.AccountUpdated(profile); err != nil {
 					s.logger.Info("Couldn't update account", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ACCOUNT_DELETED:
 				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&id); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.AccountDeleted(id); err != nil {
 					s.logger.Info("Couldn't delete account", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLE_CREATED:
 				var role internaldomain.Roles
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&role); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&role); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleCreated(role); err != nil {
 					s.logger.Info("Couldn't index role", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLE_UPDATED:
 				var role internaldomain.Roles
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&role); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&role); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleUpdated(role); err != nil {
 					s.logger.Info("Couldn't update role", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLE_DELETED:
 				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&id); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleDeleted(id); err != nil {
 					s.logger.Info("Couldn't delete role", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_TASK_CREATED:
 				var task internaldomain.Tasks
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&task); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&task); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.TaskCreated(task); err != nil {
 					s.logger.Info("Couldn't index task", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_TASK_UPDATED:
 				var task internaldomain.Tasks
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&task); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&task); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.TaskUpdated(task); err != nil {
 					s.logger.Info("Couldn't update task", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_TASK_DELETED:
 				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&id); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.TaskDeleted(id); err != nil {
 					s.logger.Info("Couldn't delete task", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ACCOUNTROLE_CREATED:
-				var accountRoles internaldomain.AccountRoles
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&accountRoles); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				var accountRole internaldomain.AccountRoles
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&accountRole); err != nil {
+					nack = true
+					return
 				}
-				if err := s.events.AccountRoleCreated(accountRoles); err != nil {
+				if err := s.events.AccountRoleCreated(accountRole); err != nil {
 					s.logger.Info("Couldn't index accountrole", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ACCOUNTROLE_UPDATED:
-				var accountRoles internaldomain.AccountRoles
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&accountRoles); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				var accountRole internaldomain.AccountRoles
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&accountRole); err != nil {
+					nack = true
+					return
 				}
-				if err := s.events.AccountRoleUpdated(accountRoles); err != nil {
+				if err := s.events.AccountRoleUpdated(accountRole); err != nil {
 					s.logger.Info("Couldn't update accountrole", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ACCOUNTROLE_DELETED:
 				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&id); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.AccountRoleDeleted(id); err != nil {
 					s.logger.Info("Couldn't delete accountrole", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLETASK_CREATED:
 				var roleTask internaldomain.RoleTasks
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&roleTask); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&roleTask); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleTaskCreated(roleTask); err != nil {
 					s.logger.Info("Couldn't index roletask", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLETASK_UPDATED:
 				var roleTask internaldomain.RoleTasks
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&roleTask); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&roleTask); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleTaskUpdated(roleTask); err != nil {
 					s.logger.Info("Couldn't update roletask", zap.Error(err))
+					nack = true
 				}
 			case internaldomain.EVENT_ROLETASK_DELETED:
 				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+				if err := gob.NewDecoder(bytes.NewReader(msg.Body)).Decode(&id); err != nil {
+					nack = true
+					return
 				}
 				if err := s.events.RoleTaskDeleted(id); err != nil {
 					s.logger.Info("Couldn't delete roletask", zap.Error(err))
+					nack = true
 				}
+			default:
+				nack = true
+			}
+
+			if nack {
+				s.logger.Info("NAcking :(")
+				err = msg.Nack(false, nack)
+			} else {
+				s.logger.Info("Acking :)")
+				_ = msg.Ack(false)
 			}
 		}
 
@@ -309,7 +365,7 @@ func (s *Server) ListenAndServe() error {
 func (s *Server) Shutdown(ctx context.Context) error {
 	s.logger.Info("Shutting down server")
 
-	s.pubsub.Close()
+	s.rmq.Channel.Cancel(rabbitMQConsumerName, false)
 
 	for {
 		select {

@@ -26,6 +26,7 @@ require (
 	github.com/o1egl/paseto v1.0.0
 	github.com/opencontainers/runc v1.0.1 // indirect
 	github.com/ory/dockertest v3.3.5+incompatible
+	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.19.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.19.0

@@ -57,10 +57,10 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 - [X] Tokens
   - [X] JWT
   - [X] PASETO
-- [ ] Events and Messaging
+- [X] Events and Messaging
   - [ ] Apache Kafka
   - [ ] RabbitMq
-  - [ ] Redis
+  - [X] Redis
 - [X] Testing
   - [X] Type safe mocks with [`maxbrunsfeld/counterfeiter`](https://github.com/maxbrunsfeld/counterfeiter)
   - [X] Equality with [`google/go-cmp`](https://github.com/google/go-cmp)
