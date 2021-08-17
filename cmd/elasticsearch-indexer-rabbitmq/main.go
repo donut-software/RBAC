@@ -18,7 +18,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 
@@ -137,7 +136,7 @@ type Server struct {
 	logger *zap.Logger
 	rmq    *internal.RabbitMQ
 	rbac   *memcached.RBAC
-	queue  amqp.Queue
+	// queue  amqp.Queue
 	events *events.RBACEvents
 	done   chan struct{}
 }
