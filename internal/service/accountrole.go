@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"rbac/internal"
+	"strings"
 
 	"go.opentelemetry.io/otel/trace"
 )
@@ -25,12 +26,22 @@ func (r *RBAC) CreateAccountRole(ctx context.Context, accountRole internal.Accou
 func (r *RBAC) AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AccountRole")
 	defer span.End()
-	role, err := r.search.GetAccountRole(ctx, accountRoleId)
+	accRole, err := r.search.GetAccountRole(ctx, accountRoleId)
 	if err != nil {
-		fmt.Println(err)
-		return internal.AccountRoles{}, err
+		if strings.Contains(err.Error(), "404") {
+			accRole, err = r.repo.AccountRole(ctx, accountRoleId)
+			if err != nil {
+				return internal.AccountRoles{}, fmt.Errorf("get account: %w", err)
+			}
+			//if you get here means account and profile has value and no error
+			err = r.search.IndexAccountRole(ctx, accRole)
+			if err != nil {
+				return internal.AccountRoles{}, fmt.Errorf("index account: %w", err)
+			}
+			return accRole, err
+		}
 	}
-	return role, err
+	return accRole, err
 }
 func (r *RBAC) AccountRoleByAccount(ctx context.Context, username string) (internal.AccountRoleByAccountResult, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AccountRoleByAccount")

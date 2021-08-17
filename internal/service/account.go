@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"rbac/internal"
+	"strings"
 
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/net/context"
@@ -62,7 +63,22 @@ func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, 
 	defer span.End()
 	account, err := r.search.GetAccount(ctx, username)
 	if err != nil {
-		return internal.Account{}, fmt.Errorf("get account: %w", err)
+		if strings.Contains(err.Error(), "404") {
+			account, err = r.repo.Account(ctx, username)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("get account: %w", err)
+			}
+			//if you get here means account and profile has value and no error
+			err = r.search.IndexAccount(ctx, account)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("index account: %w", err)
+			}
+			err = r.search.IndexProfile(ctx, account.Profile)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("index profile: %w", err)
+			}
+			return account, err
+		}
 	}
 	account.Profile, err = r.search.GetProfile(ctx, account.Profile.Id)
 	if err != nil {
@@ -76,7 +92,26 @@ func (r *RBAC) AccountByID(ctx context.Context, id string) (internal.Account, er
 	// account, err := r.repo.Account(ctx, username)
 	account, err := r.search.GetAccountById(ctx, id)
 	if err != nil {
-		return internal.Account{}, fmt.Errorf("get account: %w", err)
+		if strings.Contains(err.Error(), "404") {
+			account, err = r.repo.AccountByID(ctx, id)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("get account: %w", err)
+			}
+			fmt.Println("Not Found", id)
+			//if you get here means account and profile has value and no error
+			err = r.search.IndexAccount(ctx, account)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("index account: %w", err)
+			}
+			err = r.search.IndexProfile(ctx, account.Profile)
+			if err != nil {
+				return internal.Account{}, fmt.Errorf("index profile: %w", err)
+			}
+			return account, err
+		}
+		if err != nil {
+			return internal.Account{}, fmt.Errorf("get account: %w", err)
+		}
 	}
 	account.Profile, err = r.search.GetProfile(ctx, account.Profile.Id)
 	if err != nil {
@@ -91,7 +126,6 @@ func (r *RBAC) UpdateProfile(ctx context.Context, profile internal.Profile) erro
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
-
 	_ = r.msgBroker.ProfileUpdated(ctx, profile)
 	return nil
 }
@@ -111,10 +145,6 @@ func (r *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	// err = r.search.DeleteAccount(ctx, username)
-	// if err != nil {
-	// 	return fmt.Errorf("search: %w", err)
-	// }
 	_ = r.msgBroker.AccountDeleted(ctx, username)
 	return nil
 }

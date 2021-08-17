@@ -64,6 +64,7 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 	})
 	return accId, err
 }
+
 func (s *Store) Account(ctx context.Context, username string) (internal.Account, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
 	span.SetAttributes(attribute.String("db.system", "postgresql"))
@@ -71,6 +72,48 @@ func (s *Store) Account(ctx context.Context, username string) (internal.Account,
 	account := internal.Account{}
 	err := s.execTx(ctx, func(q *Queries) error {
 		acc, err := q.SelectAccounts(ctx, username)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		account.Id = acc.ID.String()
+		account.UserName = acc.Username
+		// account.HashedPassword = acc.Hashedpassword
+		account.IsBlocked = acc.IsBlocked
+		account.CreatedAt = acc.CreatedAt
+		prof, err := q.SelectProfile(ctx, acc.Profile)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		profile := internal.Profile{
+			Id:                 prof.ID.String(),
+			Profile_Picture:    prof.ProfilePicture,
+			Profile_Background: prof.ProfileBackground,
+			First_Name:         prof.FirstName,
+			Last_Name:          prof.LastName,
+			Mobile:             prof.Mobile,
+			Email:              prof.Email,
+			CreatedAt:          prof.CreatedAt,
+		}
+		account.Profile = profile
+		return nil
+	})
+	return account, err
+}
+
+func (s *Store) AccountByID(ctx context.Context, id string) (internal.Account, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
+	span.SetAttributes(attribute.String("db.system", "postgresql"))
+	defer span.End()
+	account := internal.Account{}
+	err := s.execTx(ctx, func(q *Queries) error {
+		aid, err := uuid.Parse(id)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		acc, err := q.SelectAccountsById(ctx, aid)
 		if err != nil {
 			fmt.Println(err)
 			return err

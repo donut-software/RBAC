@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"rbac/internal"
+	"strings"
 
 	"go.opentelemetry.io/otel/trace"
 )
@@ -27,7 +28,18 @@ func (r *RBAC) Role(ctx context.Context, id string) (internal.Roles, error) {
 	defer span.End()
 	role, err := r.search.GetRole(ctx, id)
 	if err != nil {
-		return internal.Roles{}, fmt.Errorf("search: %w", err)
+		if strings.Contains(err.Error(), "404") {
+			role, err = r.repo.Role(ctx, id)
+			if err != nil {
+				return internal.Roles{}, fmt.Errorf("get account: %w", err)
+			}
+			//if you get here means account and profile has value and no error
+			err = r.search.IndexRole(ctx, role)
+			if err != nil {
+				return internal.Roles{}, fmt.Errorf("index account: %w", err)
+			}
+			return role, err
+		}
 	}
 	return role, err
 }

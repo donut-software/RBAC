@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"rbac/internal"
+	"strings"
 
 	"go.opentelemetry.io/otel/trace"
 )
@@ -25,11 +26,22 @@ func (r *RBAC) CreateRoleTask(ctx context.Context, roleTask internal.RoleTasks) 
 func (r *RBAC) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.RoleTask")
 	defer span.End()
-	role, err := r.search.GetRoleTask(ctx, roleTaskId)
+	roleTask, err := r.search.GetRoleTask(ctx, roleTaskId)
 	if err != nil {
-		return internal.RoleTasks{}, fmt.Errorf("search: %w", err)
+		if strings.Contains(err.Error(), "404") {
+			roleTask, err = r.repo.RoleTask(ctx, roleTaskId)
+			if err != nil {
+				return internal.RoleTasks{}, fmt.Errorf("get account: %w", err)
+			}
+			//if you get here means account and profile has value and no error
+			err = r.search.IndexRoleTask(ctx, roleTask)
+			if err != nil {
+				return internal.RoleTasks{}, fmt.Errorf("index account: %w", err)
+			}
+			return roleTask, err
+		}
 	}
-	return role, err
+	return roleTask, err
 }
 func (r *RBAC) UpdateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.Update")
