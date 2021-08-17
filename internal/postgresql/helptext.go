@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -18,16 +17,14 @@ func (s *Store) CreateHelpText(ctx context.Context, helptext internal.HelpText) 
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(helptext.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := q.InsertHelpText(ctx, InsertHelpTextParams{
 			Helptext: helptext.HelpText,
 			TaskID:   tid,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "create help text", internal.ErrorCodeUnknown, "")
 		}
 		htid = id.String()
 		return nil
@@ -42,13 +39,11 @@ func (s *Store) HelpText(ctx context.Context, id string) (internal.HelpText, err
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		ht, err := q.SelectHelpText(ctx, htId)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get helptext", internal.ErrorCodeUnknown, "helptext not found")
 		}
 		helptext.Id = ht.ID.String()
 		helptext.HelpText = ht.Helptext
@@ -65,13 +60,11 @@ func (s *Store) UpdateHelpText(ctx context.Context, helptext internal.HelpText) 
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(helptext.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse task id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := uuid.Parse(helptext.Id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse helptext id", internal.ErrorCodeUnknown, "")
 		}
 		err = q.UpdateHelpText(ctx, UpdateHelpTextParams{
 			TaskID:   tid,
@@ -79,8 +72,7 @@ func (s *Store) UpdateHelpText(ctx context.Context, helptext internal.HelpText) 
 			ID:       id,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "update helptext", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -93,13 +85,11 @@ func (s *Store) DeleteHelpText(ctx context.Context, id string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		hid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.DeleteHelpText(ctx, hid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete helptext", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})

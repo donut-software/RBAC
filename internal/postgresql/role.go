@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -18,8 +17,7 @@ func (s *Store) CreateRole(ctx context.Context, rolename string) (string, error)
 	err := s.execTx(ctx, func(q *Queries) error {
 		id, err := q.InsertRole(ctx, rolename)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "create role", internal.ErrorCodeUnknown, "")
 		}
 		rid = id.String()
 		return nil
@@ -35,13 +33,11 @@ func (s *Store) Role(ctx context.Context, id string) (internal.Roles, error) {
 	err := s.execTx(ctx, func(q *Queries) error {
 		rid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		r, err := q.SelectRole(ctx, rid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get role", internal.ErrorCodeInvalidArgument, "role not found")
 		}
 		role.Id = r.ID.String()
 		role.Role = r.Role
@@ -59,16 +55,14 @@ func (s *Store) UpdateRole(ctx context.Context, id string, rolename string) erro
 	err := s.execTx(ctx, func(q *Queries) error {
 		rid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.UpdateRole(ctx, UpdateRoleParams{
 			Role: rolename,
 			ID:   rid,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "update role", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -82,23 +76,19 @@ func (s *Store) DeleteRole(ctx context.Context, id string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		rid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.DeleteAccountRoleByRole(ctx, rid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete account role by role", internal.ErrorCodeUnknown, "")
 		}
 		err = q.DeleteRoleTaskByRole(ctx, rid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete task by role", internal.ErrorCodeUnknown, "")
 		}
 		err = q.DeleteRole(ctx, rid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete role", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})

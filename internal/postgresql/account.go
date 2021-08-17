@@ -2,8 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -16,14 +14,11 @@ func (a *Store) Login(ctx context.Context, username string, password string) err
 		//find the account first
 		acc, err := q.SelectAccounts(ctx, username)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				return internal.WrapErrorf(err, internal.ErrorCodeNotFound, "login account no found")
-			}
-			return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "login account")
+			return handleError(err, "get account", internal.ErrorCodeUnknown, "account not found")
 		}
 		err = CheckPassword(password, acc.Hashedpassword)
 		if err != nil {
-			return internal.WrapErrorf(err, internal.ErrorCodeInvalidArgument, "login account")
+			return handleError(err, "check password", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -45,11 +40,11 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 			Email:             account.Profile.Email,
 		})
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "create profile", internal.ErrorCodeUnknown, "")
 		}
 		hashedPassword, err := HashPassword(password)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "hash password ", internal.ErrorCodeInvalidArgument, "")
 		}
 		aid, err := q.InsertAccounts(ctx, InsertAccountsParams{
 			Username:       account.UserName,
@@ -57,7 +52,7 @@ func (s *Store) CreateAccount(ctx context.Context, account internal.Account, pas
 			Profile:        profileId,
 		})
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "create account", internal.ErrorCodeUnknown, "")
 		}
 		accId = aid.String()
 		return nil
@@ -73,8 +68,7 @@ func (s *Store) Account(ctx context.Context, username string) (internal.Account,
 	err := s.execTx(ctx, func(q *Queries) error {
 		acc, err := q.SelectAccounts(ctx, username)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get account", internal.ErrorCodeUnknown, "account not found")
 		}
 		account.Id = acc.ID.String()
 		account.UserName = acc.Username
@@ -83,8 +77,7 @@ func (s *Store) Account(ctx context.Context, username string) (internal.Account,
 		account.CreatedAt = acc.CreatedAt
 		prof, err := q.SelectProfile(ctx, acc.Profile)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get profile", internal.ErrorCodeUnknown, "profile not found")
 		}
 		profile := internal.Profile{
 			Id:                 prof.ID.String(),
@@ -110,13 +103,11 @@ func (s *Store) AccountByID(ctx context.Context, id string) (internal.Account, e
 	err := s.execTx(ctx, func(q *Queries) error {
 		aid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		acc, err := q.SelectAccountsById(ctx, aid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get account", internal.ErrorCodeUnknown, "account not found")
 		}
 		account.Id = acc.ID.String()
 		account.UserName = acc.Username
@@ -125,8 +116,7 @@ func (s *Store) AccountByID(ctx context.Context, id string) (internal.Account, e
 		account.CreatedAt = acc.CreatedAt
 		prof, err := q.SelectProfile(ctx, acc.Profile)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get profile", internal.ErrorCodeUnknown, "profile not found")
 		}
 		profile := internal.Profile{
 			Id:                 prof.ID.String(),
@@ -150,8 +140,7 @@ func (s *Store) UpdateProfile(ctx context.Context, profile internal.Profile) err
 	err := s.execTx(ctx, func(q *Queries) error {
 		profId, err := uuid.Parse(profile.Id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		q.UpdateProfile(ctx, UpdateProfileParams{
 			ProfilePicture:    profile.Profile_Picture,
@@ -173,8 +162,7 @@ func (s *Store) DeleteAccount(ctx context.Context, username string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		err := q.DeleteAccount(ctx, username)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete account", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -187,16 +175,14 @@ func (s *Store) ChangePassword(ctx context.Context, username string, password st
 	err := s.execTx(ctx, func(q *Queries) error {
 		hashedPassword, err := HashPassword(password)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "hash password", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.ChangePassword(ctx, ChangePasswordParams{
 			Hashedpassword: hashedPassword,
 			Username:       username,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "change password", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})

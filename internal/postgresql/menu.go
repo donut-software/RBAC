@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -18,16 +17,14 @@ func (s *Store) CreateMenu(ctx context.Context, menu internal.Menu) (string, err
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(menu.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := q.InsertMenu(ctx, InsertMenuParams{
 			Name:   menu.Name,
 			TaskID: htId,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "create menu", internal.ErrorCodeUnknown, "")
 		}
 		mid = id.String()
 		return nil
@@ -42,13 +39,11 @@ func (s *Store) Menu(ctx context.Context, id string) (internal.Menu, error) {
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		ht, err := q.SelectMenu(ctx, htId)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get menu", internal.ErrorCodeUnknown, "menu not found")
 		}
 		menu.Id = ht.ID.String()
 		menu.Name = ht.Name
@@ -65,13 +60,11 @@ func (s *Store) UpdateMenu(ctx context.Context, menu internal.Menu) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(menu.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse task id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := uuid.Parse(menu.Id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse menu id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.UpdateMenu(ctx, UpdateMenuParams{
 			TaskID: tid,
@@ -79,8 +72,7 @@ func (s *Store) UpdateMenu(ctx context.Context, menu internal.Menu) error {
 			ID:     id,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "update menu", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -93,13 +85,11 @@ func (s *Store) DeleteMenu(ctx context.Context, id string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		hid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.DeleteMenu(ctx, hid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete menu", internal.ErrorCodeInvalidArgument, "")
 		}
 		return nil
 	})

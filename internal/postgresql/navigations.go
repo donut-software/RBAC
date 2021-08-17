@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -18,16 +17,14 @@ func (s *Store) CreateNavigation(ctx context.Context, menu internal.Navigation) 
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(menu.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := q.InsertNavigation(ctx, InsertNavigationParams{
 			Name:   menu.Name,
 			TaskID: htId,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "create navigation", internal.ErrorCodeUnknown, "")
 		}
 		nid = id.String()
 		return nil
@@ -42,13 +39,11 @@ func (s *Store) Navigation(ctx context.Context, id string) (internal.Navigation,
 	err := s.execTx(ctx, func(q *Queries) error {
 		htId, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		ht, err := q.SelectNavigation(ctx, htId)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get navigation", internal.ErrorCodeUnknown, "navigation not found")
 		}
 		menu.Id = ht.ID.String()
 		menu.Name = ht.Name
@@ -65,13 +60,11 @@ func (s *Store) UpdateNavigation(ctx context.Context, menu internal.Navigation) 
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(menu.Task_id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse task id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := uuid.Parse(menu.Id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse menu id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.UpdateNavigation(ctx, UpdateNavigationParams{
 			TaskID: tid,
@@ -79,8 +72,7 @@ func (s *Store) UpdateNavigation(ctx context.Context, menu internal.Navigation) 
 			ID:     id,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "update navigation", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -93,13 +85,11 @@ func (s *Store) DeleteNavigation(ctx context.Context, id string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		hid, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.DeleteNavigation(ctx, hid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "delete navigation", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"rbac/internal"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -40,4 +41,11 @@ func HashPassword(password string) (string, error) {
 
 func CheckPassword(password string, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func handleError(err error, others string, othersErrorCode internal.ErrorCode, queryError string) error {
+	if err == sql.ErrNoRows {
+		return internal.WrapErrorf(err, internal.ErrorCodeNotFound, queryError)
+	}
+	return internal.WrapErrorf(err, othersErrorCode, others)
 }

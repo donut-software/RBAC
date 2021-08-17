@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"fmt"
 	"rbac/internal"
 
 	"github.com/google/uuid"
@@ -18,21 +17,18 @@ func (s *Store) CreateRoleTasks(ctx context.Context, taskid string, roleid strin
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(taskid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse task id", internal.ErrorCodeInvalidArgument, "")
 		}
 		rid, err := uuid.Parse(roleid)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "parse role id", internal.ErrorCodeInvalidArgument, "")
 		}
 		id, err := q.InsertRoleTask(ctx, InsertRoleTaskParams{
 			RoleID: rid,
 			TaskID: tid,
 		})
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "create role task", internal.ErrorCodeUnknown, "")
 		}
 		rtid = id.String()
 		return nil
@@ -47,74 +43,29 @@ func (s *Store) RoleTask(ctx context.Context, roleTaskId string) (internal.RoleT
 	err := s.execTx(ctx, func(q *Queries) error {
 		rtId, err := uuid.Parse(roleTaskId)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		rt, err := q.SelectRoleTask(ctx, rtId)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get role task", internal.ErrorCodeUnknown, "roletask not found")
 		}
 		roletask.Id = rt.ID.String()
 
 		t, err := q.SelectTask(ctx, rt.TaskID)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "get task", internal.ErrorCodeUnknown, "task not found")
 		}
-		// ht, err := q.SelectHelpTextByTasks(ctx, rt.TaskID)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return err
-		// }
-		// helptext := internal.HelpText{
-		// 	Id:        ht.ID.String(),
-		// 	Task_id:   ht.TaskID.String(),
-		// 	HelpText:  ht.Helptext,
-		// 	CreatedAt: ht.CreatedAt,
-		// }
 
-		// m, err := q.SelectMenuByTask(ctx, rt.TaskID)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return err
-		// }
-		// menu := []internal.Menu{}
-		// for _, value := range m {
-		// 	menu = append(menu, internal.Menu{
-		// 		Id:        value.ID.String(),
-		// 		Name:      value.Name,
-		// 		Task_id:   value.TaskID.String(),
-		// 		CreatedAt: value.CreatedAt,
-		// 	})
-		// }
-
-		// n, err := q.SelectNavigationByTask(ctx, rt.TaskID)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return err
-		// }
-		// nav := []internal.Navigation{}
-		// for _, value := range n {
-		// 	nav = append(nav, internal.Navigation{
-		// 		Id:        value.ID.String(),
-		// 		Name:      value.Name,
-		// 		Task_id:   value.TaskID.String(),
-		// 		CreatedAt: value.CreatedAt,
-		// 	})
-		// }
 		task := internal.Tasks{
-			Id:   t.ID.String(),
-			Task: t.Task,
-			// HelpText:   helptext,
-			// Menu:       menu,
-			// Navigation: nav,
+			Id:        t.ID.String(),
+			Task:      t.Task,
 			CreatedAt: t.CreatedAt,
 		}
 		roletask.Task = task
 
 		r, err := q.SelectRole(ctx, rt.RoleID)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return handleError(err, "get role", internal.ErrorCodeUnknown, "role not found")
 		}
 		role := internal.Roles{
 			Id:        r.ID.String(),
@@ -133,15 +84,15 @@ func (s *Store) UpdateRoleTask(ctx context.Context, taskId string, roleId string
 	err := s.execTx(ctx, func(q *Queries) error {
 		tid, err := uuid.Parse(taskId)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "parse task id", internal.ErrorCodeInvalidArgument, "")
 		}
 		rid, err := uuid.Parse(roleId)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "parse role id", internal.ErrorCodeInvalidArgument, "")
 		}
 		rtId, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.UpdateRoleTask(ctx, UpdateRoleTaskParams{
 			TaskID: tid,
@@ -149,7 +100,7 @@ func (s *Store) UpdateRoleTask(ctx context.Context, taskId string, roleId string
 			ID:     rtId,
 		})
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "update roletask", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
@@ -162,11 +113,11 @@ func (s *Store) DeleteRoleTask(ctx context.Context, id string) error {
 	err := s.execTx(ctx, func(q *Queries) error {
 		rtId, err := uuid.Parse(id)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "parse id", internal.ErrorCodeInvalidArgument, "")
 		}
 		err = q.DeleteRoleTask(ctx, rtId)
 		if err != nil {
-			fmt.Println(err)
+			return handleError(err, "delete role task", internal.ErrorCodeUnknown, "")
 		}
 		return nil
 	})
