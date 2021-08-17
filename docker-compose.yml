@@ -21,9 +21,10 @@ services:
       - postgres
       - vault
       - prometheus
+      - elasticsearch
       - jaeger
       - memcached
-      - elasticsearch
+      - redis
       # - zookeeper
       # - kafka
       # - rabbitmq
@@ -67,24 +68,23 @@ services:
     image: memcached:1.6.9-alpine
     ports:
       - "11211:11211"
-  # rabbitmq:
-  #   image: rabbitmq:3.8.14-management-alpine
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  # elasticsearch-indexer:
-  #   build:
-  #     context: .
-  #     dockerfile: ./build/elasticsearch-indexer/Dockerfile
-  #   command: elasticsearch-indexer -env /api/env.example
-  #   environment:
-  #     JAEGER_ENDPOINT: "http://jaeger:14268/api/traces"
-  #     VAULT_ADDRESS: "http://vault:8300"
-  #     ELASTICSEARCH_URL: "http://elasticsearch:9200"
-  #     RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
-  #   depends_on:
-  #     - vault
-  #     - prometheus
-  #     - jaeger
-  #     - elasticsearch
-  #     - rabbitmq
+  redis:
+    image: redis:6.2.3-alpine3.13
+    ports:
+      - "6379:6379"
+  elasticsearch-indexer-redis:
+    build:
+      context: .
+      dockerfile: ./build/elasticsearch-indexer-redis/Dockerfile
+    command: elasticsearch-indexer -env /api/env.example
+    environment:
+      JAEGER_ENDPOINT: "http://jaeger:14268/api/traces"
+      VAULT_ADDRESS: "http://vault:8300"
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+      REDIS_URL: "redis:6379"
+    depends_on:
+      - vault
+      - prometheus
+      - jaeger
+      - elasticsearch
+      - redis

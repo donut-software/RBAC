@@ -58,8 +58,8 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
   - [X] JWT
   - [X] PASETO
 - [X] Events and Messaging
-  - [ ] Apache Kafka
-  - [ ] RabbitMq
+  - [X] Apache Kafka
+  - [X] RabbitMq
   - [X] Redis
 - [X] Testing
   - [X] Type safe mocks with [`maxbrunsfeld/counterfeiter`](https://github.com/maxbrunsfeld/counterfeiter)

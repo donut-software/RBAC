@@ -14,9 +14,9 @@ import (
 	"rbac/cmd/internal"
 	"rbac/internal/elasticsearch"
 	"rbac/internal/envvar"
-	"rbac/internal/kafka"
 	"rbac/internal/memcached"
 	"rbac/internal/postgresql"
+	"rbac/internal/redis"
 	"rbac/internal/rest"
 	"rbac/internal/service"
 	"rbac/internal/tokenmaker"
@@ -99,19 +99,19 @@ func run(env, address string) (<-chan error, error) {
 		return nil, fmt.Errorf("newTokenMaker %w", err)
 	}
 
-	// rdb, err := internal.NewRedis(conf)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("internal.NewRabbitMQ %w", err)
-	// }
+	rdb, err := internal.NewRedis(conf)
+	if err != nil {
+		return nil, fmt.Errorf("internal.NewRabbitMQ %w", err)
+	}
 	// rmq, err := internal.NewRabbitMQ(conf)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("newRabbitMq %w", err)
 	// }
 
-	kafka, err := internal.NewKafkaProducer(conf)
-	if err != nil {
-		return nil, fmt.Errorf("newRabbitMq %w", err)
-	}
+	// kafka, err := internal.NewKafkaProducer(conf)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("newRabbitMq %w", err)
+	// }
 	srv, err := newServer(serverConfig{
 		Address:       address,
 		Db:            db,
@@ -121,9 +121,9 @@ func run(env, address string) (<-chan error, error) {
 		Middlewares:   []mux.MiddlewareFunc{otelmux.Middleware("user-management-server"), logging},
 		Logger:        logger,
 		Memcached:     memcached,
-		// Redis:         rdb,
+		Redis:         rdb,
 		// RabbitMQ:      rmq,
-		Kafka: kafka,
+		// Kafka: kafka,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("newServer %w", err)
@@ -189,8 +189,8 @@ type serverConfig struct {
 	Logger        *zap.Logger
 	Memcached     *memcache.Client
 	Redis         *rv8.Client
-	RabbitMQ      *internal.RabbitMQ
-	Kafka         *internal.KafkaProducer
+	// RabbitMQ      *internal.RabbitMQ
+	// Kafka         *internal.KafkaProducer
 }
 
 func newServer(conf serverConfig) (*http.Server, error) {
@@ -203,12 +203,12 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	search := elasticsearch.NewRBAC(conf.ElasticSearch, 100)
 	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
 
-	// msgBroker := redis.NewAccount(conf.Redis)
+	msgBroker := redis.NewAccount(conf.Redis)
 	// msgBroker, err := rabbitmq.NewRBAC(conf.RabbitMQ.Channel)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("rabbitmq.NewAccount %w", err)
 	// }
-	msgBroker := kafka.NewRBAC(conf.Kafka.Producer, conf.Kafka.Topic)
+	// msgBroker := kafka.NewRBAC(conf.Kafka.Producer, conf.Kafka.Topic)
 
 	svc := service.NewRBAC(repo, mclient, conf.Token, msgBroker)
 
