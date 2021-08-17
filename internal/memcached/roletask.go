@@ -51,6 +51,13 @@ func (t *RBAC) GetRoleTask(ctx context.Context, roletaskId string) (internal.Rol
 func (t *RBAC) DeleteRoleTask(ctx context.Context, roletaskId string) error {
 	return t.orig.DeleteRoleTask(ctx, roletaskId)
 }
+func (t *RBAC) UpdateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error {
+	err := t.orig.DeleteRoleTask(ctx, roleTask.Id)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRoleTask")
+	}
+	return t.orig.IndexRoleTask(ctx, roleTask)
+}
 
 func (t *RBAC) GetRoleTaskByRole(ctx context.Context, roleid string) (internal.RoleTaskByRole, error) {
 	key := "roletaskbyrole_" + roleid

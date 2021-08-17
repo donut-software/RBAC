@@ -108,12 +108,11 @@ type FakeRBACService struct {
 		result1 string
 		result2 error
 	}
-	CreateAccountRoleStub        func(context.Context, string, string) error
+	CreateAccountRoleStub        func(context.Context, internal.AccountRoles) error
 	createAccountRoleMutex       sync.RWMutex
 	createAccountRoleArgsForCall []struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
+		arg2 internal.AccountRoles
 	}
 	createAccountRoleReturns struct {
 		result1 error
@@ -171,12 +170,11 @@ type FakeRBACService struct {
 		result1 string
 		result2 error
 	}
-	CreateRoleTaskStub        func(context.Context, string, string) error
+	CreateRoleTaskStub        func(context.Context, internal.RoleTasks) error
 	createRoleTaskMutex       sync.RWMutex
 	createRoleTaskArgsForCall []struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
+		arg2 internal.RoleTasks
 	}
 	createRoleTaskReturns struct {
 		result1 error
@@ -542,13 +540,11 @@ type FakeRBACService struct {
 		result1 internal.Tasks
 		result2 error
 	}
-	UpdateAccountRoleStub        func(context.Context, string, string, string) error
+	UpdateAccountRoleStub        func(context.Context, internal.AccountRoles) error
 	updateAccountRoleMutex       sync.RWMutex
 	updateAccountRoleArgsForCall []struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-		arg4 string
+		arg2 internal.AccountRoles
 	}
 	updateAccountRoleReturns struct {
 		result1 error
@@ -616,13 +612,11 @@ type FakeRBACService struct {
 	updateRoleReturnsOnCall map[int]struct {
 		result1 error
 	}
-	UpdateRoleTaskStub        func(context.Context, string, string, string) error
+	UpdateRoleTaskStub        func(context.Context, internal.RoleTasks) error
 	updateRoleTaskMutex       sync.RWMutex
 	updateRoleTaskArgsForCall []struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-		arg4 string
+		arg2 internal.RoleTasks
 	}
 	updateRoleTaskReturns struct {
 		result1 error
@@ -1113,20 +1107,19 @@ func (fake *FakeRBACService) CreateAccountReturnsOnCall(i int, result1 string, r
 	}{result1, result2}
 }
 
-func (fake *FakeRBACService) CreateAccountRole(arg1 context.Context, arg2 string, arg3 string) error {
+func (fake *FakeRBACService) CreateAccountRole(arg1 context.Context, arg2 internal.AccountRoles) error {
 	fake.createAccountRoleMutex.Lock()
 	ret, specificReturn := fake.createAccountRoleReturnsOnCall[len(fake.createAccountRoleArgsForCall)]
 	fake.createAccountRoleArgsForCall = append(fake.createAccountRoleArgsForCall, struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-	}{arg1, arg2, arg3})
+		arg2 internal.AccountRoles
+	}{arg1, arg2})
 	stub := fake.CreateAccountRoleStub
 	fakeReturns := fake.createAccountRoleReturns
-	fake.recordInvocation("CreateAccountRole", []interface{}{arg1, arg2, arg3})
+	fake.recordInvocation("CreateAccountRole", []interface{}{arg1, arg2})
 	fake.createAccountRoleMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3)
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1140,17 +1133,17 @@ func (fake *FakeRBACService) CreateAccountRoleCallCount() int {
 	return len(fake.createAccountRoleArgsForCall)
 }
 
-func (fake *FakeRBACService) CreateAccountRoleCalls(stub func(context.Context, string, string) error) {
+func (fake *FakeRBACService) CreateAccountRoleCalls(stub func(context.Context, internal.AccountRoles) error) {
 	fake.createAccountRoleMutex.Lock()
 	defer fake.createAccountRoleMutex.Unlock()
 	fake.CreateAccountRoleStub = stub
 }
 
-func (fake *FakeRBACService) CreateAccountRoleArgsForCall(i int) (context.Context, string, string) {
+func (fake *FakeRBACService) CreateAccountRoleArgsForCall(i int) (context.Context, internal.AccountRoles) {
 	fake.createAccountRoleMutex.RLock()
 	defer fake.createAccountRoleMutex.RUnlock()
 	argsForCall := fake.createAccountRoleArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeRBACService) CreateAccountRoleReturns(result1 error) {
@@ -1427,20 +1420,19 @@ func (fake *FakeRBACService) CreateRoleReturnsOnCall(i int, result1 string, resu
 	}{result1, result2}
 }
 
-func (fake *FakeRBACService) CreateRoleTask(arg1 context.Context, arg2 string, arg3 string) error {
+func (fake *FakeRBACService) CreateRoleTask(arg1 context.Context, arg2 internal.RoleTasks) error {
 	fake.createRoleTaskMutex.Lock()
 	ret, specificReturn := fake.createRoleTaskReturnsOnCall[len(fake.createRoleTaskArgsForCall)]
 	fake.createRoleTaskArgsForCall = append(fake.createRoleTaskArgsForCall, struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-	}{arg1, arg2, arg3})
+		arg2 internal.RoleTasks
+	}{arg1, arg2})
 	stub := fake.CreateRoleTaskStub
 	fakeReturns := fake.createRoleTaskReturns
-	fake.recordInvocation("CreateRoleTask", []interface{}{arg1, arg2, arg3})
+	fake.recordInvocation("CreateRoleTask", []interface{}{arg1, arg2})
 	fake.createRoleTaskMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3)
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -1454,17 +1446,17 @@ func (fake *FakeRBACService) CreateRoleTaskCallCount() int {
 	return len(fake.createRoleTaskArgsForCall)
 }
 
-func (fake *FakeRBACService) CreateRoleTaskCalls(stub func(context.Context, string, string) error) {
+func (fake *FakeRBACService) CreateRoleTaskCalls(stub func(context.Context, internal.RoleTasks) error) {
 	fake.createRoleTaskMutex.Lock()
 	defer fake.createRoleTaskMutex.Unlock()
 	fake.CreateRoleTaskStub = stub
 }
 
-func (fake *FakeRBACService) CreateRoleTaskArgsForCall(i int) (context.Context, string, string) {
+func (fake *FakeRBACService) CreateRoleTaskArgsForCall(i int) (context.Context, internal.RoleTasks) {
 	fake.createRoleTaskMutex.RLock()
 	defer fake.createRoleTaskMutex.RUnlock()
 	argsForCall := fake.createRoleTaskArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeRBACService) CreateRoleTaskReturns(result1 error) {
@@ -3215,21 +3207,19 @@ func (fake *FakeRBACService) TaskReturnsOnCall(i int, result1 internal.Tasks, re
 	}{result1, result2}
 }
 
-func (fake *FakeRBACService) UpdateAccountRole(arg1 context.Context, arg2 string, arg3 string, arg4 string) error {
+func (fake *FakeRBACService) UpdateAccountRole(arg1 context.Context, arg2 internal.AccountRoles) error {
 	fake.updateAccountRoleMutex.Lock()
 	ret, specificReturn := fake.updateAccountRoleReturnsOnCall[len(fake.updateAccountRoleArgsForCall)]
 	fake.updateAccountRoleArgsForCall = append(fake.updateAccountRoleArgsForCall, struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-		arg4 string
-	}{arg1, arg2, arg3, arg4})
+		arg2 internal.AccountRoles
+	}{arg1, arg2})
 	stub := fake.UpdateAccountRoleStub
 	fakeReturns := fake.updateAccountRoleReturns
-	fake.recordInvocation("UpdateAccountRole", []interface{}{arg1, arg2, arg3, arg4})
+	fake.recordInvocation("UpdateAccountRole", []interface{}{arg1, arg2})
 	fake.updateAccountRoleMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3, arg4)
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -3243,17 +3233,17 @@ func (fake *FakeRBACService) UpdateAccountRoleCallCount() int {
 	return len(fake.updateAccountRoleArgsForCall)
 }
 
-func (fake *FakeRBACService) UpdateAccountRoleCalls(stub func(context.Context, string, string, string) error) {
+func (fake *FakeRBACService) UpdateAccountRoleCalls(stub func(context.Context, internal.AccountRoles) error) {
 	fake.updateAccountRoleMutex.Lock()
 	defer fake.updateAccountRoleMutex.Unlock()
 	fake.UpdateAccountRoleStub = stub
 }
 
-func (fake *FakeRBACService) UpdateAccountRoleArgsForCall(i int) (context.Context, string, string, string) {
+func (fake *FakeRBACService) UpdateAccountRoleArgsForCall(i int) (context.Context, internal.AccountRoles) {
 	fake.updateAccountRoleMutex.RLock()
 	defer fake.updateAccountRoleMutex.RUnlock()
 	argsForCall := fake.updateAccountRoleArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeRBACService) UpdateAccountRoleReturns(result1 error) {
@@ -3589,21 +3579,19 @@ func (fake *FakeRBACService) UpdateRoleReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeRBACService) UpdateRoleTask(arg1 context.Context, arg2 string, arg3 string, arg4 string) error {
+func (fake *FakeRBACService) UpdateRoleTask(arg1 context.Context, arg2 internal.RoleTasks) error {
 	fake.updateRoleTaskMutex.Lock()
 	ret, specificReturn := fake.updateRoleTaskReturnsOnCall[len(fake.updateRoleTaskArgsForCall)]
 	fake.updateRoleTaskArgsForCall = append(fake.updateRoleTaskArgsForCall, struct {
 		arg1 context.Context
-		arg2 string
-		arg3 string
-		arg4 string
-	}{arg1, arg2, arg3, arg4})
+		arg2 internal.RoleTasks
+	}{arg1, arg2})
 	stub := fake.UpdateRoleTaskStub
 	fakeReturns := fake.updateRoleTaskReturns
-	fake.recordInvocation("UpdateRoleTask", []interface{}{arg1, arg2, arg3, arg4})
+	fake.recordInvocation("UpdateRoleTask", []interface{}{arg1, arg2})
 	fake.updateRoleTaskMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3, arg4)
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
@@ -3617,17 +3605,17 @@ func (fake *FakeRBACService) UpdateRoleTaskCallCount() int {
 	return len(fake.updateRoleTaskArgsForCall)
 }
 
-func (fake *FakeRBACService) UpdateRoleTaskCalls(stub func(context.Context, string, string, string) error) {
+func (fake *FakeRBACService) UpdateRoleTaskCalls(stub func(context.Context, internal.RoleTasks) error) {
 	fake.updateRoleTaskMutex.Lock()
 	defer fake.updateRoleTaskMutex.Unlock()
 	fake.UpdateRoleTaskStub = stub
 }
 
-func (fake *FakeRBACService) UpdateRoleTaskArgsForCall(i int) (context.Context, string, string, string) {
+func (fake *FakeRBACService) UpdateRoleTaskArgsForCall(i int) (context.Context, internal.RoleTasks) {
 	fake.updateRoleTaskMutex.RLock()
 	defer fake.updateRoleTaskMutex.RUnlock()
 	argsForCall := fake.updateRoleTaskArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeRBACService) UpdateRoleTaskReturns(result1 error) {

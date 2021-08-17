@@ -19,13 +19,11 @@ func (r *RBAC) CreateTask(ctx context.Context, taskname string) (string, error) 
 	if err != nil {
 		return id, fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.IndexTask(ctx, task)
-	if err != nil {
-		return id, fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.TaskCreated(ctx, task)
 	return id, nil
 }
 func (r *RBAC) Task(ctx context.Context, id string) (internal.Tasks, error) {
+	fmt.Println("get task")
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Task.Task")
 	defer span.End()
 	// role, err := r.repo.Task(ctx, id)
@@ -46,14 +44,7 @@ func (r *RBAC) UpdateTask(ctx context.Context, task internal.Tasks) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteTask(ctx, rt.Id)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
-	err = r.search.IndexTask(ctx, rt)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.TaskUpdated(ctx, rt)
 	return err
 }
 func (r *RBAC) DeleteTask(ctx context.Context, id string) error {
@@ -63,10 +54,7 @@ func (r *RBAC) DeleteTask(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteTask(ctx, id)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.TaskDeleted(ctx, id)
 	return err
 }
 

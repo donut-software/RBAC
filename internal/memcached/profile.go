@@ -51,3 +51,11 @@ func (t *RBAC) GetProfile(ctx context.Context, profileid string) (internal.Profi
 func (t *RBAC) DeleteProfile(ctx context.Context, roleId string) error {
 	return t.orig.DeleteProfile(ctx, roleId)
 }
+
+func (t *RBAC) UpdateProfile(ctx context.Context, profile internal.Profile) error {
+	err := t.orig.DeleteProfile(ctx, profile.Id)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DelerteProfie")
+	}
+	return t.orig.IndexProfile(ctx, profile)
+}

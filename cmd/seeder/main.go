@@ -48,17 +48,17 @@ func newTask() []string {
 	tasks = append(tasks, internaldomain.DELETE_ROLE)
 	tasks = append(tasks, internaldomain.LIST_ROLE)
 
-	tasks = append(tasks, internaldomain.CREATE_ACCOUNT_ROLE)
-	tasks = append(tasks, internaldomain.GET_ACCOUNT_ROLE)
-	tasks = append(tasks, internaldomain.UPDATE_ACCOUNT_ROLE)
-	tasks = append(tasks, internaldomain.DELETE_ACCOUNT_ROLE)
-	tasks = append(tasks, internaldomain.LIST_ACCOUNT_ROLE)
-
 	tasks = append(tasks, internaldomain.CREATE_TASK)
 	tasks = append(tasks, internaldomain.GET_TASK)
 	tasks = append(tasks, internaldomain.UPDATE_TASK)
 	tasks = append(tasks, internaldomain.DELETE_TASK)
 	tasks = append(tasks, internaldomain.LIST_TASK)
+
+	tasks = append(tasks, internaldomain.CREATE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.GET_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.UPDATE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.DELETE_ACCOUNT_ROLE)
+	tasks = append(tasks, internaldomain.LIST_ACCOUNT_ROLE)
 
 	tasks = append(tasks, internaldomain.CREATE_ROLE_TASK)
 	tasks = append(tasks, internaldomain.GET_ROLE_TASK)
@@ -113,7 +113,7 @@ func main() {
 
 	msgBroker := redis.NewAccount(rdb)
 	repo := postgresql.NewRBAC(db)
-	search := elasticsearch.NewRBAC(es)
+	search := elasticsearch.NewRBAC(es, 100)
 	mclient := memcached.NewRBAC(m, search, logger)
 	svc := service.NewRBAC(repo, mclient, token, msgBroker)
 
@@ -131,7 +131,15 @@ func main() {
 	}
 
 	//create new accountrole
-	err = svc.CreateAccountRole(ctx, accId, rid)
+	// err = svc.CreateAccountRole(ctx, accId, rid)
+	err = svc.CreateAccountRole(ctx, internaldomain.AccountRoles{
+		Account: internaldomain.Account{
+			Id: accId,
+		},
+		Role: internaldomain.Roles{
+			Id: rid,
+		},
+	})
 	if err != nil {
 		log.Fatal(fmt.Errorf("new accountrole %w", err))
 	}
@@ -142,7 +150,7 @@ func main() {
 		if err != nil {
 			log.Fatal(fmt.Errorf("new task %w", err))
 		}
-		//create helptext for the task
+		// create helptext for the task
 		err = svc.CreateHelpText(ctx, internaldomain.HelpText{
 			Task_id:  tid,
 			HelpText: "Helptext " + value,
@@ -164,8 +172,16 @@ func main() {
 		if err != nil {
 			log.Fatal(fmt.Errorf("new navigation %w", err))
 		}
-		//create new roletask
-		err = svc.CreateRoleTask(ctx, tid, rid)
+		// create new roletask
+		// err = svc.CreateRoleTask(ctx, tid, rid)
+		err = svc.CreateRoleTask(ctx, internaldomain.RoleTasks{
+			Task: internaldomain.Tasks{
+				Id: tid,
+			},
+			Role: internaldomain.Roles{
+				Id: rid,
+			},
+		})
 		if err != nil {
 			log.Fatal(fmt.Errorf("new roletask %w", err))
 		}

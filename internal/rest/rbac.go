@@ -28,9 +28,9 @@ type RBACService interface {
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
 	DeleteRole(ctx context.Context, id string) error
 
-	CreateAccountRole(ctx context.Context, accountid string, roleid string) error
+	CreateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
-	UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error
+	UpdateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 	AccountRoleByAccount(ctx context.Context, accountRoleId string) (internal.AccountRoleByAccountResult, error)
 	AccountRoleByRole(ctx context.Context, id string) (internal.AccountRoleByRoleResult, error)
@@ -42,9 +42,9 @@ type RBACService interface {
 	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
 	DeleteTask(ctx context.Context, id string) error
 
-	CreateRoleTask(ctx context.Context, taskid string, roleid string) error
+	CreateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error
 	RoleTask(ctx context.Context, roleTaskId string) (internal.RoleTasks, error)
-	UpdateRoleTask(ctx context.Context, taskId string, roleId string, id string) error
+	UpdateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error
 	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
 	DeleteRoleTask(ctx context.Context, id string) error
 

@@ -5,12 +5,14 @@ import (
 )
 
 type RBAC struct {
-	client *esv7.Client
+	client     *esv7.Client
+	searchSize *int
 }
 
-func NewRBAC(client *esv7.Client) *RBAC {
+func NewRBAC(client *esv7.Client, searchSize int) *RBAC {
 	return &RBAC{
-		client: client,
+		client:     client,
+		searchSize: &searchSize,
 	}
 }
 

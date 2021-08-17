@@ -187,7 +187,7 @@ func newServer(conf serverConfig) (*http.Server, error) {
 	msgBroker := redis.NewAccount(conf.Redis)
 
 	repo := postgresql.NewRBAC(conf.Db)
-	search := elasticsearch.NewRBAC(conf.ElasticSearch)
+	search := elasticsearch.NewRBAC(conf.ElasticSearch, 100)
 	mclient := memcached.NewRBAC(conf.Memcached, search, conf.Logger)
 	svc := service.NewRBAC(repo, mclient, conf.Token, msgBroker)
 

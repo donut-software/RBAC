@@ -61,11 +61,13 @@ type RBACSearchRepository interface {
 	IndexProfile(ctx context.Context, profile internal.Profile) error
 	GetProfile(ctx context.Context, profileid string) (internal.Profile, error)
 	DeleteProfile(ctx context.Context, roleId string) error
+	UpdateProfile(ctx context.Context, profile internal.Profile) error
 
 	IndexRole(ctx context.Context, role internal.Roles) error
 	GetRole(ctx context.Context, roleId string) (internal.Roles, error)
 	DeleteRole(ctx context.Context, roleId string) error
 	ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error)
+	UpdateRole(ctx context.Context, role internal.Roles) error
 
 	IndexAccountRole(ctx context.Context, accRole internal.AccountRoles) error
 	GetAccountRole(ctx context.Context, accRoleId string) (internal.AccountRoles, error)
@@ -73,15 +75,18 @@ type RBACSearchRepository interface {
 	GetAccountRoleByRole(ctx context.Context, roleid string) (internal.AccountRoleByRoleResult, error)
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
 	DeleteAccountRole(ctx context.Context, accRoleId string) error
+	UpdateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error
 
 	IndexTask(ctx context.Context, role internal.Tasks) error
 	GetTask(ctx context.Context, taskId string) (internal.Tasks, error)
 	DeleteTask(ctx context.Context, roleId string) error
 	ListTask(ctx context.Context, args internal.ListArgs) (internal.ListTask, error)
+	UpdateTask(ctx context.Context, task internal.Tasks) error
 
 	IndexRoleTask(ctx context.Context, roletask internal.RoleTasks) error
 	GetRoleTask(ctx context.Context, roletaskId string) (internal.RoleTasks, error)
 	DeleteRoleTask(ctx context.Context, roletaskId string) error
+	UpdateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error
 	GetRoleTaskByRole(ctx context.Context, roleid string) (internal.RoleTaskByRole, error)
 	GetRoleTaskByTask(ctx context.Context, taskid string) (internal.RoleTaskByTask, error)
 	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
@@ -113,6 +118,22 @@ type RBACMessageBrokerRepository interface {
 	ProfileCreated(ctx context.Context, profile internal.Profile) error
 	ProfileDeleted(ctx context.Context, id string) error
 	ProfileUpdated(ctx context.Context, profile internal.Profile) error
+
+	RoleCreated(ctx context.Context, roles internal.Roles) error
+	RoleDeleted(ctx context.Context, id string) error
+	RoleUpdated(ctx context.Context, role internal.Roles) error
+
+	TaskCreated(ctx context.Context, tasks internal.Tasks) error
+	TaskDeleted(ctx context.Context, id string) error
+	TaskUpdated(ctx context.Context, task internal.Tasks) error
+
+	RoleTaskCreated(ctx context.Context, roleTasks internal.RoleTasks) error
+	RoleTaskDeleted(ctx context.Context, id string) error
+	RoleTaskUpdated(ctx context.Context, roleTask internal.RoleTasks) error
+
+	AccountRoleCreated(ctx context.Context, accountRole internal.AccountRoles) error
+	AccountRoleDeleted(ctx context.Context, id string) error
+	AccountRoleUpdated(ctx context.Context, accountRole internal.AccountRoles) error
 }
 type TokenMaker interface {
 	CreateToken(username string) (string, error)

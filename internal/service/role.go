@@ -19,10 +19,7 @@ func (r *RBAC) CreateRole(ctx context.Context, rolename string) (string, error) 
 	if err != nil {
 		return id, fmt.Errorf("search: %w", err)
 	}
-	err = r.search.IndexRole(ctx, role)
-	if err != nil {
-		return id, fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.RoleCreated(ctx, role)
 	return id, nil
 }
 func (r *RBAC) Role(ctx context.Context, id string) (internal.Roles, error) {
@@ -45,14 +42,7 @@ func (r *RBAC) UpdateRole(ctx context.Context, rl internal.Roles) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteRole(ctx, rl.Id)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
-	err = r.search.IndexRole(ctx, role)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.RoleUpdated(ctx, role)
 	return err
 }
 func (r *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.ListRole, error) {
@@ -72,9 +62,6 @@ func (r *RBAC) DeleteRole(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteRole(ctx, id)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.RoleDeleted(ctx, id)
 	return err
 }

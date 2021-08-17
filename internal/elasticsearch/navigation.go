@@ -156,6 +156,7 @@ func (a *RBAC) NavigationByTask(ctx context.Context, taskId string) ([]internal.
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_NAVIGATION},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)

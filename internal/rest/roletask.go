@@ -39,7 +39,15 @@ func (rb *RBACHandler) createRoleTask(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.CreateRoleTask(r.Context(), req.TaskId, req.RoleId)
+	// err = rb.svc.CreateRoleTask(r.Context(), req.TaskId, req.RoleId)
+	err = rb.svc.CreateRoleTask(r.Context(), internal.RoleTasks{
+		Task: internal.Tasks{
+			Id: req.TaskId,
+		},
+		Role: internal.Roles{
+			Id: req.RoleId,
+		},
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create accountrole failed", err)
 		return
@@ -124,7 +132,16 @@ func (rb *RBACHandler) updateRoleTask(w http.ResponseWriter, r *http.Request) {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.UpdateRoleTask(r.Context(), req.TaskId, req.RoleId, req.Id)
+	// err = rb.svc.UpdateRoleTask(r.Context(), req.TaskId, req.RoleId, req.Id)
+	err = rb.svc.UpdateRoleTask(r.Context(), internal.RoleTasks{
+		Id: req.Id,
+		Task: internal.Tasks{
+			Id: req.TaskId,
+		},
+		Role: internal.Roles{
+			Id: req.RoleId,
+		},
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating role", err)
 		return

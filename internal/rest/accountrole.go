@@ -39,7 +39,15 @@ func (rb *RBACHandler) createAccountRole(w http.ResponseWriter, r *http.Request)
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.CreateAccountRole(r.Context(), req.AccountId, req.RoleId)
+	// err = rb.svc.CreateAccountRole(r.Context(), req.AccountId, req.RoleId)
+	err = rb.svc.CreateAccountRole(r.Context(), internal.AccountRoles{
+		Account: internal.Account{
+			Id: req.AccountId,
+		},
+		Role: internal.Roles{
+			Id: req.RoleId,
+		},
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "create accountrole failed", err)
 		return
@@ -136,7 +144,16 @@ func (rb *RBACHandler) updateAccountRole(w http.ResponseWriter, r *http.Request)
 		renderErrorResponse(r.Context(), w, "invalid request", err)
 		return
 	}
-	err = rb.svc.UpdateAccountRole(r.Context(), req.AccountId, req.RoleId, req.Id)
+	// err = rb.svc.UpdateAccountRole(r.Context(), req.AccountId, req.RoleId, req.Id)
+	err = rb.svc.UpdateAccountRole(r.Context(), internal.AccountRoles{
+		Id: req.Id,
+		Account: internal.Account{
+			Id: req.AccountId,
+		},
+		Role: internal.Roles{
+			Id: req.RoleId,
+		},
+	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error updating role", err)
 		return

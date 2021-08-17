@@ -8,10 +8,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (r *RBAC) CreateAccountRole(ctx context.Context, accountid string, roleid string) error {
+func (r *RBAC) CreateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Create")
 	defer span.End()
-	id, err := r.repo.CreateAccountRole(ctx, accountid, roleid)
+	id, err := r.repo.CreateAccountRole(ctx, accountRole.Account.Id, accountRole.Role.Id)
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
@@ -19,16 +19,12 @@ func (r *RBAC) CreateAccountRole(ctx context.Context, accountid string, roleid s
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.IndexAccountRole(ctx, ar)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	_ = r.msgBroker.AccountRoleCreated(ctx, ar)
 	return nil
 }
 func (r *RBAC) AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.AccountRole")
 	defer span.End()
-	// role, err := r.repo.AccountRole(ctx, accountRoleId)
 	role, err := r.search.GetAccountRole(ctx, accountRoleId)
 	if err != nil {
 		fmt.Println(err)
@@ -54,13 +50,14 @@ func (r *RBAC) AccountRoleByRole(ctx context.Context, id string) (internal.Accou
 	}
 	return role, err
 }
-func (r *RBAC) UpdateAccountRole(ctx context.Context, accountId string, roleId string, id string) error {
+func (r *RBAC) UpdateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "AccountRole.Update")
 	defer span.End()
-	err := r.repo.UpdateAccountRole(ctx, accountId, roleId, id)
+	err := r.repo.UpdateAccountRole(ctx, accountRole.Account.Id, accountRole.Role.Id, accountRole.Id)
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
+	_ = r.msgBroker.AccountRoleUpdated(ctx, accountRole)
 	return err
 }
 func (r *RBAC) DeleteAccountRole(ctx context.Context, id string) error {
@@ -70,10 +67,7 @@ func (r *RBAC) DeleteAccountRole(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteAccountRole(ctx, id)
-	if err != nil {
-		return fmt.Errorf("repo: %w", err)
-	}
+	_ = r.msgBroker.AccountRoleDeleted(ctx, id)
 	return err
 }
 func (r *RBAC) ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error) {

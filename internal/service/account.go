@@ -53,22 +53,13 @@ func (r *RBAC) CreateAccount(ctx context.Context, account internal.Account, pass
 	if err != nil {
 		return id, fmt.Errorf("repo create account: %w", err)
 	}
-	// err = r.search.IndexAccount(ctx, acc)
-	// if err != nil {
-	// 	return id, fmt.Errorf("search indexed account: %w", err)
-	// }
-	_ = r.msgBroker.AccountCreated(ctx, acc) // XXX: Ignoring errors on purpose
-	// err = r.search.IndexProfile(ctx, acc.Profile)
-	// if err != nil {
-	// 	return id, fmt.Errorf("search indexed account: %w", err)
-	// }
+	_ = r.msgBroker.AccountCreated(ctx, acc)
 	_ = r.msgBroker.ProfileCreated(ctx, acc.Profile)
 	return id, nil
 }
 func (r *RBAC) Account(ctx context.Context, username string) (internal.Account, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "Account.Account")
 	defer span.End()
-	// account, err := r.repo.Account(ctx, username)
 	account, err := r.search.GetAccount(ctx, username)
 	if err != nil {
 		return internal.Account{}, fmt.Errorf("get account: %w", err)
@@ -100,14 +91,8 @@ func (r *RBAC) UpdateProfile(ctx context.Context, profile internal.Profile) erro
 	if err != nil {
 		return fmt.Errorf("search: %w", err)
 	}
-	err = r.search.DeleteProfile(ctx, profile.Id)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
-	err = r.search.IndexProfile(ctx, profile)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+
+	_ = r.msgBroker.ProfileUpdated(ctx, profile)
 	return nil
 }
 func (r *RBAC) ChangePassword(ctx context.Context, username string, password string) error {
@@ -126,10 +111,11 @@ func (r *RBAC) DeleteAccount(ctx context.Context, username string) error {
 	if err != nil {
 		return fmt.Errorf("repo: %w", err)
 	}
-	err = r.search.DeleteAccount(ctx, username)
-	if err != nil {
-		return fmt.Errorf("search: %w", err)
-	}
+	// err = r.search.DeleteAccount(ctx, username)
+	// if err != nil {
+	// 	return fmt.Errorf("search: %w", err)
+	// }
+	_ = r.msgBroker.AccountDeleted(ctx, username)
 	return nil
 }
 func (r *RBAC) ListAccount(ctx context.Context, args internal.ListArgs) (internal.ListAccount, error) {

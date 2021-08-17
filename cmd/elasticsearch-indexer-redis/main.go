@@ -2,18 +2,17 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"rbac/cmd/events"
 	"rbac/cmd/internal"
 	internaldomain "rbac/internal"
 	"rbac/internal/elasticsearch"
 	"rbac/internal/envvar"
 	"rbac/internal/memcached"
-	"strings"
 	"syscall"
 	"time"
 
@@ -79,13 +78,15 @@ func run(env string) (<-chan error, error) {
 	if err != nil {
 		return nil, fmt.Errorf("internal.NewMemcached %w", err)
 	}
-	search := elasticsearch.NewRBAC(es)
-	mclient := memcached.NewRBAC(mem, search, logger)
+	search := elasticsearch.NewRBAC(es, 100)
+	mClient := memcached.NewRBAC(mem, search, logger)
 
+	rbEvents := events.NewRBACEvents(mClient)
 	srv := &Server{
 		logger: logger,
 		rdb:    rdb,
-		cache:  mclient,
+		cache:  mClient,
+		events: rbEvents,
 		done:   make(chan struct{}),
 	}
 
@@ -134,12 +135,13 @@ type Server struct {
 	rdb    *redis.Client
 	pubsub *redis.PubSub
 	cache  *memcached.RBAC
+	events *events.RBACEvents
 	done   chan struct{}
 }
 
 // ListenAndServe ...
 func (s *Server) ListenAndServe() error {
-	pubsub := s.rdb.PSubscribe(context.Background(), "accounts.*")
+	pubsub := s.rdb.PSubscribe(context.Background(), "rbac.*")
 
 	_, err := pubsub.Receive(context.Background())
 	if err != nil {
@@ -155,36 +157,65 @@ func (s *Server) ListenAndServe() error {
 			s.logger.Info(fmt.Sprintf("Received message: %s", msg.Channel))
 
 			switch msg.Channel {
-			case "accounts.event.created":
-				var account internaldomain.Account
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&account); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
-				}
-				if err := s.cache.IndexAccount(context.Background(), account); err != nil {
+			case internaldomain.EVENT_ACCOUNT_CREATED:
+				if err := s.events.AccountCreated(msg); err != nil {
 					s.logger.Info("Couldn't index account", zap.Error(err))
 				}
-			case "accounts.event.updated":
-				var profile internaldomain.Profile
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&profile); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+			case internaldomain.EVENT_PROFILE_UPDATED:
+				if err := s.events.AccountUpdated(msg); err != nil {
+					s.logger.Info("Couldn't update account", zap.Error(err))
 				}
-				if err := s.cache.DeleteProfile(context.Background(), profile.Id); err != nil {
-					s.logger.Info("Couldn't delete profile", zap.Error(err))
+			case internaldomain.EVENT_ACCOUNT_DELETED:
+				if err := s.events.AccountDeleted(msg); err != nil {
+					s.logger.Info("Couldn't delete account", zap.Error(err))
 				}
-				if err := s.cache.IndexProfile(context.Background(), profile); err != nil {
-					s.logger.Info("Couldn't index profile", zap.Error(err))
+			case internaldomain.EVENT_ROLE_CREATED:
+				if err := s.events.RoleCreated(msg); err != nil {
+					s.logger.Info("Couldn't index role", zap.Error(err))
 				}
-
-			case "accounts.event.deleted":
-				var id string
-				if err := json.NewDecoder(strings.NewReader(msg.Payload)).Decode(&id); err != nil {
-					s.logger.Info("Ignoring message, invalid", zap.Error(err))
-					continue
+			case internaldomain.EVENT_ROLE_UPDATED:
+				if err := s.events.RoleUpdated(msg); err != nil {
+					s.logger.Info("Couldn't update role", zap.Error(err))
 				}
-				if err := s.cache.DeleteProfile(context.Background(), id); err != nil {
+			case internaldomain.EVENT_ROLE_DELETED:
+				if err := s.events.RoleDeleted(msg); err != nil {
+					s.logger.Info("Couldn't delete role", zap.Error(err))
+				}
+			case internaldomain.EVENT_TASK_CREATED:
+				if err := s.events.TaskCreated(msg); err != nil {
+					s.logger.Info("Couldn't index task", zap.Error(err))
+				}
+			case internaldomain.EVENT_TASK_UPDATED:
+				if err := s.events.TaskUpdated(msg); err != nil {
+					s.logger.Info("Couldn't update task", zap.Error(err))
+				}
+			case internaldomain.EVENT_TASK_DELETED:
+				if err := s.events.TaskDeleted(msg); err != nil {
 					s.logger.Info("Couldn't delete task", zap.Error(err))
+				}
+			case internaldomain.EVENT_ACCOUNTROLE_CREATED:
+				if err := s.events.AccountRoleCreated(msg); err != nil {
+					s.logger.Info("Couldn't index accountrole", zap.Error(err))
+				}
+			case internaldomain.EVENT_ACCOUNTROLE_UPDATED:
+				if err := s.events.AccountRoleUpdated(msg); err != nil {
+					s.logger.Info("Couldn't update accountrole", zap.Error(err))
+				}
+			case internaldomain.EVENT_ACCOUNTROLE_DELETED:
+				if err := s.events.AccountRoleDeleted(msg); err != nil {
+					s.logger.Info("Couldn't delete accountrole", zap.Error(err))
+				}
+			case internaldomain.EVENT_ROLETASK_CREATED:
+				if err := s.events.RoleTaskCreated(msg); err != nil {
+					s.logger.Info("Couldn't index roletask", zap.Error(err))
+				}
+			case internaldomain.EVENT_ROLETASK_UPDATED:
+				if err := s.events.RoleTaskUpdated(msg); err != nil {
+					s.logger.Info("Couldn't update roletask", zap.Error(err))
+				}
+			case internaldomain.EVENT_ROLETASK_DELETED:
+				if err := s.events.RoleTaskDeleted(msg); err != nil {
+					s.logger.Info("Couldn't delete roletask", zap.Error(err))
 				}
 			}
 		}

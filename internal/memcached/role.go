@@ -111,3 +111,11 @@ func (t *RBAC) ListRole(ctx context.Context, args internal.ListArgs) (internal.L
 	}
 	return res, nil
 }
+
+func (t *RBAC) UpdateRole(ctx context.Context, role internal.Roles) error {
+	err := t.orig.DeleteRole(ctx, role.Id)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRole")
+	}
+	return t.orig.IndexRole(ctx, role)
+}

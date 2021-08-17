@@ -130,7 +130,7 @@ func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.Role
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.ByAccount")
 	defer span.End()
 
-	should := make([]interface{}, 0, 4)
+	should := make([]interface{}, 0, 1)
 
 	should = append(should, map[string]interface{}{
 		"match": map[string]interface{}{
@@ -162,6 +162,7 @@ func (a *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.Role
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ROLE_TASK},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -244,6 +245,7 @@ func (a *RBAC) RoleTaskByTask(ctx context.Context, taskId string) (internal.Role
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ROLE_TASK},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -345,30 +347,6 @@ func (a *RBAC) ListRoleTask(ctx context.Context, args internal.ListArgs) (intern
 	}, nil
 }
 
-func (a *RBAC) DeleteRoleTaskByTask(ctx context.Context, roletaskId string) error {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.DeleteByTask")
-	defer span.End()
-
-	req := esv7api.DeleteRequest{
-		Index:      INDEX_ROLE_TASK,
-		DocumentID: roletaskId,
-	}
-
-	resp, err := req.Do(ctx, a.client)
-	if err != nil {
-		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "DeleteRequest.Do")
-	}
-	defer resp.Body.Close()
-
-	if resp.IsError() {
-		return internal.NewErrorf(internal.ErrorCodeUnknown, "DeleteRequest.Do %s", resp.StatusCode)
-	}
-
-	io.Copy(ioutil.Discard, resp.Body)
-
-	return nil
-}
-
 // Search returns tasks matching a query.
 // XXX: Pagination will be implemented in future episodes
 func (a *RBAC) RoleTaskByTaskReturnIds(ctx context.Context, taskId string) ([]string, error) {
@@ -407,6 +385,7 @@ func (a *RBAC) RoleTaskByTaskReturnIds(ctx context.Context, taskId string) ([]st
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ROLE_TASK},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -480,6 +459,7 @@ func (a *RBAC) RoleTaskByRoleReturnId(ctx context.Context, roleId string) ([]str
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ROLE_TASK},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)

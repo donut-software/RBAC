@@ -156,6 +156,7 @@ func (a *RBAC) MenuByTask(ctx context.Context, taskId string) ([]internal.Menu, 
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_MENU},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)

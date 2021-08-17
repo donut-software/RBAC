@@ -3,6 +3,7 @@ package internal
 import "time"
 
 const (
+	//default tasks
 	CREATE_ACCOUNT = "create account"
 	GET_ACCOUNT    = "get account"
 	UPDATE_ACCOUNT = "update account"
@@ -32,6 +33,31 @@ const (
 	UPDATE_ROLE_TASK = "update role task"
 	DELETE_ROLE_TASK = "delete role task"
 	LIST_ROLE_TASK   = "list role task"
+
+	//events
+	EVENT_ACCOUNT_CREATED = "rbac.accounts.event.created"
+	EVENT_ACCOUNT_UPDATED = "rbac.accounts.event.updated"
+	EVENT_ACCOUNT_DELETED = "rbac.accounts.event.deleted"
+
+	EVENT_PROFILE_CREATED = "rbac.profiles.event.created"
+	EVENT_PROFILE_UPDATED = "rbac.profiles.event.updated"
+	EVENT_PROFILE_DELETED = "rbac.profiles.event.deleted"
+
+	EVENT_TASK_CREATED = "rbac.tasks.event.created"
+	EVENT_TASK_UPDATED = "rbac.tasks.event.updated"
+	EVENT_TASK_DELETED = "rbac.tasks.event.deleted"
+
+	EVENT_ROLE_CREATED = "rbac.roles.event.created"
+	EVENT_ROLE_UPDATED = "rbac.roles.event.updated"
+	EVENT_ROLE_DELETED = "rbac.roles.event.deleted"
+
+	EVENT_ACCOUNTROLE_CREATED = "rbac.accountRole.event.created"
+	EVENT_ACCOUNTROLE_UPDATED = "rbac.accountRole.event.updated"
+	EVENT_ACCOUNTROLE_DELETED = "rbac.accountRole.event.deleted"
+
+	EVENT_ROLETASK_CREATED = "rbac.roleTasks.event.created"
+	EVENT_ROLETASK_UPDATED = "rbac.roleTasks.event.updated"
+	EVENT_ROLETASK_DELETED = "rbac.roleTasks.event.deleted"
 )
 
 type Profile struct {

@@ -155,6 +155,7 @@ func (a *RBAC) HelpTextByTask(ctx context.Context, taskId string) (internal.Help
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_HELPTEXT},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)

@@ -17,6 +17,7 @@ func (t *RBAC) IndexTask(ctx context.Context, task internal.Tasks) error {
 }
 
 func (t *RBAC) GetTask(ctx context.Context, taskId string) (internal.Tasks, error) {
+
 	key := "task_" + taskId
 	item, err := t.client.Get(key)
 	if err != nil {
@@ -141,4 +142,12 @@ func (t *RBAC) ListTask(ctx context.Context, args internal.ListArgs) (internal.L
 		return internal.ListTask{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "gob.NewDecoder")
 	}
 	return res, nil
+}
+
+func (t *RBAC) UpdateTask(ctx context.Context, task internal.Tasks) error {
+	err := t.orig.DeleteTask(ctx, task.Id)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteTask")
+	}
+	return t.orig.IndexTask(ctx, task)
 }

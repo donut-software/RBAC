@@ -163,6 +163,7 @@ func (a *RBAC) AccountRoleByAccount(ctx context.Context, username *string) (inte
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ACCOUNT_ROLE},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -247,6 +248,7 @@ func (a *RBAC) AccountRoleByRole(ctx context.Context, roleId *string) (internal.
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ACCOUNT_ROLE},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -386,6 +388,7 @@ func (a *RBAC) AccountRoleByRoleReturnId(ctx context.Context, roleId string) ([]
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ACCOUNT_ROLE},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)
@@ -462,6 +465,7 @@ func (a *RBAC) AccountRoleByAccountReturnId(ctx context.Context, username string
 	req := esv7api.SearchRequest{
 		Index: []string{INDEX_ACCOUNT_ROLE},
 		Body:  &buf,
+		Size:  a.searchSize,
 	}
 
 	resp, err := req.Do(ctx, a.client)

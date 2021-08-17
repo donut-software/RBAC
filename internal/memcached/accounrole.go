@@ -66,6 +66,14 @@ func (t *RBAC) DeleteAccountRole(ctx context.Context, accRoleId string) error {
 	return t.orig.DeleteAccountRole(ctx, accRoleId)
 }
 
+func (t *RBAC) UpdateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error {
+	err := t.orig.DeleteAccountRole(ctx, accountRole.Id)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteAccountRole")
+	}
+	return t.orig.IndexAccountRole(ctx, accountRole)
+}
+
 func (t *RBAC) GetAccountRoleByAccount(ctx context.Context, username string) (internal.AccountRoleByAccountResult, error) {
 	key := "accountrolebyaccount_" + username
 	item, err := t.client.Get(key)
