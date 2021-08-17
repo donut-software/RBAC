@@ -67,17 +67,16 @@ func (t *RBAC) DeleteTask(ctx context.Context, taskId string) error {
 	if err != nil {
 		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
 	}
-	//get all the roletask
-	rt, err := t.orig.RoleTaskByTaskReturnIds(ctx, taskId)
-	if err != nil {
-		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
-	}
 	//then delete the task before others
 	err = t.orig.DeleteTask(ctx, taskId)
 	if err != nil {
 		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteTask")
 	}
-
+	//get all the roletask
+	rt, err := t.orig.RoleTaskByTaskReturnIds(ctx, taskId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetTask")
+	}
 	//delete all roletask
 	for _, value := range rt {
 		err = t.orig.DeleteRoleTask(ctx, value)

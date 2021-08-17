@@ -54,15 +54,15 @@ func (t *RBAC) DeleteRole(ctx context.Context, roleId string) error {
 	if err != nil {
 		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetAccountRoleByRoleReturnId")
 	}
-	//get all taskrole
-	rt, err := t.orig.RoleTaskByRoleReturnId(ctx, roleId)
-	if err != nil {
-		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetRoleTaskByRoleReturnId")
-	}
 	//delete first the role
 	err = t.orig.DeleteRole(ctx, roleId)
 	if err != nil {
 		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.DeleteRole")
+	}
+	//get all taskrole
+	rt, err := t.orig.RoleTaskByRoleReturnId(ctx, roleId)
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "orig.GetRoleTaskByRoleReturnId")
 	}
 	for _, value := range ar {
 		err = t.orig.DeleteAccountRole(ctx, value)
