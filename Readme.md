@@ -47,13 +47,13 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 - [X] Persistent Storage
   - [X] Using Postgresql
     - [X] sqlc
-- [ ] Rest APIs
+- [X] Rest APIs
   - [X] HTTP Handlers
   - [X] Custom JSON Types
   - [X] Versioning 
   - [X] Error Handling
   - [X] OpenAPI 3 and Swagger-UI
-  - [ ] Authorization
+  - [X] Authorization
 - [X] Tokens
   - [X] JWT
   - [X] PASETO
