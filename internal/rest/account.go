@@ -49,12 +49,39 @@ func (a *RBACHandler) login(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusCreated)
 }
 
-func (a *RBACHandler) me(w http.ResponseWriter, r *http.Request) {
+func (rb *RBACHandler) me(w http.ResponseWriter, r *http.Request) {
 	username := r.Header.Get("username")
-	account, err := a.svc.Account(r.Context(), username)
+	account, err := rb.svc.Account(r.Context(), username)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "error getting the account", err)
 		return
+	}
+	acr, err := rb.svc.AccountRoleByAccount(r.Context(), username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting the role by account", err)
+		return
+	}
+	var roles []Role
+	for _, value := range acr.Roles {
+		rt, err := rb.svc.RoleTaskByRole(r.Context(), value.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting task by role", err)
+			return
+		}
+		var tasks []Task
+		for _, value := range rt.Tasks {
+			tasks = append(tasks, Task{
+				Id:        value.Id,
+				Task:      value.Task,
+				CreatedAt: value.CreatedAt,
+			})
+		}
+		roles = append(roles, Role{
+			Id:        rt.Role.Id,
+			Role:      rt.Role.Role,
+			Task:      tasks,
+			CreatedAt: rt.Role.CreatedAt,
+		})
 	}
 	profile := Profile{
 		Id:                account.Profile.Id,
@@ -71,6 +98,7 @@ func (a *RBACHandler) me(w http.ResponseWriter, r *http.Request) {
 			Id:        account.Id,
 			Username:  account.UserName,
 			Profile:   profile,
+			Role:      roles,
 			CreatedAt: account.CreatedAt,
 		},
 	}, http.StatusOK)
@@ -91,6 +119,7 @@ type Account struct {
 	Id        string    `json:"id"`
 	Username  string    `json:"username"`
 	Profile   Profile   `json:"profile"`
+	Role      []Role    `json:"roles"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -167,11 +196,45 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 		Email:             account.Profile.Email,
 		CreatedAt:         account.CreatedAt,
 	}
+	acr, err := rb.svc.AccountRoleByAccount(r.Context(), username)
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "error getting the role by account", err)
+		return
+	}
+	var roles []Role
+	for _, value := range acr.Roles {
+		// role, err := rb.svc.Role(r.Context(), value.Id)
+		// if err != nil {
+		// 	renderErrorResponse(r.Context(), w, "error getting the role", err)
+		// 	return
+		// }
+		//roletaskbyrole
+		rt, err := rb.svc.RoleTaskByRole(r.Context(), value.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting task by role", err)
+			return
+		}
+		var tasks []Task
+		for _, value := range rt.Tasks {
+			tasks = append(tasks, Task{
+				Id:        value.Id,
+				Task:      value.Task,
+				CreatedAt: value.CreatedAt,
+			})
+		}
+		roles = append(roles, Role{
+			Id:        rt.Role.Id,
+			Role:      rt.Role.Role,
+			Task:      tasks,
+			CreatedAt: rt.Role.CreatedAt,
+		})
+	}
 	renderResponse(w, &ReadAccountResponse{
 		Account: Account{
 			Id:        account.Id,
 			Username:  account.UserName,
 			Profile:   profile,
+			Role:      roles,
 			CreatedAt: account.CreatedAt,
 		},
 	}, http.StatusOK)
@@ -386,15 +449,29 @@ func (rb *RBACHandler) getAccountRoleByAccount(w http.ResponseWriter, r *http.Re
 	}
 	roles := []Role{}
 	for _, value := range la.Roles {
-		rl, err := rb.svc.Role(r.Context(), value.Id)
+		// rl, err := rb.svc.Role(r.Context(), value.Id)
+		// if err != nil {
+		// 	renderErrorResponse(r.Context(), w, "error getting role", err)
+		// 	return
+		// }
+		rt, err := rb.svc.RoleTaskByRole(r.Context(), value.Id)
 		if err != nil {
-			renderErrorResponse(r.Context(), w, "error getting role", err)
+			renderErrorResponse(r.Context(), w, "error getting task by role", err)
 			return
 		}
+		var tasks []Task
+		for _, value := range rt.Tasks {
+			tasks = append(tasks, Task{
+				Id:        value.Id,
+				Task:      value.Task,
+				CreatedAt: value.CreatedAt,
+			})
+		}
 		roles = append(roles, Role{
-			Id:        rl.Id,
-			Role:      rl.Role,
-			CreatedAt: rl.CreatedAt,
+			Id:        rt.Role.Id,
+			Role:      rt.Role.Role,
+			Task:      tasks,
+			CreatedAt: rt.Role.CreatedAt,
 		})
 	}
 	renderResponse(w, &AccountRoleByAccount{

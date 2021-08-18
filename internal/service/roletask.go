@@ -77,3 +77,13 @@ func (r *RBAC) ListRoleTask(ctx context.Context, args internal.ListArgs) (intern
 	}
 	return lacr, err
 }
+
+func (r *RBAC) RoleTaskByRole(ctx context.Context, roleId string) (internal.RoleTaskByRole, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "RoleTask.RoleTaskByRole")
+	defer span.End()
+	rt, err := r.search.GetRoleTaskByRole(ctx, roleId)
+	if err != nil {
+		return internal.RoleTaskByRole{}, fmt.Errorf("search: %w", err)
+	}
+	return rt, err
+}

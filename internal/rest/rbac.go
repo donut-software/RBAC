@@ -32,7 +32,7 @@ type RBACService interface {
 	AccountRole(ctx context.Context, accountRoleId string) (internal.AccountRoles, error)
 	UpdateAccountRole(ctx context.Context, accountRole internal.AccountRoles) error
 	ListAccountRole(ctx context.Context, args internal.ListArgs) (internal.ListAccountRole, error)
-	AccountRoleByAccount(ctx context.Context, accountRoleId string) (internal.AccountRoleByAccountResult, error)
+	AccountRoleByAccount(ctx context.Context, username string) (internal.AccountRoleByAccountResult, error)
 	AccountRoleByRole(ctx context.Context, id string) (internal.AccountRoleByRoleResult, error)
 	DeleteAccountRole(ctx context.Context, id string) error
 
@@ -47,6 +47,7 @@ type RBACService interface {
 	UpdateRoleTask(ctx context.Context, roleTask internal.RoleTasks) error
 	ListRoleTask(ctx context.Context, args internal.ListArgs) (internal.ListRoleTask, error)
 	DeleteRoleTask(ctx context.Context, id string) error
+	RoleTaskByRole(ctx context.Context, roleId string) (internal.RoleTaskByRole, error)
 
 	CreateHelpText(ctx context.Context, helptext internal.HelpText) error
 	HelpText(ctx context.Context, id string) (internal.HelpText, error)

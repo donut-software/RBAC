@@ -12,6 +12,7 @@ import (
 type Role struct {
 	Id        string    `json:"id"`
 	Role      string    `json:"role"`
+	Task      []Task    `json:"tasks"`
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateRoleRequest struct {
@@ -64,16 +65,31 @@ func (rb *RBACHandler) role(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	roleId := mux.Vars(r)["roleId"]
-	role, err := rb.svc.Role(r.Context(), roleId)
+	// role, err := rb.svc.Role(r.Context(), roleId)
+	// if err != nil {
+	// 	renderErrorResponse(r.Context(), w, "error getting the role", err)
+	// 	return
+	// }
+	//roletaskbyrole
+	rt, err := rb.svc.RoleTaskByRole(r.Context(), roleId)
 	if err != nil {
-		renderErrorResponse(r.Context(), w, "error getting the role", err)
+		renderErrorResponse(r.Context(), w, "error getting task by role", err)
 		return
+	}
+	var tasks []Task
+	for _, value := range rt.Tasks {
+		tasks = append(tasks, Task{
+			Id:        value.Id,
+			Task:      value.Task,
+			CreatedAt: value.CreatedAt,
+		})
 	}
 	renderResponse(w, &GetRoleResponse{
 		Role: Role{
-			Id:        role.Id,
-			Role:      role.Role,
-			CreatedAt: role.CreatedAt,
+			Id:        rt.Role.Id,
+			Role:      rt.Role.Role,
+			Task:      tasks,
+			CreatedAt: rt.Role.CreatedAt,
 		},
 	}, http.StatusOK)
 }
@@ -149,9 +165,23 @@ func (rb *RBACHandler) listrole(w http.ResponseWriter, r *http.Request) {
 	}
 	roles := []Role{}
 	for _, value := range la.Roles {
+		rt, err := rb.svc.RoleTaskByRole(r.Context(), value.Id)
+		if err != nil {
+			renderErrorResponse(r.Context(), w, "error getting task by role", err)
+			return
+		}
+		var tasks []Task
+		for _, value := range rt.Tasks {
+			tasks = append(tasks, Task{
+				Id:        value.Id,
+				Task:      value.Task,
+				CreatedAt: value.CreatedAt,
+			})
+		}
 		acc := Role{
 			Id:        value.Id,
 			Role:      value.Role,
+			Task:      tasks,
 			CreatedAt: value.CreatedAt,
 		}
 		roles = append(roles, acc)
