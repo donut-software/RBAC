@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rbac/internal"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -91,24 +92,28 @@ func (rb *RBACHandler) updateMenu(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusCreated)
 }
 
-type ListMenuRequest struct {
-	From int `json:"from"`
-	Size int `json:"size"`
-}
 type ListMenuResponse struct {
 	Menu  []Menu `json:"menus"`
 	Total int64  `json:"total"`
 }
 
 func (rb *RBACHandler) listMenu(w http.ResponseWriter, r *http.Request) {
-	var req ListMenuRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		renderErrorResponse(r.Context(), w, "invalid request", err)
+	var from int
+	var size int
+	v := r.URL.Query()
+	from, err := strconv.Atoi(v.Get("from"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param from", err)
+		return
+	}
+	size, err = strconv.Atoi(v.Get("size"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param size", err)
 		return
 	}
 	la, err := rb.svc.ListMenu(r.Context(), internal.ListArgs{
-		From: &req.From,
-		Size: &req.Size,
+		From: &from,
+		Size: &size,
 	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)

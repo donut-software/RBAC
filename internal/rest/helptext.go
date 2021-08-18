@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rbac/internal"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -91,24 +92,29 @@ func (rb *RBACHandler) updateHelpText(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusCreated)
 }
 
-type ListHelpTextRequest struct {
-	From int `json:"from"`
-	Size int `json:"size"`
-}
 type ListHelpTextResponse struct {
 	HelpText []HelpText `json:"helptexts"`
 	Total    int64      `json:"total"`
 }
 
 func (rb *RBACHandler) listHelpText(w http.ResponseWriter, r *http.Request) {
-	var req ListHelpTextRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		renderErrorResponse(r.Context(), w, "invalid request", err)
+
+	var from int
+	var size int
+	v := r.URL.Query()
+	from, err := strconv.Atoi(v.Get("from"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param from", err)
+		return
+	}
+	size, err = strconv.Atoi(v.Get("size"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param size", err)
 		return
 	}
 	la, err := rb.svc.ListHelpText(r.Context(), internal.ListArgs{
-		From: &req.From,
-		Size: &req.Size,
+		From: &from,
+		Size: &size,
 	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)

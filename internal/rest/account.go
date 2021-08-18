@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rbac/internal"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -240,21 +241,27 @@ func (rb *RBACHandler) account(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
-type ListAccountRequest struct {
-	From int `json:"from"`
-	Size int `json:"size"`
-}
 type ListAccountResponse struct {
 	Accounts []Account `json:"accounts"`
 	Total    int64     `json:"total"`
 }
 
 func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
-	var req ListAccountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		renderErrorResponse(r.Context(), w, "invalid request", err)
+	
+	var from int
+	var size int
+	v := r.URL.Query()
+	from, err := strconv.Atoi(v.Get("from"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param from", err)
 		return
 	}
+	size, err = strconv.Atoi(v.Get("size"))
+	if err != nil {
+		renderErrorResponse(r.Context(), w, "invalid param size", err)
+		return
+	}
+
 	authusername := r.Header.Get("username")
 	allowed, err := rb.svc.IsAllowed(r.Context(), authusername, internal.LIST_ACCOUNT)
 	if err != nil {
@@ -266,8 +273,8 @@ func (rb *RBACHandler) listaccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	la, err := rb.svc.ListAccount(r.Context(), internal.ListArgs{
-		From: &req.From,
-		Size: &req.Size,
+		From: &from,
+		Size: &size,
 	})
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "invalid request", err)
